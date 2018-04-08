@@ -266,7 +266,7 @@ Some good examples I picked out of my dataset are:</p>
 <p>Despite most Powershell download cradles in my list above being classed as memory resident, there are some that write payloads and artefacts. In the example below of particular interest in the Internet Explorer and Office COM object methods are the cached and *.url link files for downloaded file.</p>
 
 <p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_file.png" alt="A selection of Powershell Office COM object file writes - url files are link files that will provide path and file downloaded" />
-Monitoring for unusual file writes by Powershell, certutil.exe and bitsadmin.exe are other simple techniques enabled by visibility that can be used to detect download cradle activity.</p>
+Monitoring for unusual file writes by Powershell, and certutil.exe are other simple techniques enabled by visibility that can be used to detect download cradle activity.</p>
 
 <h3 id="registry">Registry</h3>
 <p>Not all download cradles I looked at had specific registry IOCs that were worth monitoring. An exception is the existence of powershell_RASMANCS and powershell_RASAPI32 tracing keys that are evidence of Powershell network communication.</p>
