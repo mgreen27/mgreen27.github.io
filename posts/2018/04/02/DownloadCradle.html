@@ -246,9 +246,9 @@ From a defenders standpoint, obfuscation can defeat specific command line detect
 Some good examples I picked out of my dataset are:</p>
 
 <ul>
-  <li>Powershell.exe loading rasman.dll and rasapi32.dll (Powershell Webclient methods)</li>
+  <li>Powershell.exe loading rasman.dll and rasapi32.dll (Powershell network methods)</li>
   <li>Powershell.exe loading ieproxy.dll (Powershell IE COM methods)</li>
-  <li>Powershell.exe loading dnsapi.dll or wininet.dll (Common network modules)</li>
+  <li>Powershell.exe loading dnsapi.dll or winhttp.dll or wininet.dll (Common network modules)</li>
   <li>Powershell.exe loading msxml3.dll (Powershell MsXml COM)</li>
   <li>Powershell.exe loading qmgrprxy.dll or Microsoft.BackgroundIntelligentTransfer.Management.Interop.dll (Powershell BITS)</li>
   <li>Certutil.exe loading wininet.dll</li>
@@ -274,15 +274,15 @@ Monitoring for unusual file writes by Powershell, certutil.exe and bitsadmin.exe
 <p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_registry.png" alt="Monitor for activity to HKLM\SOFTWARE\Microsoft\Tracing\powershell_RASMANCS and HKLM\SOFTWARE\Microsoft\Tracing\powershell_RASAPI32" /></p>
 
 <h3 id="other-artefacts">Other Artefacts</h3>
-<p>I would expect all modern EDR vendors to provide event visibility of the above artifacts as standard. However, in real world situations, agent coverage may be incomplete or we may be getting into the fight late for event telemetry.</p>
+<p>I would expect all modern EDR vendors to provide event visibility of the above artefacts as standard. However, in real world situations, agent coverage may be incomplete or we may be getting into the fight late for event telemetry.</p>
 
-<p>With that in mind, a component for download cradle detection is traditional forensic capability. Evidence of execution, registry, event logs or volatile data analysis spotting similar artifacts to the event data above is the obvious starting point. In the example below I have highlighted a prefetch entry with reference to the handle to some of the DLLs listed above.</p>
+<p>With that in mind, a component for download cradle detection is traditional forensic capability. Evidence of execution, registry, event logs or volatile data analysis spotting similar artefacts to the event data above is the obvious starting point. In the example below I have highlighted a prefetch entry with reference to the handle to some of the DLLs listed above.</p>
 
 <p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_prefetch.png" alt="Evidence of Execution - Powershell Webclient method" />
-Microsoft BITS also has some specific forensic artifacts I have previously covered in another post that I have included in my references below.</p>
+Microsoft BITS also has some specific forensic artefacts I have previously covered in another post that I have included in my references below.</p>
 
 <h1 id="final-thoughts">Final Thoughts</h1>
-<p>Network and endpoint visibility should be priority of all blue teams. Although focusing on a small section of the attack lifecycle, this post has been an overview of some of the areas I found interesting when thinking about download cradle detection. Understanding offensive technique and forensic artifacts enables blue teams to write high quality detections near the top the pyramid of pain. Correlating this data towards your own visibility levels, blue teams can work towards improvement and optimising resources for both detection and response.</p>
+<p>Network and endpoint visibility should be priority of all blue teams. Although focusing on a small section of the attack lifecycle, this post has been an overview of some of the areas I found interesting when thinking about download cradle detection. Understanding offensive technique and forensic artefacts enables blue teams to write high quality detections near the top the pyramid of pain. Correlating this data towards your own visibility levels, blue teams can work towards improvement and optimising resources for both detection and response.</p>
 
 <p>Let me know if you have any questions. I have added my <a href="https://github.com/mgreen27/mgreen27.github.io/tree/master/other/DownloadCradle">testing results and script here</a>. I would be interested to hear results testing these out on different vendors.</p>
 
