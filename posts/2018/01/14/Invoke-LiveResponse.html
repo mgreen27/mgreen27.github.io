@@ -125,7 +125,7 @@ implementation for live response and file collections over Powershell remoting. 
 
 <div class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c"># Proxy aware download install of Invoke-LiveResponse and Powerforensics</span>
 <span class="nb">Set-Executionpolicy</span> <span class="n">-ExecutionPolicy</span> <span class="n">bypass</span> <span class="n">-force</span>
-<span class="nv">$url</span><span class="p">=</span><span class="s2">&quot;https://raw.githubusercontent.com/mgreen27/Powershell-IR/master/Get-Forensicating.ps1&quot;</span>
+<span class="nv">$url</span><span class="p">=</span><span class="s2">&quot;https://raw.githubusercontent.com/mgreen27/Powershell-IR/master/Content/Ancillaries/Get-Forensicating.ps1&quot;</span>
 <span class="nv">$WebClient</span><span class="p">=(</span><span class="nb">New-Object</span> <span class="n">System</span><span class="p">.</span><span class="n">Net</span><span class="p">.</span><span class="n">WebClient</span><span class="p">)</span>
 <span class="nv">$WebClient</span><span class="p">.</span><span class="n">Proxy</span><span class="p">=</span><span class="no">[System.Net.WebRequest]</span><span class="p">::</span><span class="n">GetSystemWebProxy</span><span class="p">()</span>
 <span class="nv">$WebClient</span><span class="p">.</span><span class="n">Proxy</span><span class="p">.</span><span class="n">Credentials</span><span class="p">=</span><span class="no">[System.Net.CredentialCache]</span><span class="p">::</span><span class="n">DefaultNetworkCredentials</span>
