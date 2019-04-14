@@ -126,7 +126,7 @@ Writescriptblock also writes a scriptblock to allow for local LiveResponse and M
 <p>Alternatively a localout or UNC path can be defined. Note: UNC path will map a drive to copy, specifying localout will only use preexisting mappings or write to local drives (which is potentially forensically destructive).</p>
 
 <h4 id="volume-shadowcopy">Volume ShadowCopy</h4>
-<p>The “-VSS” switch enables collection of Volume ShadowCopy Service artefacts for all selected collections. The feature invokes CreateSymbolicLink via PInvoke to minimise forensic footprint, mounting all available VSC then copying artefacts if available. A dedup feature will take a hash of the VSS item and compare it to hashtable collected files, skipping if previously copied. </p>
+<p>The “-VSS” switch enables collection of Volume ShadowCopy Service artefacts for all selected collections. The feature invokes CreateSymbolicLink via PInvoke to minimise forensic footprint, mounting all available VSC then copying artefacts if available. A dedup feature will take a hash of the VSS item and compare it to hashable collected files, skipping if previously copied. </p>
 
 <h4 id="nobase64">NoBase64</h4>
 <p>For raw disk access I-LR will utilise reflection to load an embedded Powerforensics module to memory. In field, some EDR / Powershell prevention tools will block the conversion function from base64. The “-Nobase64” switch leverages a direct byte array and GzipStream to bypass this technique. It is worthy to note, the created script is slightly larger size than its base64 equivalent. </p>
