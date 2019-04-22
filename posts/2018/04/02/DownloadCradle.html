@@ -1,87 +1,147 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <meta charset="utf-8">
-  <!-- (1) Optimize for mobile versions: http://goo.gl/EOpFl -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- (1) force latest IE rendering engine: bit.ly/1c8EiC9 -->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/static/img/favicon.ico" />
+    <title>Powershell Download Cradles - Matt's DFIR Blog</title>
+    <meta name="author" content="Matthew Green" />
+    <meta name="description" content="Powershell Download Cradles" />
+    <meta name="keywords" content="Powershell Download Cradles, Matt's DFIR Blog, posts" />
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+    <meta content="" property="fb:app_id">
+    <meta content="Matt's DFIR Blog" property="og:site_name">
 
-  <title>Powershell Download Cradles</title>
-  <meta name="description" content="In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about..." />
-
-  <meta name="HandheldFriendly" content="True" />
-  <meta name="MobileOptimized" content="320" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@mgreen27" />
-    <meta name="twitter:title" content="Powershell Download Cradles" />
-    <meta name="twitter:image" content="https://mgreen27.github.io/assets/images/buddyicon.jpg" />
     
-    <meta name="twitter:description"  content="In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about..." />
+
     
-  
-  
-  <meta property="og:site_name" content="Matt's DFIR blog" />
-  <meta property="og:title" content="Powershell Download Cradles"/>
-  
-  <meta property="og:description" content="In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about..." />
-  
-  <meta property="og:image" content="https://mgreen27.github.io/assets/article_images/2018-04-02-DownloadCradle/wolfandsheep2.png" />
-  <meta property="og:url" content="https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html" >
-  <meta property="og:type" content="blog" />
-  <meta property="article:published_time" content="2018-04-02T00:00:00+00:00">
+      <meta content="Powershell Download Cradles" property="og:title">
+      <meta content="article" property="og:type">
+    
 
-  <link rel="canonical" href="https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html"/>
-  <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/png"/>
-  <link rel="stylesheet" href="//brick.a.ssl.fastly.net/Linux+Libertine:400,400i,700,700i/Open+Sans:400,400i,700,700i">
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
+      <meta content="A blog for DFIR thoughts, research and for my future reference" property="og:description">
+    
 
-  <link rel="stylesheet" type="text/css" media="screen" href="/css/main.css" />
-  <link rel="stylesheet" type="text/css" media="print" href="/css/print.css" />
-</head>
+    
+      <meta content="http://localhost:4000/posts/2018/04/02/DownloadCradle.html" property="og:url">
+    
 
-  <body itemscope itemtype="http://schema.org/Article">
-    <!-- header start -->
+    
+      <meta content="2018-04-02T00:00:00+10:00" property="article:published_time">
+      <meta content="http://localhost:4000/about/" property="article:author">
+    
 
+    
+      <meta content="http://localhost:4000/static/img/posts//static/img/article_images/2018-04-02-DownloadCradle/wolfandsheep2.png" property="og:image">
+    
 
-  <a href="https://mgreen27.github.io" class="logo-readium"><span class="logo" style="background-image: url(/assets/images/buddyicon.jpg)"></span></a>
+    
+      
+        <meta content="posts" property="article:section">
+      
+    
 
-<!-- header end -->
+    
+      
+        <meta content="DFIR" property="article:tag">
+      
+        <meta content="Powershell" property="article:tag">
+      
+    
 
-    <main class="content" role="main">
-      <article class="post">
-        
-        <div class="article-image">
-          <div class="post-image-image" style="background-image: url(/assets/article_images/2018-04-02-DownloadCradle/wolfandsheep2.png)">
-            Article Image
-          </div>
-          <div class="post-image-image2" style="background-image: url()">
-            Article Image
-          </div>
-          <div class="post-meta">
-            <h1 class="post-title">Powershell Download Cradles</h1>
-            <div class="cf post-meta-text">
-              <div class="author-image" style="background-image: url(/assets/images/author.jpg)">Blog Logo</div>
-              <h4 class="author-name" itemprop="author" itemscope itemtype="http://schema.org/Person">Matthew Green</h4>
-              on
-              <time datetime="2018-04-02 00:00">02 Apr 2018</time>
-              <!-- , tagged on <span class="post-tag-">, <a href="/tag/"></a></span> -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@mgreen27">
+    <meta name="twitter:creator" content="@mgreen27">
+
+    
+      <meta name="twitter:title" content="Powershell Download Cradles">
+    
+
+    
+      <meta name="twitter:url" content="http://localhost:4000/posts/2018/04/02/DownloadCradle.html">
+    
+
+    
+      <meta name="twitter:description" content="A blog for DFIR thoughts, research and for my future reference">
+    
+
+    
+
+    <!-- Font awesome icons -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+    <!-- syntax highlighting CSS -->
+    <link rel="stylesheet" href="/static/css/syntax.css">
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/super-search.css">
+    <link rel="stylesheet" href="/static/css/thickbox.css">
+    <link rel="stylesheet" href="/static/css/projects.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="col-sm-3">
+        <div class="fixed-condition">
+          <a href="/"><img class="profile-avatar" src="/static/img/avatar.jpg" height="75px" width="75px" /></a>
+          <h1 class="author-name">Matthew Green</h1>
+          
+            <div class="profile-about">
+              I am a DFIR and detection guy from Sydney Australia.
             </div>
-            <div style="text-align:center">
-              <a href="#topofpage" class="topofpage"><i class="fa fa-angle-down"></i></a>
-            </div>
+          
+          <div class="social">
+            <ul>
+              
+                <li><a href="https://www.twitter.com/mgreen27" target="_blank"><i class="fa fa-twitter"></i></a></li>
+              
+                <li><a href="https://www.linkedin.com/in/mgreen27/" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+              
+                <li><a href="https://github.com/mgreen27" target="_blank"><i class="fa fa-github"></i></a></li>
+              
+            </ul>
           </div>
+          <div class="search" id="js-search">
+            <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+            <ul class="search__results" id="js-search__results"></ul>
+          </div>
+          <hr />
+          <ul class="sidebar-nav">
+            <strong>Navigation</strong>
+            <li><a href="/">Home</a></li>
+            
+              <li><a class="about" href="/about/">About Me</a></li>
+            
+              <li><a class="about" href="/projects/">My Projects</a></li>
+            
+              <li><a class="about" href="/feed.xml">XML Feed</a></li>
+            
+          </ul>
         </div>
-        
-        <section class="post-content">
-          <div class="post-reading">
-            <span class="post-reading-time"></span> read
-          </div>
-          <a name="topofpage"></a>
-          <p>In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about detection from both network and endpoint views.</p>
+        <!-- end /.fixed-condition -->
+      </div>
+      <div class="col-sm-8 col-offset-1 main-layout">
+        <header class="post-header">
+  <h1 class="post-title">Powershell Download Cradles</h1>
+</header>
+
+<span class="time">02 Apr 2018</span>
+
+  <span class="categories">
+    &raquo; <a href="/category/posts">posts</a>
+  </span>
+
+
+<div class="content">
+  <div class="post"><div style="text-align: center;"><img src="/static/img/article_images/2018-04-02-DownloadCradle/wolfandsheep2.png" width="500" /></div>
+
+<p>In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about detection from both network and endpoint views.</p>
 
 <p>I have also included a link to a results summary and a noisemaker script I have been using to test. I focused on Powershell download cradles, or more specifically cradles that I could execute a Powershell payload. I have also not included all the .NET methods that seem to be effectively the same as Powershell WebClient. <br /></p>
 
@@ -91,121 +151,14 @@
 <p>From an evil standpoint - the best download cradles are proxy, credential and https aware so will slide right by a corporate firewall.
 For defenders, obtaining visibility and focusing detection at a common attack chokepoint, we can minimize impact effectively.</p>
 
-<p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_CLI_ALL.png" alt="There is a large menu of evil download cradles - a selection with un-obfuscated CommandLine" /></p>
+<p><img src="/static/img/article_images/2018-04-02-DownloadCradle/Powershell_CLI_ALL.png" alt="There is a large menu of evil download cradles - a selection with un-obfuscated CommandLine" /></p>
 
 <h1 id="network-detection">Network Detection</h1>
 <p>Network is usually the easiest point of visibility but can be noisy looking at unfiltered events. I have found interesting use cases baselining current activity then spotting deviations from normal filtering on User-Agent, content, http method, destination domain and URL.</p>
 
 <p>Understanding the traffic behavior for each cradle and whitelisting trusted components is a good start on building out detection.</p>
 
-<table>
-  <thead>
-    <tr>
-      <th>Technique</th>
-      <th>Method: User-Agent</th>
-      <th>Notes</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Powershell WebClient<br />or  XmlRequest</td>
-      <td>GET: $Null</td>
-      <td>Extremely noisy and you may find alternate endpoint detection below is the best path beyond a standard content based approach. User-Agent is trivial to change.</td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td>Invoke-WebRequest<br />Invoke-RequestMethod</td>
-      <td>GET: Mozilla/* (Windows NT; Windows NT *; *) WindowsPowerShell/*</td>
-      <td>Easy to detect and baseline all traffic using a search for User-Agent=*WindowsPowershell*. User-Agent is trivial to change.</td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td>PowerShell Word COM Object<br />&amp; Excel COM Object</td>
-      <td>OPTIONS: Microsoft Office *<br /> HEAD: Microsoft Office *<br /> HEAD: Microsoft Office Existence Discovery<br /> GET: Mozilla/* (compatible; MSIE *; Windows NT * Trident/*; .NET *; .NET CLR *; ms-office; MSOffice*)</td>
-      <td>Bucketing for multiple methods by URL over a few seconds reduces noise significantly. Legitimate activity typically GET and involves document content.</td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td>Powershell IE COM Object</td>
-      <td>GET: Mozilla/* (Windows NT *; WOW64; Trident/*; rv:*) like Gecko</td>
-      <td>Extremely noisy and you may find alternate endpoint detection below is the best path beyond a standard content based approach.</td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td>Powershell MsXml COM<br />&amp; WinHttp COM</td>
-      <td>GET: Mozilla/* (compatible; Win32; WinHttp.WinHttpRequest.*)</td>
-      <td>Does not appear to be proxy aware, so understanding this context (and response codes!) may be helpful in determining priority.</td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td>Microsoft BITS</td>
-      <td>HEAD: Microsoft BITS/*<br />GET: Microsoft BITS/*</td>
-      <td>Fairly simple to basline as Microsoft BITS typically requests Windows Update, application and media domain content.</td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td>Microsoft CertUtil</td>
-      <td>GET: CertUtil URL Agent<br /> GET: Microsoft-CryptoAPI/*</td>
-      <td>Note: two GET requests are always initiated by this download cradle method one of each User-Agent. Best detection on User-Agent = “CertUtil URL Agent” as this is sparse. Legitimate traffic is easy to baseline as typically involves certificate related traffic to a fairly static set of domains.</td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td>regsvr32<br />wmic<br />run32dll<br />mshta.exe</td>
-      <td>GET: Mozilla/* (compatible; MSIE *; Windows NT * Trident/*; .NET*; .NET CLR *)</td>
-      <td>Another relatively noisy User-Agent, focus on content and endpoint.</td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td>WebDAV</td>
-      <td>Microsoft-WebDAV-MiniRedir/*</td>
-      <td>WebDAV GET requests are very sparse and simple to detect evil if monitored.</td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td>DnsTxtRecord</td>
-      <td>N/A</td>
-      <td>N/A in most orgs. DNS TXT traffic is typically DMARC related, very large encoded responses for unusual requests are immediately suspicious</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><br /></p>
+<p><img src="/static/img/article_images/2018-04-02-DownloadCradle/CradleSummary.jpg" alt="Download Cradle summary table" /></p>
 
 <h1 id="endpoint-detection">Endpoint Detection</h1>
 <p>Endpoint visibility enables the lions share of quality detection opportunities and bypasses network encryption limitations. I see several main visibility areas that highlight the benefit of modern endpoint capability in addition to network monitoring.</p>
@@ -225,24 +178,25 @@ Some examples:<br />
 
 <p>Some of these process relationships may be legitimate in a large environment so appropriate baselining is recommended. A mature blue team understands expected process image and chain mappings to spot deviation from normal. A mature team is also able to spot new and unusual process paths across multigenerational chains.</p>
 
-<p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_chain.png" alt=" Process chain from a cradle triggered by opening a maldoc" /></p>
+<div style="text-align: center;"><img src="/static/img/article_images/2018-04-02-DownloadCradle/Powershell_chain.png" alt=" Process chain from a cradle triggered by opening a maldoc" width="500" /></div>
 
 <h3 id="command-line">Command Line</h3>
 <p>Considering process command line makes the blue team’s job much easier by adding another whitelistable data point to the process chain stack.</p>
 
-<p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_CLI.png" alt=" DDE attack (top) and WMI based macro (bottom)" /></p>
+<p><img src="/static/img/article_images/2018-04-02-DownloadCradle/Powershell_CLI.png" alt=" DDE attack (top) and WMI based macro (bottom)" /></p>
 
 <p>Some of the gaps to this method as a standalone technique is command line obfuscation. Obfuscation is an extreamly large area and to give coverage justice, I have included a link in my references below to some excellent research by Daniel Bohannon (Invoke-CradleCrafter was a huge influence on some of the types of cradles I tested).</p>
 
-<p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_CLI_03.png" alt="This download cradle was generated by Daniel Bohannon's excellent obfuscation toolsets." />
-From a defenders standpoint, obfuscation can defeat specific command line detection, however itself is an indicator. Understanding process chains and their command line enables defenders to whitelist known good and spot abnormalities.</p>
+<div style="text-align: center;"><img src="/static/img/article_images/2018-04-02-DownloadCradle/Powershell_CLI_03.png" width="500" alt="This download cradle was generated by Daniel Bohannon's excellent obfuscation toolsets." /></div>
+
+<p>From a defenders standpoint, obfuscation can defeat specific command line detection, however itself is an indicator. Understanding process chains and their command line enables defenders to whitelist known good and spot abnormalities.&lt;/p&gt;</p>
 
 <p>Its also worthy to note, depending on the obfuscation type - enabling latest Powershell version 5.x script block logging and Windows10 Anti-Malware Scan Interface equipped tools can assist detection of obfuscated Powershell payloads at runtime.</p>
 
 <h3 id="module-loads">Module loads</h3>
 <p>Module loads provide another unique visibility point vital for modern endpoint based detection. For an attacker living off the land it is impossible for a download cradle to operate without network based modules. Below you can see an example of Powershell loaded network modules during execution.</p>
 
-<p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_module.png" alt=" Powershell Webclient network module loads" />
+<p><img src="/static/img/article_images/2018-04-02-DownloadCradle/Powershell_module.png" alt=" Powershell Webclient network module loads" />
 Some good examples I picked out of my dataset are:</p>
 
 <ul>
@@ -260,31 +214,31 @@ Some good examples I picked out of my dataset are:</p>
 <h3 id="network-connections">Network connections</h3>
 <p>Network connections from the endpoints view provides additional context to detect bad. A mature blue team can collect and baseline network connections by process and user context. In most environments, powershell.exe (and others) would be unexpected connecting to the internet on a standard user endpoint.</p>
 
-<p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_network.png" alt="Network activity by process - importance of endpoint context" /></p>
+<p><img src="/static/img/article_images/2018-04-02-DownloadCradle/Powershell_network.png" alt="Network activity by process - importance of endpoint context" /></p>
 
 <h3 id="file-write-events">File write events</h3>
 <p>Despite most Powershell download cradles in my list above being classed as memory resident, there are some that write payloads and artefacts. In the example below of particular interest in the Internet Explorer and Office COM object methods are the cached and *.url link files for downloaded file.</p>
 
-<p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_file.png" alt="A selection of Powershell Office COM object file writes - url files are link files that will provide path and file downloaded" />
+<p><img src="/static/img/article_images/2018-04-02-DownloadCradle/Powershell_file.png" alt="A selection of Powershell Office COM object file writes - url files are link files that will provide path and file downloaded" />
 Monitoring for unusual file writes by Powershell and certutil.exe are other simple techniques enabled by visibility that can be used to detect download cradle activity.</p>
 
 <h3 id="registry">Registry</h3>
 <p>Not all download cradles I looked at had specific registry IOCs that were worth monitoring. An exception is the existence of powershell_RASMANCS and powershell_RASAPI32 tracing keys that are evidence of Powershell network communication.</p>
 
-<p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_registry.png" alt="Monitor for activity to HKLM\SOFTWARE\Microsoft\Tracing\powershell_RASMANCS and HKLM\SOFTWARE\Microsoft\Tracing\powershell_RASAPI32" /></p>
+<p><img src="/static/img/article_images/2018-04-02-DownloadCradle/Powershell_registry.png" alt="Monitor for activity to HKLM\SOFTWARE\Microsoft\Tracing\powershell_RASMANCS and HKLM\SOFTWARE\Microsoft\Tracing\powershell_RASAPI32" /></p>
 
 <h3 id="other-artefacts">Other Artefacts</h3>
 <p>I would expect all modern EDR vendors to provide event visibility of the above artefacts as standard. However, in real world situations, agent coverage may be incomplete or we may be getting into the fight late for event telemetry.</p>
 
 <p>With that in mind, a component for download cradle detection is traditional forensic capability. Evidence of execution, registry, event logs or volatile data analysis spotting similar artefacts to the event data above is the obvious starting point. In the example below I have highlighted a prefetch entry with reference to the handle to some of the DLLs listed above.</p>
 
-<p><img src="/assets/article_images/2018-04-02-DownloadCradle/Powershell_prefetch.png" alt="Evidence of Execution - Powershell Webclient method" />
+<p><img src="/static/img/article_images/2018-04-02-DownloadCradle/Powershell_prefetch.png" alt="Evidence of Execution - Powershell Webclient method" />
 Microsoft BITS also has some specific forensic artefacts I have previously covered in another post that I have included in my references below.</p>
 
 <h1 id="final-thoughts">Final Thoughts</h1>
 <p>Network and endpoint visibility should be priority of all blue teams. Although focusing on a small section of the attack lifecycle, this post has been an overview of some of the areas I found interesting when thinking about download cradle detection. Understanding offensive technique and forensic artefacts enables blue teams to write high quality detections near the top the pyramid of pain. Correlating this data towards your own visibility levels, blue teams can work towards improvement and optimising resources for both detection and response.</p>
 
-<p>Let me know if you have any questions. I have added my <a href="https://github.com/mgreen27/mgreen27.github.io/tree/master/other/DownloadCradle">testing results and script here</a>. I would be interested to hear results testing these out on different vendors.</p>
+<p>Let me know if you have any questions. I have added my <a href="https://github.com/mgreen27/mgreen27.github.io/tree/master/static/other/DownloadCradle">testing results and script here</a>. I would be interested to hear results testing these out on different vendors.</p>
 
 <h1 id="references">References</h1>
 <p>1) Arno0x0x. <a href="https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/">Windows oneliners to download remote payload and execute arbitrary code</a></p>
@@ -303,119 +257,165 @@ Microsoft BITS also has some specific forensic artefacts I have previously cover
 
 <p>8) Green, Matthew. <a href="https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html">Sharing my BITS</a></p>
 
-        </section>
-        <footer class="post-footer">
-          <section class="share">
-            
-              
-                <a class="icon-twitter" href="http://twitter.com/share?text=Powershell+Download+Cradles&amp;url=https://mgreen27.github.io/posts/2018/04/02/DownloadCradle"
-                  onclick="window.open(this.href, 'twitter-share', 'width=550,height=255');return false;">
-                <i class="fa fa-twitter"></i><span class="hidden">twitter</span>
-                </a>
-              
-            
-              
-                <a class="icon-linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;title=Powershell+Download+Cradles&amp;url=https://mgreen27.github.io/posts/2018/04/02/DownloadCradle"
-                  onclick="window.open(this.href, 'linkedin-share', 'width=550,height=255');return false;">
-                <i class="fa fa-linkedin"></i><span class="hidden">linkedin</span>
-                </a>
-              
-            
-              
-            
-          </section>
-        </footer>
-        <div class="bottom-teaser cf">
-          <div class="isLeft">
-            <h5 class="index-headline featured"><span>Written by</span></h5>
-            <section class="author">
-              <div class="author-image" style="background-image: url(/assets/images/author.jpg)">Blog Logo</div>
-              <h4>Matthew Green</h4>
-              <p class="bio"></p>
-              <hr>
-              <p class="published">Published <time datetime="2018-04-02 00:00">02 Apr 2018</time></p>
-            </section>
-          </div>
-          
-          <div class="isRight">
-            <h5 class="index-headline featured"><span>Supported by</span></h5>
-            <footer class="site-footer">
-              <section class="poweredby">Proudly published with <a href="http://jekyllrb.com"> Jekyll</a></section>
-              <a class="subscribe" href="/feed.xml"> <span class="tooltip"> <i class="fa fa-rss"></i> You should subscribe to my feed.</span></a>
-              <div class="inner">
-                <section class="copyright">All content copyright <a href="/">Matthew Green</a> &copy; 2018<br>All rights reserved.</section>
-              </div>
-            </footer>
-          </div>
-        </div>
-        
-      </article>
-    </main>
-    <div class="bottom-closer">
-      <div class="background-closer-image"  style="background-image: url(/assets/images/luna_background.jpg)">
-        Image
-      </div>
-      <div class="inner">
-        <h1 class="blog-title">Matt's DFIR blog</h1>
-        <h2 class="blog-description">A blog for DFIR thoughts, research and future reference
-</h2>
-        <a href=/ class="btn">Back to Overview</a>
-      </div>
-    </div>
-    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
-<script type="text/javascript" src="/assets/js/index.js"></script>
-<script type="text/javascript" src="/assets/js/readingTime.min.js"></script>
-<script>
-(function ($) {
-  "use strict";
-  $(document).ready(function(){
+</div>
+  <div class="share-page">
+  <span style="float: left;">Share by: &nbsp;&nbsp;</span>
 
-    var $window = $(window),
-    $image = $('.post-image-image, .teaserimage-image');
+  <!-- Twitter -->
+  <a href="https://twitter.com/share" class="twitter-share-button" data-via="mgreen27">Tweet</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+</div>
+
+
+  
     
-      $window.on('scroll', function() {
-        var top = $window.scrollTop();
+      
+        
+          
+            
+            <div class="panel-body">
+              <h4>Related Posts</h4>
+              <ul>
+            
+                <li class="relatedPost">
+                  <a href="http://localhost:4000/posts/2019/04/07/ILRScriptBuilder.html">Live Response Script Builder</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="http://localhost:4000/posts/2018/02/18/Sharing_my_BITS.html">Sharing my BITS</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="http://localhost:4000/posts/2018/01/14/Invoke-LiveResponse.html">Invoke-LiveResponse</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="http://localhost:4000/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html">Blue Team Hacks - WMI Eventing</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="http://localhost:4000/posts/2017/01/12/PowerShell_Remoting_IR.html">PowerShell Remoting and Incident Response</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+  
+  </ul>
+</div>
 
-        if (top < 0 || top > 1500) { return; }
-        $image
-          .css('transform', 'translate3d(0px, '+top/3+'px, 0px)')
-          .css('opacity', 1-Math.max(top/700, 0));
-      });
-      $window.trigger('scroll');
 
-      var height = $('.article-image').height();
-      $('.post-content').css('padding-top', height + 'px');
+<div class="PageNavigation">
+  
+    <a class="prev" href="/posts/2018/02/18/Sharing_my_BITS.html">&laquo; Sharing my BITS</a>
+  
+  
+    <a class="next" href="/posts/2019/04/07/ILRScriptBuilder.html">Live Response Script Builder &raquo;</a>
+  
+</div>
 
-      $('a[href*=#]:not([href=#])').click(function() {
-        if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'')
-         && location.hostname == this.hostname) {
-          var target = $(this.hash);
-          target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
-          if (target.length) {
-            $('html,body').animate({ scrollTop: target.offset().top }, 500);
-            return false;
-          }
-        }
-      });
+<div class="disqus-comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    /* <![CDATA[ */
+    var disqus_shortname = "";
+    var disqus_identifier = "http://localhost:4000_Powershell Download Cradles";
+    var disqus_title = "Powershell Download Cradles";
 
-  });
-}(jQuery));
-</script>
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    /* ]]> */
+  </script>
+</div>
 
-<!-- Google Analytics -->
-<script>
-   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        <footer>
+          &copy; Matthew Green
+          
+            - <a href="https://github.com/mgreen27">https://github.com/mgreen27</a> - Powered by Jekyll.
+          
+        </footer>
+      </div>
+      <!-- end /.col-sm-8 -->
+    </div>
+    <!-- end /.container -->
 
-ga('create', 'UA-109549583-1', 'auto');
-ga('send', 'pageview');
-
-</script>
-
-
-
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/super-search.js"></script>
+    <script src="/static/js/thickbox-compressed.js"></script>
+    <script src="/static/js/projects.js"></script>
   </body>
 </html>
+

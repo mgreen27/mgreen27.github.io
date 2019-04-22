@@ -1,87 +1,150 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <meta charset="utf-8">
-  <!-- (1) Optimize for mobile versions: http://goo.gl/EOpFl -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- (1) force latest IE rendering engine: bit.ly/1c8EiC9 -->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/static/img/favicon.ico" />
+    <title>Blue Team Hacks - WMI Eventing - Matt's DFIR Blog</title>
+    <meta name="author" content="Matthew Green" />
+    <meta name="description" content="Blue Team Hacks - WMI Eventing" />
+    <meta name="keywords" content="Blue Team Hacks - WMI Eventing, Matt's DFIR Blog, posts" />
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+    <meta content="" property="fb:app_id">
+    <meta content="Matt's DFIR Blog" property="og:site_name">
 
-  <title>Blue Team Hacks - WMI Eventing</title>
-  <meta name="description" content="In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. T..." />
-
-  <meta name="HandheldFriendly" content="True" />
-  <meta name="MobileOptimized" content="320" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@mgreen27" />
-    <meta name="twitter:title" content="Blue Team Hacks - WMI Eventing" />
-    <meta name="twitter:image" content="https://mgreen27.github.io/assets/images/buddyicon.jpg" />
     
-    <meta name="twitter:description"  content="In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. T..." />
+
     
-  
-  
-  <meta property="og:site_name" content="Matt's DFIR blog" />
-  <meta property="og:title" content="Blue Team Hacks - WMI Eventing"/>
-  
-  <meta property="og:description" content="In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. T..." />
-  
-  <meta property="og:image" content="https://mgreen27.github.io/assets/article_images/2017-04-03-WMI/00Title_cogs.jpg" />
-  <meta property="og:url" content="https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html" >
-  <meta property="og:type" content="blog" />
-  <meta property="article:published_time" content="2017-04-03T00:00:00+10:00">
+      <meta content="Blue Team Hacks - WMI Eventing" property="og:title">
+      <meta content="article" property="og:type">
+    
 
-  <link rel="canonical" href="https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html"/>
-  <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/png"/>
-  <link rel="stylesheet" href="//brick.a.ssl.fastly.net/Linux+Libertine:400,400i,700,700i/Open+Sans:400,400i,700,700i">
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
+      <meta content="A blog for DFIR thoughts, research and for my future reference" property="og:description">
+    
 
-  <link rel="stylesheet" type="text/css" media="screen" href="/css/main.css" />
-  <link rel="stylesheet" type="text/css" media="print" href="/css/print.css" />
-</head>
+    
+      <meta content="http://localhost:4000/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html" property="og:url">
+    
 
-  <body itemscope itemtype="http://schema.org/Article">
-    <!-- header start -->
+    
+      <meta content="2017-04-03T00:00:00+10:00" property="article:published_time">
+      <meta content="http://localhost:4000/about/" property="article:author">
+    
 
+    
+      <meta content="http://localhost:4000/static/img/posts//assets/article_images/2017-04-03-WMI/00Title_cogs.jpg" property="og:image">
+    
 
-  <a href="https://mgreen27.github.io" class="logo-readium"><span class="logo" style="background-image: url(/assets/images/buddyicon.jpg)"></span></a>
+    
+      
+        <meta content="posts" property="article:section">
+      
+    
 
-<!-- header end -->
+    
+      
+        <meta content="DFIR" property="article:tag">
+      
+        <meta content="Powershell" property="article:tag">
+      
+        <meta content="WMI" property="article:tag">
+      
+    
 
-    <main class="content" role="main">
-      <article class="post">
-        
-        <div class="article-image">
-          <div class="post-image-image" style="background-image: url(/assets/article_images/2017-04-03-WMI/00Title_cogs.jpg)">
-            Article Image
-          </div>
-          <div class="post-image-image2" style="background-image: url()">
-            Article Image
-          </div>
-          <div class="post-meta">
-            <h1 class="post-title">Blue Team Hacks - WMI Eventing</h1>
-            <div class="cf post-meta-text">
-              <div class="author-image" style="background-image: url(/assets/images/author.jpg)">Blog Logo</div>
-              <h4 class="author-name" itemprop="author" itemscope itemtype="http://schema.org/Person">Matthew Green</h4>
-              on
-              <time datetime="2017-04-03 00:00">03 Apr 2017</time>
-              <!-- , tagged on <span class="post-tag-">, <a href="/tag/"></a></span> -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@mgreen27">
+    <meta name="twitter:creator" content="@mgreen27">
+
+    
+      <meta name="twitter:title" content="Blue Team Hacks - WMI Eventing">
+    
+
+    
+      <meta name="twitter:url" content="http://localhost:4000/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html">
+    
+
+    
+      <meta name="twitter:description" content="A blog for DFIR thoughts, research and for my future reference">
+    
+
+    
+
+    <!-- Font awesome icons -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+    <!-- syntax highlighting CSS -->
+    <link rel="stylesheet" href="/static/css/syntax.css">
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/super-search.css">
+    <link rel="stylesheet" href="/static/css/thickbox.css">
+    <link rel="stylesheet" href="/static/css/projects.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="col-sm-3">
+        <div class="fixed-condition">
+          <a href="/"><img class="profile-avatar" src="/static/img/avatar.jpg" height="75px" width="75px" /></a>
+          <h1 class="author-name">Matthew Green</h1>
+          
+            <div class="profile-about">
+              I am a DFIR and detection guy from Sydney Australia.
             </div>
-            <div style="text-align:center">
-              <a href="#topofpage" class="topofpage"><i class="fa fa-angle-down"></i></a>
-            </div>
+          
+          <div class="social">
+            <ul>
+              
+                <li><a href="https://www.twitter.com/mgreen27" target="_blank"><i class="fa fa-twitter"></i></a></li>
+              
+                <li><a href="https://www.linkedin.com/in/mgreen27/" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+              
+                <li><a href="https://github.com/mgreen27" target="_blank"><i class="fa fa-github"></i></a></li>
+              
+            </ul>
           </div>
+          <div class="search" id="js-search">
+            <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+            <ul class="search__results" id="js-search__results"></ul>
+          </div>
+          <hr />
+          <ul class="sidebar-nav">
+            <strong>Navigation</strong>
+            <li><a href="/">Home</a></li>
+            
+              <li><a class="about" href="/about/">About Me</a></li>
+            
+              <li><a class="about" href="/projects/">My Projects</a></li>
+            
+              <li><a class="about" href="/feed.xml">XML Feed</a></li>
+            
+          </ul>
         </div>
-        
-        <section class="post-content">
-          <div class="post-reading">
-            <span class="post-reading-time"></span> read
-          </div>
-          <a name="topofpage"></a>
-          <p>In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. Thinking about this gap led to me looking at WMI starting as an alternate near real time detection fix, and during feature investigation ended with another technically novel solution I thought was interesting enough to share.</p>
+        <!-- end /.fixed-condition -->
+      </div>
+      <div class="col-sm-8 col-offset-1 main-layout">
+        <header class="post-header">
+  <h1 class="post-title">Blue Team Hacks - WMI Eventing</h1>
+</header>
+
+<span class="time">03 Apr 2017</span>
+
+  <span class="categories">
+    &raquo; <a href="/category/posts">posts</a>
+  </span>
+
+
+<div class="content">
+  <div class="post"><div style="text-align: center;"><img src="/static/img/article_images/2017-04-03-WMI/00Title.jpg" width="600" /></div>
+
+<h2 id="blue-team-hacks---wmi-eventing">Blue Team Hacks - WMI Eventing</h2>
+<p>In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. Thinking about this gap led to me looking at WMI starting as an alternate near real time detection fix, and during feature investigation ended with another technically novel solution I thought was interesting enough to share.</p>
 
 <h1 id="the-problem">The problem</h1>
 <p>I recently worked an engagement where our Process Monitoring tool of choice utilised Microsoft Sysmon. Unfortunately Sysmon only supports Windows 2008R2 and above, presenting with an interesting visibility gap for older machines. The first question was, how can I provide some advanced capability without needing to install another agent?</p>
@@ -100,11 +163,11 @@
 
 <p>WMI Eventing comes in two flavours, a local single process context or permanent WMI Event Subscriptions which are our focus today. These permanent subscriptions are stored in the WMI repository and persist across system shutdown / reboots. It is also worthy to note permanent WMI events run as SYSTEM level privileges.</p>
 
-<p><img src="/assets/article_images/2017-04-03-WMI/01WMIOverview.png" alt=" " /></p>
+<p><img src="/static/img/article_images/2017-04-03-WMI/01WMIOverview.png" alt=" " /></p>
 
 <p>There are 3 components in WMI Eventing:</p>
 
-<h2 id="an-event-filter">1. An Event Filter</h2>
+<h4 id="1-an-event-filter"><strong>1. An Event Filter</strong></h4>
 <p>An Event Filter is a WQL query that outlines the event of interest. Think of this as the “signature” component of which are two types covering almost all conceivable operating system events.</p>
 
 <ul>
@@ -112,10 +175,10 @@
 In my use case I used a a WQL query that polls every 30 seconds to report on all file creations in relevant staging location. For example: C:\Windows\VSS.</li>
 </ul>
 
-<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">__InstanceCreationEvent</span> <span class="n">WITHIN</span> <span class="mi">30</span>
-	<span class="k">WHERE</span> <span class="n">TargetInstance</span> <span class="n">ISA</span> <span class="ss">&quot;CIM_DataFile&quot;</span> 
-	<span class="k">AND</span> <span class="n">TargetInstance</span><span class="p">.</span><span class="n">Drive</span> <span class="o">=</span> <span class="ss">&quot;C:&quot;</span> 
-	<span class="k">AND</span> <span class="n">TargetInstance</span><span class="p">.</span><span class="n">Path</span> <span class="o">=</span> <span class="err">&quot;\\</span><span class="n">Windows</span><span class="err">\\</span><span class="n">VSS</span><span class="err">\\”</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql">	<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">__InstanceCreationEvent</span> <span class="n">WITHIN</span> <span class="mi">30</span>
+	<span class="k">WHERE</span> <span class="n">TargetInstance</span> <span class="n">ISA</span> <span class="nv">"CIM_DataFile"</span> 
+	<span class="k">AND</span> <span class="n">TargetInstance</span><span class="p">.</span><span class="n">Drive</span> <span class="o">=</span> <span class="nv">"C:"</span> 
+	<span class="k">AND</span> <span class="n">TargetInstance</span><span class="p">.</span><span class="n">Path</span> <span class="o">=</span> <span class="nv">"</span><span class="se">\\</span><span class="nv">Windows</span><span class="se">\\</span><span class="nv">VSS</span><span class="se">\\</span><span class="nv">” </span></code></pre></figure>
 
 <ul>
   <li>Alternatively, <strong>Extrinsic events</strong> are real time filters. The downside is there are not a lot of Extrinsic events available, but they should take preference over Intrinsic.</li>
@@ -123,10 +186,10 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
 
 <p>Below will alert on WMI Process Create event and trigger on some WMI based lateral movement.</p>
 
-<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">MSFT_WmiProvider_ExecMethodAsyncEvent_Pre</span> 
-	<span class="k">WHERE</span> <span class="n">ObjectPath</span><span class="o">=</span><span class="ss">&quot;Win32_Process&quot;</span> <span class="k">AND</span> <span class="n">MethodName</span><span class="o">=</span><span class="ss">&quot;Create&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql">	<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">MSFT_WmiProvider_ExecMethodAsyncEvent_Pre</span> 
+	<span class="k">WHERE</span> <span class="n">ObjectPath</span><span class="o">=</span><span class="nv">"Win32_Process"</span> <span class="k">AND</span> <span class="n">MethodName</span><span class="o">=</span><span class="nv">"Create"</span></code></pre></figure>
 
-<h2 id="event-consumer">2. Event Consumer</h2>
+<h4 id="2-event-consumer"><strong>2. Event Consumer</strong></h4>
 <p>An Event Consumer is an action to perform upon triggering an event. There are 5 possible classes.</p>
 
 <ul>
@@ -139,7 +202,7 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
 
 <p>I initially was looking at NTEventLogEventConsumer which could be the preferred option for most organisations looking for a monitoring capability. For my use case above, I ended up implementing an ActiveScriptEventConsumer that wrote to a particular log file and completed the file copy in a single Event Consumer to a friendly folder. The alerts and file copy status for each machine is managed and retrieved by a centralised dashboard, however the solution could alert, post, or write to any scriptable resource.</p>
 
-<h2 id="filter-to-consumer-binding">3. Filter to Consumer Binding</h2>
+<h4 id="3-filter-to-consumer-binding"><strong>3. Filter to Consumer Binding</strong></h4>
 <p>Filter to consumer Binding is the registration mechanism that binds a filter to a consumer.</p>
 
 <h1 id="final-thoughts">Final Thoughts</h1>
@@ -153,7 +216,7 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
 
 <p>Hopefully this post has provided some good food for thought and pointed interested parties in the direction for further research and reference material. Feel free to reach out if you have any questions.</p>
 
-<h2 id="references">References:</h2>
+<h3 id="references">References:</h3>
 <p>1) Ballenthin,William. Graeber, Matt. Teodorescu Claudiu. <a href="https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/wp-windows-management-instrumentation.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">Windows Management Instrumentation (WMI) Offense, Defense, and Forensics</a>, 2015</p>
 
 <p>2) Distributed Management Task Force, <a href="http://www.dmtf.org/standards/cim?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">Common Information Model</a></p>
@@ -171,120 +234,165 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
 <p>8) Parisi, Timothy. Pena, Evan. <a href="https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">WMI vs. WMI: Monitoring for Malicious Activity</a>, 2016</p>
 
 <p>9) US Department of Homeland Security. <a href="https://ics-cert.us-cert.gov/sites/default/files/documents/WMI_for_Detection_and_Response_S508C.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">WMI for Detection and Response</a>, 2016</p>
+</div>
+  <div class="share-page">
+  <span style="float: left;">Share by: &nbsp;&nbsp;</span>
 
-        </section>
-        <footer class="post-footer">
-          <section class="share">
-            
-              
-                <a class="icon-twitter" href="http://twitter.com/share?text=Blue+Team+Hacks+-+WMI+Eventing&amp;url=https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing"
-                  onclick="window.open(this.href, 'twitter-share', 'width=550,height=255');return false;">
-                <i class="fa fa-twitter"></i><span class="hidden">twitter</span>
-                </a>
-              
-            
-              
-                <a class="icon-linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;title=Blue+Team+Hacks+-+WMI+Eventing&amp;url=https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing"
-                  onclick="window.open(this.href, 'linkedin-share', 'width=550,height=255');return false;">
-                <i class="fa fa-linkedin"></i><span class="hidden">linkedin</span>
-                </a>
-              
-            
-              
-            
-          </section>
-        </footer>
-        <div class="bottom-teaser cf">
-          <div class="isLeft">
-            <h5 class="index-headline featured"><span>Written by</span></h5>
-            <section class="author">
-              <div class="author-image" style="background-image: url(/assets/images/author.jpg)">Blog Logo</div>
-              <h4>Matthew Green</h4>
-              <p class="bio"></p>
-              <hr>
-              <p class="published">Published <time datetime="2017-04-03 00:00">03 Apr 2017</time></p>
-            </section>
-          </div>
-          
-          <div class="isRight">
-            <h5 class="index-headline featured"><span>Supported by</span></h5>
-            <footer class="site-footer">
-              <section class="poweredby">Proudly published with <a href="http://jekyllrb.com"> Jekyll</a></section>
-              <a class="subscribe" href="/feed.xml"> <span class="tooltip"> <i class="fa fa-rss"></i> You should subscribe to my feed.</span></a>
-              <div class="inner">
-                <section class="copyright">All content copyright <a href="/">Matthew Green</a> &copy; 2018<br>All rights reserved.</section>
-              </div>
-            </footer>
-          </div>
-        </div>
-        
-      </article>
-    </main>
-    <div class="bottom-closer">
-      <div class="background-closer-image"  style="background-image: url(/assets/images/luna_background.jpg)">
-        Image
-      </div>
-      <div class="inner">
-        <h1 class="blog-title">Matt's DFIR blog</h1>
-        <h2 class="blog-description">A blog for DFIR thoughts, research and future reference
-</h2>
-        <a href=/ class="btn">Back to Overview</a>
-      </div>
-    </div>
-    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
-<script type="text/javascript" src="/assets/js/index.js"></script>
-<script type="text/javascript" src="/assets/js/readingTime.min.js"></script>
-<script>
-(function ($) {
-  "use strict";
-  $(document).ready(function(){
+  <!-- Twitter -->
+  <a href="https://twitter.com/share" class="twitter-share-button" data-via="mgreen27">Tweet</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 
-    var $window = $(window),
-    $image = $('.post-image-image, .teaserimage-image');
+</div>
+
+
+  
     
-      $window.on('scroll', function() {
-        var top = $window.scrollTop();
+      
+        
+          
+            
+            <div class="panel-body">
+              <h4>Related Posts</h4>
+              <ul>
+            
+                <li class="relatedPost">
+                  <a href="http://localhost:4000/posts/2019/04/07/ILRScriptBuilder.html">Live Response Script Builder</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="http://localhost:4000/posts/2018/04/02/DownloadCradle.html">Powershell Download Cradles</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="http://localhost:4000/posts/2018/02/18/Sharing_my_BITS.html">Sharing my BITS</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="http://localhost:4000/posts/2018/01/14/Invoke-LiveResponse.html">Invoke-LiveResponse</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="http://localhost:4000/posts/2017/01/12/PowerShell_Remoting_IR.html">PowerShell Remoting and Incident Response</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+  
+  </ul>
+</div>
 
-        if (top < 0 || top > 1500) { return; }
-        $image
-          .css('transform', 'translate3d(0px, '+top/3+'px, 0px)')
-          .css('opacity', 1-Math.max(top/700, 0));
-      });
-      $window.trigger('scroll');
 
-      var height = $('.article-image').height();
-      $('.post-content').css('padding-top', height + 'px');
+<div class="PageNavigation">
+  
+    <a class="prev" href="/posts/2017/01/12/PowerShell_Remoting_IR.html">&laquo; PowerShell Remoting and Incident Response</a>
+  
+  
+    <a class="next" href="/posts/2018/01/14/Invoke-LiveResponse.html">Invoke-LiveResponse &raquo;</a>
+  
+</div>
 
-      $('a[href*=#]:not([href=#])').click(function() {
-        if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'')
-         && location.hostname == this.hostname) {
-          var target = $(this.hash);
-          target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
-          if (target.length) {
-            $('html,body').animate({ scrollTop: target.offset().top }, 500);
-            return false;
-          }
-        }
-      });
+<div class="disqus-comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    /* <![CDATA[ */
+    var disqus_shortname = "";
+    var disqus_identifier = "http://localhost:4000_Blue Team Hacks - WMI Eventing";
+    var disqus_title = "Blue Team Hacks - WMI Eventing";
 
-  });
-}(jQuery));
-</script>
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    /* ]]> */
+  </script>
+</div>
 
-<!-- Google Analytics -->
-<script>
-   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        <footer>
+          &copy; Matthew Green
+          
+            - <a href="https://github.com/mgreen27">https://github.com/mgreen27</a> - Powered by Jekyll.
+          
+        </footer>
+      </div>
+      <!-- end /.col-sm-8 -->
+    </div>
+    <!-- end /.container -->
 
-ga('create', 'UA-109549583-1', 'auto');
-ga('send', 'pageview');
-
-</script>
-
-
-
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/super-search.js"></script>
+    <script src="/static/js/thickbox-compressed.js"></script>
+    <script src="/static/js/projects.js"></script>
   </body>
 </html>
+
