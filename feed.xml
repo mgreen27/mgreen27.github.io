@@ -5,8 +5,8 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 22 Apr 2019 17:01:12 +1000</pubDate>
-    <lastBuildDate>Mon, 22 Apr 2019 17:01:12 +1000</lastBuildDate>
+    <pubDate>Mon, 22 Apr 2019 19:56:08 +1000</pubDate>
+    <lastBuildDate>Mon, 22 Apr 2019 19:56:08 +1000</lastBuildDate>
     <generator>Jekyll v3.7.4</generator>
     
       <item>
