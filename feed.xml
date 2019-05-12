@@ -5,9 +5,93 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 22 Apr 2019 20:40:33 +1000</pubDate>
-    <lastBuildDate>Mon, 22 Apr 2019 20:40:33 +1000</lastBuildDate>
+    <pubDate>Mon, 13 May 2019 00:15:07 +1000</pubDate>
+    <lastBuildDate>Mon, 13 May 2019 00:15:07 +1000</lastBuildDate>
     <generator>Jekyll v3.7.4</generator>
+    
+      <item>
+        <title>Blue Team Hacks - Binary Rename</title>
+        <description>&lt;p&gt;In this post I thought I would share an interesting proof of concept I developed to detect Binary Rename of commonly abused binaries. Im going to describe the detection, its limitations and share the code.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/00title.jpg&quot; /&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
+&lt;p&gt;Binary rename is a defence evasion technique used to bypass brittle process name and path based detections. Following the mantra of misdirection and hiding in plain sight, binary rename is a sub technique of &lt;a href=&quot;https://attack.mitre.org/techniques/T1036/&quot;&gt;T1036&lt;/a&gt; - Masquerading in the Mitre ATT&amp;amp;CK framework.  Binary rename can be observed in use across all stages of the attack lifecycle and is a technique used by a large selection of actors from commodity malware crews through to Nation States. One of the most well recognised use of the binary rename technique was NotPetya, a renamed psexec binary enabling the automated and devastating lateral infection.&lt;/p&gt;
+
+&lt;p&gt;In my current $dayjob I developed a query to hunt for this activity by reviewing an executed process’ binary attributes and comparing with unexpected process names and paths. These have been some of my goto hunt queries pulling in hits for javascript based junkware, through to lateral movement, exfiltration tools and nation state level defence evasion.&lt;/p&gt;
+
+&lt;p&gt;For attacks sitting earlier in the attack lifecycle, often this involves an extension to the living off the land techniques copying a monitored binary to a less conspicuous path. For interactive attacks or attacks later in lifecycle, often an attacker will leverage a hack tool or administration binary not native to the environment but similarly “legitimate” looking to an unfamiliar eye. Understanding the types of binaries used, the PE attributes enables some interesting detection anchors and subsequent hunts.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;700&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/01vba.png&quot; /&gt;&lt;br /&gt;VBA Macro example: https://twitter.com/ItsReallyNick/status/945682763486777345&lt;/div&gt;
+
+&lt;p&gt;With that in mind, not all security teams have a capable EDR solution (End Point Detection and Response) that enables binary attribute visibility at scale. Thinking about this problem led me to thinking about an open source solution available on a wide selection of machines.&lt;/p&gt;
+
+&lt;h1 id=&quot;solution&quot;&gt;Solution&lt;/h1&gt;
+&lt;p&gt;In absence of a mature logging or EDR, an interesting visability tool is WMI Eventing. A WMI event subscription is a method of subscribing to certain system events with a trigger (filter) and action (event consumer). WMI eventing can be used to action on almost any operating system event. For example - logon, process, registry or file activity.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/01WMIOverview.png&quot; /&gt;&lt;br /&gt;WMI Eventing&lt;/div&gt;
+
+&lt;p&gt;WMI is the Blue Team’s equivalent to “living off the land” providing telemetry. This telemetry is similar to a limited version of modern EDR userland event tracing without the need to install a service or execute a binary directly. WMI Eventing is not new, Fireeye discussed the use of WMI as an endpoint intrusion detection system back in 2016. I have previously built WMI Eventing based solutions for a variety of niche IR use cases and visibility gaps. Although a complete description of WMI and WMI Event Consumers is outside the scope of this post, please see the further reading section for some detailed links and background in this space.
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/02filter.png&quot; /&gt;&lt;br /&gt;WMI Filter Query&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
+An ActiveScript Event Consumers allows the Blue Team to add logic and enrichment to WMI event triggers through the powerful Windows Scripting Host. In this POC I leverage a real time “extrinsic” wmi trigger for process execution monitoring, collecting ProcessID from all executed processes. A query of Win32_Process enables further process metadata to enable lookup of PE Attributes for detection. The PE Attribute in this use case is Original Name, with the Detection to lookup and alert against a list of high priority Original Names
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/03binaries.png&quot; /&gt;&lt;br /&gt;Binaries targetted: Original Name&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
+On condition match the POC has the capability to write to the Application event log. Event ID 8, with relevant alert details. The decision to leave out a hash calculation was decided for performance reasons, process path and Original Name providing a lead for live response.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/04evtx.png&quot; /&gt;&lt;br /&gt;Generated EventLog&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
+Similarly, output to a logfile for data ingestion. It is worthy to note: the POC can easily be modifed to suite requirements, removing the write to file or event log functions and function calls.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/04log.png&quot; /&gt;&lt;br /&gt;Generated Log File&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;limitations&quot;&gt;Limitations&lt;/h1&gt;
+&lt;p&gt;One of the limitations of leveraging WMI Eventing as an event source is events typically do not hold all the appropriate data for a mature detection use case. To enrich the detection, we require to query the Win32_Process class. There is a slight delay in obtaining process metadata so very short-lived processes (fraction of a second) may cause missed results. In my testing, these very short-lived commands like renamed cmd: &lt;code class=&quot;highlighter-rouge&quot;&gt;cdm /c echo &amp;lt;string&amp;gt;&lt;/code&gt; failed to generate wmi data however a slight pause during a local ping recorded the event. For the use case of a download cradle, access shell or other interactive commands typically of interest I do not foresee an issue but please keep this limitation in mind.&lt;/p&gt;
+
+&lt;p&gt;A second limitation is performance. Although not particularly resource intensive in my testing (no visible resource utilisation), in production there may be unexpected constraints. I have filtered my Process Events with this in mind but testing is recommended. I have also specifically kept the binary attribute matching use case very simple with a eye on performance. This may mean less fidelity in alerting, however the POC is fairly simple to modify and add capabilities.&lt;/p&gt;
+
+&lt;p&gt;Finally management, WMI Event consumers are notoriously hard to manage. I have included a Powershell installation script with uninstall instructions to support Powershell 2.0 and above.
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h1&gt;
+&lt;p&gt;This has been a fun short home project working on an open source detection capability. I was pleasantly surprised when I discovered vbscript has the ability query PE attributes. I hope others may find it useful, feel free to reach out if you have any feedback, questions, or improvements.&lt;/p&gt;
+
+&lt;p&gt;The POC template can be found here - &lt;a href=&quot;https://gist.github.com/mgreen27/80d2709c01ef795206670605c1073370&quot;&gt;WMIEvent-BinaryRename.ps1&lt;/a&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;further-reading&quot;&gt;Further reading&lt;/h1&gt;
+&lt;p&gt;1) Ballenthin,William. Graeber, Matt. Teodorescu Claudiu. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html&quot;&gt;Windows Management Instrumentation (WMI) Offense, Defense, and Forensics&lt;/a&gt;, 2015 &lt;br /&gt;
+2) Green, Matthew. &lt;a href=&quot;https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html&quot;&gt;Blue Team Hacks - WMI Eventing&lt;/a&gt;, 2017 &lt;br /&gt;
+3) The MITRE Corporation. &lt;a href=&quot;https://attack.mitre.org/techniques/T1036/&quot;&gt;Technique: Masquerading - MITRE ATT&amp;amp;CK™ - &lt;/a&gt; &lt;br /&gt;
+4) MSDN. &lt;a href=&quot;https://docs.microsoft.com/en-us/previous-versions/windows/desktop/krnlprov/win32-processstarttrace&quot;&gt;Win32_ProcessStartTrace class&lt;/a&gt; &lt;br /&gt;
+5) MSDN. &lt;a href=&quot;https://docs.microsoft.com/en-us/windows/desktop/properties/props-system-originalfilename&quot;&gt;System.OriginalFileName&lt;/a&gt; &lt;br /&gt;
+6) Parisi, Timothy. Pena, Evan. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html&quot;&gt;WMI vs. WMI: Monitoring for Malicious Activity&lt;/a&gt;, 2016 &lt;br /&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Sun, 12 May 2019 00:00:00 +1000</pubDate>
+        <link>https://mgreen27.github.io//posts/2019/05/12/BinaryRename.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>WMI</category>
+        
+        <category>EDR</category>
+        
+        <category>T1036</category>
+        
+        <category>&quot;Defence</category>
+        
+        <category>Evasion&quot;</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
     
       <item>
         <title>Live Response Script Builder</title>
@@ -20,7 +104,8 @@
 
 &lt;p&gt;Unless your running a preinstalled agent based solution, an important component of live response is local execution. As WinRM is not going to be deployed in most environments a common usecase may be via system management tools, scripting or local USB based collection. Secondly, simple expandability and the ability to write new collection capabilities quickly is an important design factor. I-LR’s supportability on Powershell 2.0 and no additional requirements beyond base operating system makes it a good candidate for this task.&lt;/p&gt;
 
-&lt;p&gt;With that in mind, im going to explain some of the features below and walk through how custom live response scripts can be generated.&lt;/p&gt;
+&lt;p&gt;With that in mind, im going to explain some of the features below and walk through how custom live response scripts can be generated.
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;modular&quot;&gt;Modular&lt;/h1&gt;
 &lt;p&gt;Invoke-LiveResponse leverages a new modular component for running collections. We still have the standard preconfigured collection options however a new “-custom” switch allows for dropping a scriptblock or multiple scriptblocks into the custom folder for ForensicCopy mode execution and script generation.&lt;/p&gt;
@@ -28,8 +113,9 @@
 &lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-04-07-ILRScriptBuilder/01CustomFolder.png&quot; /&gt;Scripts dropped into custom folder.&lt;/div&gt;
 
 &lt;div style=&quot;text-align: center; font-size:70%&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2019-04-07-ILRScriptBuilder/01CustomAll.png&quot; /&gt;&lt;br /&gt;Invoke-LiveResponse: -all -vss -custom with four custom collections.&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 
-&lt;h1 id=&quot;copy-preparation-and-search&quot;&gt;Copy Preparation and Search&lt;/h1&gt;
+&lt;h4 id=&quot;copy-preparation-and-search&quot;&gt;Copy Preparation and Search&lt;/h4&gt;
 &lt;p&gt;Under the hood, Invoke-LiveResponse now leverages a copy preparation function to simplify creating collection content. A function: Copy-LiveResponse checks for existence of items and builds a hash table of files and folders using Get-ChildItem. This enables generic glob searching on path and filtering using both Get-ChildItem or Powershell’s powerful “Where-Object” syntax. Depending on mode: Windows API via Copy-Item, or a raw copy via Invoke-ForensicCopy, copies files with fallback to the alternate method if failure.&lt;/p&gt;
 
 &lt;p&gt;Availible switches are familiar to anyone who uses Powershell Get-ChildItem:&lt;/p&gt;
@@ -58,16 +144,20 @@ WriteScriptBlock writes a .ps1 file containing the Invoke-LiveResponse scriptblo
 
 &lt;div style=&quot;text-align: center; font-size:70%&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-04-07-ILRScriptBuilder/03writescriptblock2.png&quot; /&gt;&lt;br /&gt;Invoke-LiveResponse -writescriptblock -localout:$true for local out to script location on execution.&lt;/div&gt;
 
-&lt;p&gt;Alternatively a localout or UNC path can be defined. Note: UNC path will map a drive to copy, specifying localout will only use preexisting mappings or write to local drives (which is potentially forensically destructive).&lt;/p&gt;
+&lt;p&gt;Alternatively a localout or UNC path can be defined. Note: UNC path will map a drive to copy, specifying localout will only use preexisting mappings or write to local drives (which is potentially forensically destructive).
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
-&lt;h1 id=&quot;volume-shadowcopy&quot;&gt;Volume ShadowCopy&lt;/h1&gt;
-&lt;p&gt;The “-VSS” switch enables collection of Volume ShadowCopy Service artefacts for all selected collections. The feature invokes CreateSymbolicLink via PInvoke to minimise forensic footprint, mounting all available VSC then copying artefacts if available. A dedup feature will take a hash of the VSS item and compare it to hashable collected files, skipping if previously copied.&lt;/p&gt;
+&lt;h4 id=&quot;volume-shadowcopy&quot;&gt;Volume ShadowCopy&lt;/h4&gt;
+&lt;p&gt;The “-VSS” switch enables collection of Volume ShadowCopy Service artefacts for all selected collections. The feature invokes CreateSymbolicLink via PInvoke to minimise forensic footprint, mounting all available VSC then copying artefacts if available. A dedup feature will take a hash of the VSS item and compare it to hashable collected files, skipping if previously copied.
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
-&lt;h1 id=&quot;nobase64&quot;&gt;NoBase64&lt;/h1&gt;
-&lt;p&gt;For raw disk access I-LR will utilise reflection to load an embedded Powerforensics module to memory. In field, some EDR / Powershell prevention tools will block the conversion function from base64. The “-Nobase64” switch leverages a direct byte array and GzipStream to bypass this technique. It is worthy to note, the created script is slightly larger size than its base64 equivalent.&lt;/p&gt;
+&lt;h4 id=&quot;nobase64&quot;&gt;NoBase64&lt;/h4&gt;
+&lt;p&gt;For raw disk access I-LR will utilise reflection to load an embedded Powerforensics module to memory. In field, some EDR / Powershell prevention tools will block the conversion function from base64. The “-Nobase64” switch leverages a direct byte array and GzipStream to bypass this technique. It is worthy to note, the created script is slightly larger size than its base64 equivalent.
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
-&lt;h1 id=&quot;psreflect&quot;&gt;PSReflect&lt;/h1&gt;
-&lt;p&gt;One of the components I have started rolling into Invoke-LiveResponse is reflection via pinvoke and Matt Graeber’s &lt;a href=&quot;https://www.powershellmagazine.com/2014/09/25/easily-defining-enums-structs-and-win32-functions-in-memory/&quot;&gt;PSreflect template&lt;/a&gt;. Initial implementations have been mounting UNC destination, Volume Shadow Copy and SYSTEM elevation via token impersonation. The longer term plan is to eventually run a significant LiveResponse capability via reflection for both forensic collection and live response summary information for use cases Powershell doesn’t provide legacy capability.&lt;/p&gt;
+&lt;h4 id=&quot;psreflect&quot;&gt;PSReflect&lt;/h4&gt;
+&lt;p&gt;One of the components I have started rolling into Invoke-LiveResponse is reflection via pinvoke and Matt Graeber’s &lt;a href=&quot;https://www.powershellmagazine.com/2014/09/25/easily-defining-enums-structs-and-win32-functions-in-memory/&quot;&gt;PSreflect template&lt;/a&gt;. Initial implementations have been mounting UNC destination, Volume Shadow Copy and SYSTEM elevation via token impersonation. The longer term plan is to eventually run a significant LiveResponse capability via reflection for both forensic collection and live response summary information for use cases Powershell doesn’t provide legacy capability.
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;putting-it-all-together&quot;&gt;Putting it all together&lt;/h1&gt;
 &lt;p&gt;After walking through the availible features, I thought I would walk through a script generation for a custom collection.&lt;/p&gt;
@@ -78,16 +168,17 @@ WriteScriptBlock writes a .ps1 file containing the Invoke-LiveResponse scriptblo
 &lt;code class=&quot;highlighter-rouge&quot;&gt;PS&amp;gt; Import-Module Invoke-LiveResponse&lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;To view help:&lt;br /&gt;
-&lt;code class=&quot;highlighter-rouge&quot;&gt;PS&amp;gt; Get-Help Invoke-LiveResponse -detailed&lt;/code&gt;&lt;/p&gt;
+&lt;code class=&quot;highlighter-rouge&quot;&gt;PS&amp;gt; Get-Help Invoke-LiveResponse -detailed&lt;/code&gt;
+ &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
-&lt;h2 id=&quot;memory-and-custom-disk&quot;&gt;Memory and custom disk&lt;/h2&gt;
+&lt;h4 id=&quot;memory-and-custom-disk&quot;&gt;Memory and custom disk&lt;/h4&gt;
 &lt;p&gt;In this usecase I will be collecting memory artefacts. I am interested in collecting a memory dump in addition to memory artefacts on the file system.&lt;/p&gt;
 
 &lt;p&gt;For Memory dump simple use of the inbuilt “-Mem” switch after ensuring WinPMem is available. For the FileSystem memory artefacts, I need to create a custom collection scriptblock.
-Firstly, I am interested in pagefile and swapfile collection targeting the root folder (line 6). I have chosen forensic mode as I know these files are typically locked and require special access to download. I will also use the “-VSS” switch to mount and search Volume ShadowCopy.&lt;/p&gt;
+Firstly, I am interested in pagefile and swapfile collection targeting the root folder (line 6). I have chosen forensic mode as I know these files are typically locked and require special access to download.&lt;/p&gt;
 
 &lt;div style=&quot;text-align: center; font-size:70%&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-04-07-ILRScriptBuilder/06scriptblock.png&quot; /&gt;&lt;br /&gt;Custom Scrtipblock: sbMemoryDisk.ps1&lt;/div&gt;
-&lt;p&gt;Secondly, I am interested in any *.dmp files on the filesystem (line 7). For this search I have also targeted the root folder but have also added the “-recurse” switch. This will enable the recursive search to find any dump files on the filesystem by filename. It is worthy to note if your looking for a traditional forensic carve / pattern match this is not the method for you - this is a fairly intensive search and typically during a live response we would aim to be more targeted.&lt;/p&gt;
+&lt;p&gt;Secondly, I am interested in any *.dmp files on the filesystem (line 7). For this search I have also targeted the root folder but have also added the “-recurse” switch. This will enable the recursive search to find any dump files on the filesystem by filename. I will also use the “-VSS” switch to mount and search Volume ShadowCopy. It is worthy to note if your looking for a traditional forensic carve / pattern match this is not the method for you - this is a fairly intensive search and typically during a live response we would aim to be more targeted.&lt;/p&gt;
 
 &lt;div style=&quot;text-align: center; font-size:70%&quot;&gt;&lt;img width=&quot;750&quot; src=&quot;/static/img/article_images/2019-04-07-ILRScriptBuilder/06setup.png&quot; /&gt;&lt;br /&gt;Custom Scrtipblock: add to custom folder and run Invoke-LiveResponse.&lt;/div&gt;
 
@@ -100,9 +191,11 @@ This command will output the generated live response script, to which we need to
 &lt;p&gt;On script execution, memory is collected and several files are found on the filesystem. As seen in the screenshot below, several process dumps were located on my desktop, the VSS and recyclebin.&lt;/p&gt;
 
 &lt;div style=&quot;text-align: center; font-size:70%&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-04-07-ILRScriptBuilder/06results.png&quot; /&gt;&lt;br /&gt;Memory Artefacts: Results&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h1&gt;
-&lt;p&gt;I have learnt a lot implementing some of these features in a tool that has been fairly handy to have available in the time I have been using it. There are many ways to run live response and collect data, Invoke-LiveResponse provides a solution with minimal requirements beyond what is available by default from Windows 7 and above. I hope others can get some value using it so please feel free to reach out and provide feedback and improvements.&lt;/p&gt;
+&lt;p&gt;I have learnt a lot implementing some of these features in a tool that has been fairly handy to have available in the time I have been using it. There are many ways to run live response and collect data, Invoke-LiveResponse provides a solution with minimal requirements beyond what is available by default from Windows 7 and above. I hope others can get some value using it so please feel free to reach out and provide feedback and improvements.
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 </description>
         <pubDate>Sun, 07 Apr 2019 00:00:00 +1100</pubDate>

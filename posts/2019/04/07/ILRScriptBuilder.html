@@ -152,7 +152,8 @@
 
 <p>Unless your running a preinstalled agent based solution, an important component of live response is local execution. As WinRM is not going to be deployed in most environments a common usecase may be via system management tools, scripting or local USB based collection. Secondly, simple expandability and the ability to write new collection capabilities quickly is an important design factor. I-LR’s supportability on Powershell 2.0 and no additional requirements beyond base operating system makes it a good candidate for this task.</p>
 
-<p>With that in mind, im going to explain some of the features below and walk through how custom live response scripts can be generated.</p>
+<p>With that in mind, im going to explain some of the features below and walk through how custom live response scripts can be generated.
+<br /><br /><br /></p>
 
 <h1 id="modular">Modular</h1>
 <p>Invoke-LiveResponse leverages a new modular component for running collections. We still have the standard preconfigured collection options however a new “-custom” switch allows for dropping a scriptblock or multiple scriptblocks into the custom folder for ForensicCopy mode execution and script generation.</p>
@@ -160,8 +161,9 @@
 <div style="text-align: center; font-size:70%;"><img src="/static/img/article_images/2019-04-07-ILRScriptBuilder/01CustomFolder.png" />Scripts dropped into custom folder.</div>
 
 <div style="text-align: center; font-size:70%"><img width="400" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/01CustomAll.png" /><br />Invoke-LiveResponse: -all -vss -custom with four custom collections.</div>
+<p><br /></p>
 
-<h1 id="copy-preparation-and-search">Copy Preparation and Search</h1>
+<h4 id="copy-preparation-and-search">Copy Preparation and Search</h4>
 <p>Under the hood, Invoke-LiveResponse now leverages a copy preparation function to simplify creating collection content. A function: Copy-LiveResponse checks for existence of items and builds a hash table of files and folders using Get-ChildItem. This enables generic glob searching on path and filtering using both Get-ChildItem or Powershell’s powerful “Where-Object” syntax. Depending on mode: Windows API via Copy-Item, or a raw copy via Invoke-ForensicCopy, copies files with fallback to the alternate method if failure.</p>
 
 <p>Availible switches are familiar to anyone who uses Powershell Get-ChildItem:</p>
@@ -190,16 +192,20 @@ WriteScriptBlock writes a .ps1 file containing the Invoke-LiveResponse scriptblo
 
 <div style="text-align: center; font-size:70%"><img width="500" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/03writescriptblock2.png" /><br />Invoke-LiveResponse -writescriptblock -localout:$true for local out to script location on execution.</div>
 
-<p>Alternatively a localout or UNC path can be defined. Note: UNC path will map a drive to copy, specifying localout will only use preexisting mappings or write to local drives (which is potentially forensically destructive).</p>
+<p>Alternatively a localout or UNC path can be defined. Note: UNC path will map a drive to copy, specifying localout will only use preexisting mappings or write to local drives (which is potentially forensically destructive).
+<br /><br /></p>
 
-<h1 id="volume-shadowcopy">Volume ShadowCopy</h1>
-<p>The “-VSS” switch enables collection of Volume ShadowCopy Service artefacts for all selected collections. The feature invokes CreateSymbolicLink via PInvoke to minimise forensic footprint, mounting all available VSC then copying artefacts if available. A dedup feature will take a hash of the VSS item and compare it to hashable collected files, skipping if previously copied.</p>
+<h4 id="volume-shadowcopy">Volume ShadowCopy</h4>
+<p>The “-VSS” switch enables collection of Volume ShadowCopy Service artefacts for all selected collections. The feature invokes CreateSymbolicLink via PInvoke to minimise forensic footprint, mounting all available VSC then copying artefacts if available. A dedup feature will take a hash of the VSS item and compare it to hashable collected files, skipping if previously copied.
+<br /><br /></p>
 
-<h1 id="nobase64">NoBase64</h1>
-<p>For raw disk access I-LR will utilise reflection to load an embedded Powerforensics module to memory. In field, some EDR / Powershell prevention tools will block the conversion function from base64. The “-Nobase64” switch leverages a direct byte array and GzipStream to bypass this technique. It is worthy to note, the created script is slightly larger size than its base64 equivalent.</p>
+<h4 id="nobase64">NoBase64</h4>
+<p>For raw disk access I-LR will utilise reflection to load an embedded Powerforensics module to memory. In field, some EDR / Powershell prevention tools will block the conversion function from base64. The “-Nobase64” switch leverages a direct byte array and GzipStream to bypass this technique. It is worthy to note, the created script is slightly larger size than its base64 equivalent.
+<br /><br /></p>
 
-<h1 id="psreflect">PSReflect</h1>
-<p>One of the components I have started rolling into Invoke-LiveResponse is reflection via pinvoke and Matt Graeber’s <a href="https://www.powershellmagazine.com/2014/09/25/easily-defining-enums-structs-and-win32-functions-in-memory/">PSreflect template</a>. Initial implementations have been mounting UNC destination, Volume Shadow Copy and SYSTEM elevation via token impersonation. The longer term plan is to eventually run a significant LiveResponse capability via reflection for both forensic collection and live response summary information for use cases Powershell doesn’t provide legacy capability.</p>
+<h4 id="psreflect">PSReflect</h4>
+<p>One of the components I have started rolling into Invoke-LiveResponse is reflection via pinvoke and Matt Graeber’s <a href="https://www.powershellmagazine.com/2014/09/25/easily-defining-enums-structs-and-win32-functions-in-memory/">PSreflect template</a>. Initial implementations have been mounting UNC destination, Volume Shadow Copy and SYSTEM elevation via token impersonation. The longer term plan is to eventually run a significant LiveResponse capability via reflection for both forensic collection and live response summary information for use cases Powershell doesn’t provide legacy capability.
+<br /><br /><br /></p>
 
 <h1 id="putting-it-all-together">Putting it all together</h1>
 <p>After walking through the availible features, I thought I would walk through a script generation for a custom collection.</p>
@@ -210,16 +216,17 @@ WriteScriptBlock writes a .ps1 file containing the Invoke-LiveResponse scriptblo
 <code class="highlighter-rouge">PS&gt; Import-Module Invoke-LiveResponse</code></p>
 
 <p>To view help:<br />
-<code class="highlighter-rouge">PS&gt; Get-Help Invoke-LiveResponse -detailed</code></p>
+<code class="highlighter-rouge">PS&gt; Get-Help Invoke-LiveResponse -detailed</code>
+ <br /><br /></p>
 
-<h2 id="memory-and-custom-disk">Memory and custom disk</h2>
+<h4 id="memory-and-custom-disk">Memory and custom disk</h4>
 <p>In this usecase I will be collecting memory artefacts. I am interested in collecting a memory dump in addition to memory artefacts on the file system.</p>
 
 <p>For Memory dump simple use of the inbuilt “-Mem” switch after ensuring WinPMem is available. For the FileSystem memory artefacts, I need to create a custom collection scriptblock.
-Firstly, I am interested in pagefile and swapfile collection targeting the root folder (line 6). I have chosen forensic mode as I know these files are typically locked and require special access to download. I will also use the “-VSS” switch to mount and search Volume ShadowCopy.</p>
+Firstly, I am interested in pagefile and swapfile collection targeting the root folder (line 6). I have chosen forensic mode as I know these files are typically locked and require special access to download.</p>
 
 <div style="text-align: center; font-size:70%"><img width="500" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/06scriptblock.png" /><br />Custom Scrtipblock: sbMemoryDisk.ps1</div>
-<p>Secondly, I am interested in any *.dmp files on the filesystem (line 7). For this search I have also targeted the root folder but have also added the “-recurse” switch. This will enable the recursive search to find any dump files on the filesystem by filename. It is worthy to note if your looking for a traditional forensic carve / pattern match this is not the method for you - this is a fairly intensive search and typically during a live response we would aim to be more targeted.</p>
+<p>Secondly, I am interested in any *.dmp files on the filesystem (line 7). For this search I have also targeted the root folder but have also added the “-recurse” switch. This will enable the recursive search to find any dump files on the filesystem by filename. I will also use the “-VSS” switch to mount and search Volume ShadowCopy. It is worthy to note if your looking for a traditional forensic carve / pattern match this is not the method for you - this is a fairly intensive search and typically during a live response we would aim to be more targeted.</p>
 
 <div style="text-align: center; font-size:70%"><img width="750" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/06setup.png" /><br />Custom Scrtipblock: add to custom folder and run Invoke-LiveResponse.</div>
 
@@ -232,9 +239,11 @@ This command will output the generated live response script, to which we need to
 <p>On script execution, memory is collected and several files are found on the filesystem. As seen in the screenshot below, several process dumps were located on my desktop, the VSS and recyclebin.</p>
 
 <div style="text-align: center; font-size:70%"><img src="/static/img/article_images/2019-04-07-ILRScriptBuilder/06results.png" /><br />Memory Artefacts: Results</div>
+<p><br /><br /><br /></p>
 
 <h1 id="final-thoughts">Final Thoughts</h1>
-<p>I have learnt a lot implementing some of these features in a tool that has been fairly handy to have available in the time I have been using it. There are many ways to run live response and collect data, Invoke-LiveResponse provides a solution with minimal requirements beyond what is available by default from Windows 7 and above. I hope others can get some value using it so please feel free to reach out and provide feedback and improvements.</p>
+<p>I have learnt a lot implementing some of these features in a tool that has been fairly handy to have available in the time I have been using it. There are many ways to run live response and collect data, Invoke-LiveResponse provides a solution with minimal requirements beyond what is available by default from Windows 7 and above. I hope others can get some value using it so please feel free to reach out and provide feedback and improvements.
+<br /><br /></p>
 
 </div>
   <div class="share-page">
@@ -252,6 +261,20 @@ This command will output the generated live response script, to which we need to
       
         
           
+            
+            <div class="panel-body">
+              <h4>Related Posts</h4>
+              <ul>
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
       
     
   
@@ -259,10 +282,13 @@ This command will output the generated live response script, to which we need to
       
         
           
-            
-            <div class="panel-body">
-              <h4>Related Posts</h4>
-              <ul>
+      
+    
+  
+    
+      
+        
+          
             
                 <li class="relatedPost">
                   <a href="https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html">Powershell Download Cradles</a>
@@ -353,6 +379,8 @@ This command will output the generated live response script, to which we need to
   
     <a class="prev" href="/posts/2018/04/02/DownloadCradle.html">&laquo; Powershell Download Cradles</a>
   
+  
+    <a class="next" href="/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename &raquo;</a>
   
 </div>
 
