@@ -5,8 +5,8 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 13 May 2019 00:15:07 +1000</pubDate>
-    <lastBuildDate>Mon, 13 May 2019 00:15:07 +1000</lastBuildDate>
+    <pubDate>Mon, 13 May 2019 11:18:02 +1000</pubDate>
+    <lastBuildDate>Mon, 13 May 2019 11:18:02 +1000</lastBuildDate>
     <generator>Jekyll v3.7.4</generator>
     
       <item>
@@ -40,11 +40,11 @@ An ActiveScript Event Consumers allows the Blue Team to add logic and enrichment
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/03binaries.png&quot; /&gt;&lt;br /&gt;Binaries targetted: Original Name&lt;/div&gt;
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;
-On condition match the POC has the capability to write to the Application event log. Event ID 8, with relevant alert details. The decision to leave out a hash calculation was decided for performance reasons, process path and Original Name providing a lead for live response.&lt;/p&gt;
+On condition match the POC has the capability to write to the Application event log. Event ID 4, with relevant alert details. The decision to leave out a hash calculation was decided for performance reasons, process path and Original Name providing a lead for live response.&lt;/p&gt;
 
 &lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/04evtx.png&quot; /&gt;&lt;br /&gt;Generated EventLog&lt;/div&gt;
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;
-Similarly, output to a logfile for data ingestion. It is worthy to note: the POC can easily be modifed to suite requirements, removing the write to file or event log functions and function calls.&lt;/p&gt;
+Similarly, output to a logfile for data ingestion. It is worthy to note: the POC can easily be modifed to suit requirements, removing the write to file or event log functions and function calls.&lt;/p&gt;
 
 &lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/04log.png&quot; /&gt;&lt;br /&gt;Generated Log File&lt;/div&gt;
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
@@ -58,7 +58,7 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h1&gt;
-&lt;p&gt;This has been a fun short home project working on an open source detection capability. I was pleasantly surprised when I discovered vbscript has the ability query PE attributes. I hope others may find it useful, feel free to reach out if you have any feedback, questions, or improvements.&lt;/p&gt;
+&lt;p&gt;This has been a fun short project working on an open source detection capability. I was pleasantly surprised when I discovered vbscript has the ability query PE attributes. I hope others may find it useful, feel free to reach out if you have any feedback, questions, or improvements.&lt;/p&gt;
 
 &lt;p&gt;The POC template can be found here - &lt;a href=&quot;https://gist.github.com/mgreen27/80d2709c01ef795206670605c1073370&quot;&gt;WMIEvent-BinaryRename.ps1&lt;/a&gt;
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
