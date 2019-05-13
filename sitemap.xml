@@ -5,8 +5,8 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 13 May 2019 11:18:02 +1000</pubDate>
-    <lastBuildDate>Mon, 13 May 2019 11:18:02 +1000</lastBuildDate>
+    <pubDate>Mon, 13 May 2019 11:52:15 +1000</pubDate>
+    <lastBuildDate>Mon, 13 May 2019 11:52:15 +1000</lastBuildDate>
     <generator>Jekyll v3.7.4</generator>
     
       <item>
@@ -53,6 +53,8 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
 &lt;p&gt;One of the limitations of leveraging WMI Eventing as an event source is events typically do not hold all the appropriate data for a mature detection use case. To enrich the detection, we require to query the Win32_Process class. There is a slight delay in obtaining process metadata so very short-lived processes (fraction of a second) may cause missed results. In my testing, these very short-lived commands like renamed cmd: &lt;code class=&quot;highlighter-rouge&quot;&gt;cdm /c echo &amp;lt;string&amp;gt;&lt;/code&gt; failed to generate wmi data however a slight pause during a local ping recorded the event. For the use case of a download cradle, access shell or other interactive commands typically of interest I do not foresee an issue but please keep this limitation in mind.&lt;/p&gt;
 
 &lt;p&gt;A second limitation is performance. Although not particularly resource intensive in my testing (no visible resource utilisation), in production there may be unexpected constraints. I have filtered my Process Events with this in mind but testing is recommended. I have also specifically kept the binary attribute matching use case very simple with a eye on performance. This may mean less fidelity in alerting, however the POC is fairly simple to modify and add capabilities.&lt;/p&gt;
+
+&lt;p&gt;It is also worthy to note: in some environments there may be legitimate binary rename activity for some of the targeted Original Names. Some of the binaries listed may require some tweaking of the matching logic to match host environment detection tolerance.&lt;/p&gt;
 
 &lt;p&gt;Finally management, WMI Event consumers are notoriously hard to manage. I have included a Powershell installation script with uninstall instructions to support Powershell 2.0 and above.
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
