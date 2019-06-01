@@ -5,9 +5,86 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 13 May 2019 11:52:15 +1000</pubDate>
-    <lastBuildDate>Mon, 13 May 2019 11:52:15 +1000</lastBuildDate>
+    <pubDate>Sat, 01 Jun 2019 19:27:04 +1000</pubDate>
+    <lastBuildDate>Sat, 01 Jun 2019 19:27:04 +1000</lastBuildDate>
     <generator>Jekyll v3.7.4</generator>
+    
+      <item>
+        <title>Binary Rename 2</title>
+        <description>&lt;p&gt;This is my second Binary Rename post, for the first and a detailed description of what Binary Rename is, please see: &lt;a href=&quot;https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html&quot;&gt;Blue Team Hacks - Binary Rename&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In my first post, I talked about telemetry and how we could leverage WMI Eventing for a niche detection usecase. In this post I am focusing on static detection, that is assessing files on disk. I am going to describe differences between both Yara and Powershell based detections, then share the code.&lt;/p&gt;
+
+&lt;h1 id=&quot;yara-detection&quot;&gt;Yara Detection&lt;/h1&gt;
+&lt;p&gt;Firstly Yara - Yara is a command line driven tool used mainly for pattern matching in malware or detection use cases. Rule based, though strings or binary patterns - matching can be leveraged with logic like boolean, counts or regular expressions. Although traditionally pattern based, Yara is modular and expandable such that a “PE” module is available focusing on querying common binary attributes. The PE module allows you to create rules targeted specifically to the PE file format and file headers, providing functions which can be used to write more effective rules for PE file use cases.&lt;/p&gt;
+
+&lt;p&gt;The example I am using is leveraging pe.versioninfo InternalName attribute:&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;350&quot; src=&quot;/static/img/article_images/2019-05-29-BinaryRename2/01yara.png&quot; /&gt;&lt;br /&gt;PE module import and InternalName rule for renamed cmd.exe&lt;/div&gt;
+
+&lt;p&gt;Our Yara use case is interesting as we require to compare an expected filename with the actual filename which is not typically a Yara capability. Florian Roth wrote about an “inverse” technique back in 2014 leveraging a Powershell script to obtain all files to be scanned and pass each filename into a yara scan as an external variable. The idea is a new yara instance is created for each file, passing in the relevant filename as the variable to allow comparison. In my code below I have expanded out the use case to cover x32 and x64 bit machines.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-05-29-BinaryRename2/01inversePS.png&quot; /&gt;&lt;br /&gt;Powershell: inverseYara.ps1&lt;/div&gt;
+
+&lt;p&gt;For execution we require the following files in our execution path:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;inverseYara.ps1&lt;/li&gt;
+  &lt;li&gt;yara binaries x86 and x64 in&lt;/li&gt;
+  &lt;li&gt;rename.yar&lt;br /&gt;
+&lt;br /&gt;
+Then execution via a bat file or commandline as below:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-05-29-BinaryRename2/01yararesults.png&quot; /&gt;&lt;br /&gt;Yara: Binary Rename detection results&lt;/div&gt;
+
+&lt;p&gt;This technique works very well from a detection standpoint, however in my testing performance does not appear to be optimal due to the overhead of generating a new yara process for each file scanned. It is worthy to note, the yara scan could be targeted without the filename match focusing on unexpected locations for the files in scope, but this doesn’t match the binary rename usecase as required.&lt;/p&gt;
+
+&lt;h1 id=&quot;powershell-detection&quot;&gt;Powershell Detection&lt;/h1&gt;
+&lt;p&gt;In this case, the preferred detection is moving to Powershell only. The Windows API provides access to PE attributes via the FileVersionInfo Class with support back to Powershell 2.0 /.NET 2. Speed is significantly improved and logic can be optimised adding additional items in the output that may aid analysis. In my script output below you can see I have added a sha1 hash to the output object.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-05-29-BinaryRename2/02psresults.png&quot; /&gt;&lt;br /&gt;Powershell results: 6 times faster than yara!&lt;/div&gt;
+
+&lt;h1 id=&quot;limitations&quot;&gt;Limitations&lt;/h1&gt;
+&lt;p&gt;The biggest limitation with any static detection capability that queries the whole disk is performance. Leveraging Powershell and native Windows API over yara seems to optimise performance significantly. Other optimisations added are setting CPU priority to Idle only and configuring logic to filter effectively to minimise processing footprint. Additional optimisations around performance, could be targeted queries for specific staging locations of interest as part of a targeted detection.&lt;/p&gt;
+
+&lt;p&gt;One consideration to keep in mind is the Powershell method leverages the Windows API. Although not a huge concern for my usecase of renamed binaries in a living off the land scenario, if there was tampering with rootkit like functionality a raw collection would be preferred.
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h1&gt;
+&lt;p&gt;Hopefully you will find this summary useful, closing the loop on an open source detection capability for the Binary Rename use case. Feel free to reach out if you have any feedback, questions, or improvements.&lt;/p&gt;
+
+&lt;p&gt;Powershell and Yara detection code can be found here - &lt;a href=&quot;https://gist.github.com/mgreen27/036c2b33f928d188ddc60f26b4c9a097&quot;&gt;Get-BinaryRename&lt;/a&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;further-reading&quot;&gt;Further reading&lt;/h1&gt;
+&lt;p&gt;1) Green, Matthew. &lt;a href=&quot;https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html&quot;&gt;Blue Team Hacks - Binary Rename&lt;/a&gt;, 2019 &lt;br /&gt;
+2) The MITRE Corporation. &lt;a href=&quot;https://attack.mitre.org/techniques/T1036/&quot;&gt;Technique: Masquerading - MITRE ATT&amp;amp;CK™ - &lt;/a&gt; &lt;br /&gt;
+3) MSDN. &lt;a href=&quot;https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.fileversioninfo?view=netframework-2.0&quot;&gt;FileVersionInfo&lt;/a&gt; &lt;br /&gt;
+4) Roth, Florian. &lt;a href=&quot;https://www.bsk-consulting.de/2014/05/27/inverse-yara-signature-matching/&quot;&gt;Inverse Yara Signature Matching (Part 1/2)&lt;/a&gt;, 2014 &lt;br /&gt;
+5) Roth, Florian. &lt;a href=&quot;https://www.bsk-consulting.de/2014/08/28/scan-system-files-manipulations-yara-inverse-matching-22/&quot;&gt;Inverse Yara Signature Matching (Part 2/2)&lt;/a&gt;, 2014 &lt;br /&gt;
+6) YARA v3.10.0. &lt;a href=&quot;https://yara.readthedocs.io/en/v3.10.0/modules/pe.html&quot;&gt;PE Module&lt;/a&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+</description>
+        <pubDate>Wed, 29 May 2019 00:00:00 +1000</pubDate>
+        <link>https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>Powershell</category>
+        
+        <category>Yara</category>
+        
+        <category>T1036</category>
+        
+        <category>&quot;Defence</category>
+        
+        <category>Evasion&quot;</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
     
       <item>
         <title>Blue Team Hacks - Binary Rename</title>
@@ -46,7 +123,7 @@ On condition match the POC has the capability to write to the Application event 
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;
 Similarly, output to a logfile for data ingestion. It is worthy to note: the POC can easily be modifed to suit requirements, removing the write to file or event log functions and function calls.&lt;/p&gt;
 
-&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/04log.png&quot; /&gt;&lt;br /&gt;Generated Log File&lt;/div&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;750&quot; src=&quot;/static/img/article_images/2019-05-12-BinaryRename/04log.png&quot; /&gt;&lt;br /&gt;Generated Log File&lt;/div&gt;
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;limitations&quot;&gt;Limitations&lt;/h1&gt;
