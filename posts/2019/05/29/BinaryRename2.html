@@ -165,7 +165,7 @@
 <p>For execution we require the following files in our execution path:</p>
 <ul>
   <li>inverseYara.ps1</li>
-  <li>yara binaries x86 and x64 in</li>
+  <li>yara binaries x86 or x64</li>
   <li>rename.yar<br />
 <br />
 Then execution via a bat file or commandline as below:</li>
@@ -181,7 +181,7 @@ Then execution via a bat file or commandline as below:</li>
 <div style="text-align: center; font-size:70%;"><img width="600" src="/static/img/article_images/2019-05-29-BinaryRename2/02psresults.png" /><br />Powershell results: 6 times faster than yara!</div>
 
 <h1 id="limitations">Limitations</h1>
-<p>The biggest limitation with any static detection capability that queries the whole disk is performance. Leveraging Powershell and native Windows API over yara seems to optimise performance significantly. Other optimisations added are setting CPU priority to Idle only and configuring logic to filter effectively to minimise processing footprint. Additional optimisations around performance, could be targeted queries for specific staging locations of interest as part of a targeted detection.</p>
+<p>The biggest limitation with any static detection capability that queries the whole disk is performance. Leveraging Powershell and native Windows API seems to optimise performance significantly. Other optimisations added are setting CPU priority to Idle only and configuring logic to filter effectively to minimise processing footprint. Additional optimisations around performance, could be targeted queries for specific staging locations of interest as part of a targeted detection.</p>
 
 <p>One consideration to keep in mind is the Powershell method leverages the Windows API. Although not a huge concern for my usecase of renamed binaries in a living off the land scenario, if there was tampering with rootkit like functionality a raw collection would be preferred.
 <br /><br /></p>
@@ -194,7 +194,7 @@ Then execution via a bat file or commandline as below:</li>
 
 <h1 id="further-reading">Further reading</h1>
 <p>1) Green, Matthew. <a href="https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename</a>, 2019 <br />
-2) The MITRE Corporation. <a href="https://attack.mitre.org/techniques/T1036/">Technique: Masquerading - MITRE ATT&amp;CK™ - </a> <br />
+2) The MITRE Corporation. <a href="https://attack.mitre.org/techniques/T1036/">Technique: Masquerading - MITRE ATT&amp;CK™</a> <br />
 3) MSDN. <a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.fileversioninfo?view=netframework-2.0">FileVersionInfo</a> <br />
 4) Roth, Florian. <a href="https://www.bsk-consulting.de/2014/05/27/inverse-yara-signature-matching/">Inverse Yara Signature Matching (Part 1/2)</a>, 2014 <br />
 5) Roth, Florian. <a href="https://www.bsk-consulting.de/2014/08/28/scan-system-files-manipulations-yara-inverse-matching-22/">Inverse Yara Signature Matching (Part 2/2)</a>, 2014 <br />
