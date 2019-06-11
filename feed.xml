@@ -5,9 +5,159 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 01 Jun 2019 19:27:04 +1000</pubDate>
-    <lastBuildDate>Sat, 01 Jun 2019 19:27:04 +1000</lastBuildDate>
+    <pubDate>Tue, 11 Jun 2019 21:13:22 +1000</pubDate>
+    <lastBuildDate>Tue, 11 Jun 2019 21:13:22 +1000</lastBuildDate>
     <generator>Jekyll v3.7.4</generator>
+    
+      <item>
+        <title>O365: Hidden InboxRules</title>
+        <description>&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;300&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/00title.png&quot; /&gt;&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;In this post Im going to talk about Office365 hidden inbox rules. Im going to give some background, show rule modification, and talk about detection methodology.&lt;/p&gt;
+
+&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
+&lt;p&gt;Attacks against Office 365 have generated a fair amount of industry acknowledgement in recent times as more and more organisations have moved towards cloud based services. Misconfiguration combined with less than optimal threat awareness means even the most simple attacks can provide access to this crucial service.&lt;/p&gt;
+
+&lt;p&gt;Mailbox rules are typically part of evil methodology and can be abused across the attack lifecycle:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Defence Evasion&lt;/li&gt;
+  &lt;li&gt;Reconnaissance&lt;/li&gt;
+  &lt;li&gt;Persistence&lt;/li&gt;
+  &lt;li&gt;Data collection / Exfiltration&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Typically mailbox rules are simple to detect statically via GUI access or in bulk from the Exchange Management Shell (EMS).&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/01rule.png&quot; /&gt;&lt;br /&gt;O365 OWA: Mailbox rule https://outlook.office.com/mail/options/mail/rules&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/01rule2.png&quot; /&gt;&lt;br /&gt;O365 EMS: Typical Powershell detection.&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;hidden-rules&quot;&gt;Hidden Rules&lt;/h1&gt;
+&lt;p&gt;Minimally documented, Damian Pfammatter at Compass Security explained the methodology in his September 2018 &lt;a href=&quot;https://blog.compass-security.com/2018/09/hidden-inbox-rules-in-microsoft-exchange/&quot;&gt;blog post&lt;/a&gt;. In summary, inbox rules can be hidden by leveraging an API called Messaging Application Programming Interface (MAPI), which provides low level access to exchange data stores.&lt;/p&gt;
+
+&lt;p&gt;Below I am accessing the inbox rule manually via the &lt;a href=&quot;https://github.com/stephenegriffin/mfcmapi&quot;&gt;MFCMAPI tool&lt;/a&gt; from a machine with an Outlook profile configured to our in scope mailbox. IPM.Rule.Version2.Message objects indicate an inbox rule.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/02mapi.png&quot; /&gt;&lt;br /&gt;EvilMove inbox rule: prior to change&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Modification is simply adding an unsupported value to the PR_RULE_MSG_PROVIDER field (or blanking out).&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/02mapi2.png&quot; /&gt;&lt;br /&gt;EvilMove inbox rule hidden: blanked out name and provider details.&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Once modified, the inbox rule is hidden and completely operational:&lt;/p&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/02mapi4.png&quot; /&gt;&lt;br /&gt;InboxRule hidden: no view in WebUI, InboxRule works as expected.&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/02mapi5.png&quot; /&gt;&lt;br /&gt;InboxRule hidden: EMS results.&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;detection&quot;&gt;Detection&lt;/h1&gt;
+
+&lt;p&gt;At scale detection of hidden inbox rules comes down to two main areas.&lt;/p&gt;
+
+&lt;h4 id=&quot;1-mapi-based---point-in-time&quot;&gt;1. MAPI based - point in time.&lt;/h4&gt;
+&lt;p&gt;Microsoft have released a script for use over Exchange Web Services (EWS) - Get-AllTenantRulesAndForms that enables tenant wide collection of Exchange Rules and Forms querying the low level data stores. This script enables visibility of Hidden Rules but leaves out an essential PR_RULE_MSG_PROVIDER field for detection. A modified version from Glen Scales collecting the PR_RULE_MSG_PROVIDER field is available &lt;a href=&quot;https://github.com/gscales/O365-InvestigationTooling/blob/master/Get-AllTenantRulesAndForms.ps1&quot;&gt;here - Get-AllTenantRulesAndForms&lt;/a&gt; (screenshot below).&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Frequency analysis on RuleMsgProvider field is recommended as a starting point for detection.&lt;/li&gt;
+  &lt;li&gt;Alert and investigate any mailbox rules with blank or unusual RuleMsgProvider fields.&lt;/li&gt;
+  &lt;li&gt;Alert and investigate IsPotentiallyMalicious = True - i.e rule action is an executable object.&lt;/li&gt;
+  &lt;li&gt;Limitations are high privilege requirements - Global Admin role AND EWS ApplicationImpersonation.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img height=&quot;200&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/03Detection.png&quot; /&gt;&lt;br /&gt;Exchange Web Services (EWS): Empty RuleName and RuleMsgProvider fields.&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;The action, condition and command fields (if populated) are base64 encoded raw byte arrays. I have yet to find documentation on the format for decoding or reverse engineer the data but there are some identifiable strings that can provide insights into the rule.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/03Detection1a.png&quot; /&gt;&lt;br /&gt;Decoded Action: Rule to forward email to external SMTP account.&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;For investigations, it is also possible to attempt to reanimate the strings and unhide the rules using MFCMAPI. In my testing I have been able to have the rule reappear adding in a known PR_RULE_MSG_PROVIDER field value.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;A fake, mistyped or blank PR_RULE_MSG_PROVIDER the rule would remain hidden.&lt;/li&gt;
+  &lt;li&gt;Protocol documentation can be found &lt;a href=&quot;https://docs.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxorule/70ac9436-501e-43e2-9163-20d2b546b886&quot;&gt;here&lt;/a&gt;.&lt;/li&gt;
+  &lt;li&gt;Remediation instructions can be found in the Further Reading section below.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;2-unified-audit-log---telemetry&quot;&gt;2. Unified Audit Log - telemetry.&lt;/h4&gt;
+&lt;p&gt;The Unified Audit Log (UAL) is a centralised log storing audit events for all Azure services. It can be accessed via O365 WebUI: Security &amp;amp; Compliance &amp;gt; Search &amp;gt; AuditLog Search or EMS Administration: Search-UnifiedAuditLog commandlet.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;This method is best suited to active monitoring via a SIEM or monitoring solution.&lt;/li&gt;
+  &lt;li&gt;Alert and investigate any unusual New-InboxRule (creation) or Set-InboxRule (modification) events.&lt;/li&gt;
+  &lt;li&gt;Benefits include reduced privilege requirements - e.g a user with View-Only Audit Logs or Audit Logs roles enabled.&lt;/li&gt;
+  &lt;li&gt;Logging must be enabled and retention is a consideration for historical searches.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;800&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/03Detection2.png&quot; /&gt;&lt;br /&gt;Telemetry based detection - Search-UnifiedAuditLog: New-InboxRule event&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;other-forwarding-specific&quot;&gt;Other Forwarding specific&lt;/h4&gt;
+&lt;p&gt;O365 has other indirect detection capabilities that assist spotting hidden rules. One of those is built in alerting on forwarding of mail to external addresses. This alert is also generated as a SecurityComplianceAlert in the UAL. Keep in mind on compromise of a privileged account an attacker could simply suppress these alerts to stay under the radar.&lt;/p&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/03Detection3a.png&quot; /&gt;&lt;br /&gt;Redirect Threat Management alert - Email also sent.&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;It is also possible to monitor traffic patterns of forwarded or redirected traffic. Below I have shown a summary inside the Security and Compliance Mailflow Dashboard.&lt;/p&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/03Detection4.png&quot; /&gt;&lt;br /&gt;Mailflow Dashboard: https://protection.office.com/mailflow/dashboard&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h1&gt;
+&lt;p&gt;In this post I have covered detection points for hidden mailbox rules:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Point in time query via Exchange Web Services (EWS).&lt;/li&gt;
+  &lt;li&gt;Rule creation and modification inside the Unified Audit Log.&lt;/li&gt;
+  &lt;li&gt;Other alerts in O365 ecosystem&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Although this post has an example of an inbox rule with external forwarding, hidden rules can be leveraged for other evil use cases including: persistence, reconnaissance and data collection. Best practice would include creation of a low privilege account for active monitoring of telemetry and periodic assessments leveraging a higher privilege account via Exchange Web Services.&lt;/p&gt;
+
+&lt;p&gt;I hope others found this post useful, feel free to reach out if you have any feedback, questions, or improvements.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h1 id=&quot;further-reading&quot;&gt;Further reading&lt;/h1&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Griffin, Stephen. &lt;a href=&quot;https://github.com/stephenegriffin/mfcmapi&quot;&gt;MFCMAPI github&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Hartley, Dave. &lt;a href=&quot;https://labs.mwrinfosecurity.com/blog/malicous-outlook-rules&quot;&gt;Malicious Outlook Rules&lt;/a&gt;, 2016&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Lambert, John. &lt;a href=&quot;https://onedrive.live.com/view.aspx?resid=F32A9F4F1477E49!122&amp;amp;ithint=file,pptx&amp;amp;authkey=!ACC5Ztb5uVED22k&quot;&gt;Office 365 Attacks&lt;/a&gt;, May 2019&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;MSDN. &lt;a href=&quot;https://blogs.msdn.microsoft.com/hkong/2015/02/27/how-to-delete-corrupted-hidden-inbox-rules-from-a-mailbox-using-mfcmapi/&quot;&gt;How to delete corrupted, hidden inbox rules from a mailbox using MFCMAPI&lt;/a&gt;, FeFebruary015&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Pfammatter, Damian. &lt;a href=&quot;https://blog.compass-security.com/2018/09/hidden-inbox-rules-in-microsoft-exchange/&quot;&gt;Hidden Inbox Rules in Microsoft Exchange&lt;/a&gt;, September 2018&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Scales, Glen. &lt;a href=&quot;https://gsexdev.blogspot.com/2019/05/audting-inbox-rules-with-ews-and-graph.html&quot;&gt;Auditing Inbox rules with EWS and the Graph API in Powershell&lt;/a&gt;, May 2019
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+</description>
+        <pubDate>Sun, 09 Jun 2019 00:00:00 +1000</pubDate>
+        <link>https://mgreen27.github.io//posts/2019/06/09/O365HiddenRules.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>O365</category>
+        
+        <category>Exchange</category>
+        
+        <category>Powershell</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
     
       <item>
         <title>Binary Rename 2</title>
@@ -29,7 +179,7 @@
 &lt;p&gt;For execution we require the following files in our execution path:&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;inverseYara.ps1&lt;/li&gt;
-  &lt;li&gt;yara binaries x86 and x64 in&lt;/li&gt;
+  &lt;li&gt;yara binaries x86 or x64&lt;/li&gt;
   &lt;li&gt;rename.yar&lt;br /&gt;
 &lt;br /&gt;
 Then execution via a bat file or commandline as below:&lt;/li&gt;
@@ -45,7 +195,7 @@ Then execution via a bat file or commandline as below:&lt;/li&gt;
 &lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-05-29-BinaryRename2/02psresults.png&quot; /&gt;&lt;br /&gt;Powershell results: 6 times faster than yara!&lt;/div&gt;
 
 &lt;h1 id=&quot;limitations&quot;&gt;Limitations&lt;/h1&gt;
-&lt;p&gt;The biggest limitation with any static detection capability that queries the whole disk is performance. Leveraging Powershell and native Windows API over yara seems to optimise performance significantly. Other optimisations added are setting CPU priority to Idle only and configuring logic to filter effectively to minimise processing footprint. Additional optimisations around performance, could be targeted queries for specific staging locations of interest as part of a targeted detection.&lt;/p&gt;
+&lt;p&gt;The biggest limitation with any static detection capability that queries the whole disk is performance. Leveraging Powershell and native Windows API seems to optimise performance significantly. Other optimisations added are setting CPU priority to Idle only and configuring logic to filter effectively to minimise processing footprint. Additional optimisations around performance, could be targeted queries for specific staging locations of interest as part of a targeted detection.&lt;/p&gt;
 
 &lt;p&gt;One consideration to keep in mind is the Powershell method leverages the Windows API. Although not a huge concern for my usecase of renamed binaries in a living off the land scenario, if there was tampering with rootkit like functionality a raw collection would be preferred.
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
@@ -58,7 +208,7 @@ Then execution via a bat file or commandline as below:&lt;/li&gt;
 
 &lt;h1 id=&quot;further-reading&quot;&gt;Further reading&lt;/h1&gt;
 &lt;p&gt;1) Green, Matthew. &lt;a href=&quot;https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html&quot;&gt;Blue Team Hacks - Binary Rename&lt;/a&gt;, 2019 &lt;br /&gt;
-2) The MITRE Corporation. &lt;a href=&quot;https://attack.mitre.org/techniques/T1036/&quot;&gt;Technique: Masquerading - MITRE ATT&amp;amp;CK™ - &lt;/a&gt; &lt;br /&gt;
+2) The MITRE Corporation. &lt;a href=&quot;https://attack.mitre.org/techniques/T1036/&quot;&gt;Technique: Masquerading - MITRE ATT&amp;amp;CK™&lt;/a&gt; &lt;br /&gt;
 3) MSDN. &lt;a href=&quot;https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.fileversioninfo?view=netframework-2.0&quot;&gt;FileVersionInfo&lt;/a&gt; &lt;br /&gt;
 4) Roth, Florian. &lt;a href=&quot;https://www.bsk-consulting.de/2014/05/27/inverse-yara-signature-matching/&quot;&gt;Inverse Yara Signature Matching (Part 1/2)&lt;/a&gt;, 2014 &lt;br /&gt;
 5) Roth, Florian. &lt;a href=&quot;https://www.bsk-consulting.de/2014/08/28/scan-system-files-manipulations-yara-inverse-matching-22/&quot;&gt;Inverse Yara Signature Matching (Part 2/2)&lt;/a&gt;, 2014 &lt;br /&gt;
@@ -145,7 +295,7 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
 &lt;h1 id=&quot;further-reading&quot;&gt;Further reading&lt;/h1&gt;
 &lt;p&gt;1) Ballenthin,William. Graeber, Matt. Teodorescu Claudiu. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html&quot;&gt;Windows Management Instrumentation (WMI) Offense, Defense, and Forensics&lt;/a&gt;, 2015 &lt;br /&gt;
 2) Green, Matthew. &lt;a href=&quot;https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html&quot;&gt;Blue Team Hacks - WMI Eventing&lt;/a&gt;, 2017 &lt;br /&gt;
-3) The MITRE Corporation. &lt;a href=&quot;https://attack.mitre.org/techniques/T1036/&quot;&gt;Technique: Masquerading - MITRE ATT&amp;amp;CK™ - &lt;/a&gt; &lt;br /&gt;
+3) The MITRE Corporation. &lt;a href=&quot;https://attack.mitre.org/techniques/T1036/&quot;&gt;Technique: Masquerading - MITRE ATT&amp;amp;CK™&lt;/a&gt; &lt;br /&gt;
 4) MSDN. &lt;a href=&quot;https://docs.microsoft.com/en-us/previous-versions/windows/desktop/krnlprov/win32-processstarttrace&quot;&gt;Win32_ProcessStartTrace class&lt;/a&gt; &lt;br /&gt;
 5) MSDN. &lt;a href=&quot;https://docs.microsoft.com/en-us/windows/desktop/properties/props-system-originalfilename&quot;&gt;System.OriginalFileName&lt;/a&gt; &lt;br /&gt;
 6) Parisi, Timothy. Pena, Evan. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html&quot;&gt;WMI vs. WMI: Monitoring for Malicious Activity&lt;/a&gt;, 2016 &lt;br /&gt;&lt;/p&gt;
