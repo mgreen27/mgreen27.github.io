@@ -151,7 +151,7 @@
 <h1 id="background">Background</h1>
 <p>Attacks against Office 365 have generated a fair amount of industry acknowledgement in recent times as more and more organisations have moved towards cloud based services. Misconfiguration combined with less than optimal threat awareness means even the most simple attacks can provide access to this crucial service.</p>
 
-<p>Mailbox rules are typically part of evil methodology and can be abused across the attack lifecycle:</p>
+<p>Inbox rules are typically part of evil methodology and can be abused across the attack lifecycle:</p>
 <ul>
   <li>Defence Evasion</li>
   <li>Reconnaissance</li>
@@ -159,9 +159,9 @@
   <li>Data collection / Exfiltration</li>
 </ul>
 
-<p>Typically mailbox rules are simple to detect statically via GUI access or in bulk from the Exchange Management Shell (EMS).</p>
+<p>Typically inbox rules are simple to detect statically via GUI access or in bulk from the Exchange Management Shell (EMS).</p>
 
-<div style="text-align: center; font-size:70%;"><img width="600" src="/static/img/article_images/2019-06-09-O365HiddenRules/01rule.png" /><br />O365 OWA: Mailbox rule https://outlook.office.com/mail/options/mail/rules</div>
+<div style="text-align: center; font-size:70%;"><img width="600" src="/static/img/article_images/2019-06-09-O365HiddenRules/01rule.png" /><br />O365 OWA: Inbox rule https://outlook.office.com/mail/options/mail/rules</div>
 <p><br /></p>
 
 <div style="text-align: center; font-size:70%;"><img width="500" src="/static/img/article_images/2019-06-09-O365HiddenRules/01rule2.png" /><br />O365 EMS: Typical Powershell detection.</div>
@@ -177,7 +177,7 @@
 
 <p>Modification is simply adding an unsupported value to the PR_RULE_MSG_PROVIDER field (or blanking out).</p>
 
-<div style="text-align: center; font-size:70%;"><img width="600" src="/static/img/article_images/2019-06-09-O365HiddenRules/02mapi2.png" /><br />EvilMove inbox rule hidden: blanked out name and provider details.</div>
+<div style="text-align: center; font-size:70%;"><img width="600" src="/static/img/article_images/2019-06-09-O365HiddenRules/02mapi2.png" /><br />EvilMove inbox rule hidden: fake provider details.</div>
 <p><br /></p>
 
 <p>Once modified, the inbox rule is hidden and completely operational:</p>
@@ -194,7 +194,7 @@
 <p>Microsoft have released a script for use over Exchange Web Services (EWS) - Get-AllTenantRulesAndForms that enables tenant wide collection of Exchange Rules and Forms querying the low level data stores. This script enables visibility of Hidden Rules but leaves out an essential PR_RULE_MSG_PROVIDER field for detection. A modified version from Glen Scales collecting the PR_RULE_MSG_PROVIDER field is available <a href="https://github.com/gscales/O365-InvestigationTooling/blob/master/Get-AllTenantRulesAndForms.ps1">here - Get-AllTenantRulesAndForms</a> (screenshot below).</p>
 <ul>
   <li>Frequency analysis on RuleMsgProvider field is recommended as a starting point for detection.</li>
-  <li>Alert and investigate any mailbox rules with blank or unusual RuleMsgProvider fields.</li>
+  <li>Alert and investigate any inbox rules with blank or unusual RuleMsgProvider fields.</li>
   <li>Alert and investigate IsPotentiallyMalicious = True - i.e rule action is an executable object.</li>
   <li>Limitations are high privilege requirements - Global Admin role AND EWS ApplicationImpersonation.</li>
 </ul>
@@ -238,7 +238,7 @@
 <p><br /></p>
 
 <h1 id="final-thoughts">Final Thoughts</h1>
-<p>In this post I have covered detection points for hidden mailbox rules:</p>
+<p>In this post I have covered detection points for hidden inbox rules:</p>
 <ul>
   <li>Point in time query via Exchange Web Services (EWS).</li>
   <li>Rule creation and modification inside the Unified Audit Log.</li>
