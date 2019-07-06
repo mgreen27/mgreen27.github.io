@@ -5,8 +5,8 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 11 Jun 2019 21:13:22 +1000</pubDate>
-    <lastBuildDate>Tue, 11 Jun 2019 21:13:22 +1000</lastBuildDate>
+    <pubDate>Sat, 06 Jul 2019 13:27:37 +1000</pubDate>
+    <lastBuildDate>Sat, 06 Jul 2019 13:27:37 +1000</lastBuildDate>
     <generator>Jekyll v3.7.4</generator>
     
       <item>
@@ -19,7 +19,7 @@
 &lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
 &lt;p&gt;Attacks against Office 365 have generated a fair amount of industry acknowledgement in recent times as more and more organisations have moved towards cloud based services. Misconfiguration combined with less than optimal threat awareness means even the most simple attacks can provide access to this crucial service.&lt;/p&gt;
 
-&lt;p&gt;Mailbox rules are typically part of evil methodology and can be abused across the attack lifecycle:&lt;/p&gt;
+&lt;p&gt;Inbox rules are typically part of evil methodology and can be abused across the attack lifecycle:&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;Defence Evasion&lt;/li&gt;
   &lt;li&gt;Reconnaissance&lt;/li&gt;
@@ -27,9 +27,9 @@
   &lt;li&gt;Data collection / Exfiltration&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Typically mailbox rules are simple to detect statically via GUI access or in bulk from the Exchange Management Shell (EMS).&lt;/p&gt;
+&lt;p&gt;Typically inbox rules are simple to detect statically via GUI access or in bulk from the Exchange Management Shell (EMS).&lt;/p&gt;
 
-&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/01rule.png&quot; /&gt;&lt;br /&gt;O365 OWA: Mailbox rule https://outlook.office.com/mail/options/mail/rules&lt;/div&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/01rule.png&quot; /&gt;&lt;br /&gt;O365 OWA: Inbox rule https://outlook.office.com/mail/options/mail/rules&lt;/div&gt;
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/01rule2.png&quot; /&gt;&lt;br /&gt;O365 EMS: Typical Powershell detection.&lt;/div&gt;
@@ -45,7 +45,7 @@
 
 &lt;p&gt;Modification is simply adding an unsupported value to the PR_RULE_MSG_PROVIDER field (or blanking out).&lt;/p&gt;
 
-&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/02mapi2.png&quot; /&gt;&lt;br /&gt;EvilMove inbox rule hidden: blanked out name and provider details.&lt;/div&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-06-09-O365HiddenRules/02mapi2.png&quot; /&gt;&lt;br /&gt;EvilMove inbox rule hidden: fake provider details.&lt;/div&gt;
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;p&gt;Once modified, the inbox rule is hidden and completely operational:&lt;/p&gt;
@@ -62,7 +62,7 @@
 &lt;p&gt;Microsoft have released a script for use over Exchange Web Services (EWS) - Get-AllTenantRulesAndForms that enables tenant wide collection of Exchange Rules and Forms querying the low level data stores. This script enables visibility of Hidden Rules but leaves out an essential PR_RULE_MSG_PROVIDER field for detection. A modified version from Glen Scales collecting the PR_RULE_MSG_PROVIDER field is available &lt;a href=&quot;https://github.com/gscales/O365-InvestigationTooling/blob/master/Get-AllTenantRulesAndForms.ps1&quot;&gt;here - Get-AllTenantRulesAndForms&lt;/a&gt; (screenshot below).&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;Frequency analysis on RuleMsgProvider field is recommended as a starting point for detection.&lt;/li&gt;
-  &lt;li&gt;Alert and investigate any mailbox rules with blank or unusual RuleMsgProvider fields.&lt;/li&gt;
+  &lt;li&gt;Alert and investigate any inbox rules with blank or unusual RuleMsgProvider fields.&lt;/li&gt;
   &lt;li&gt;Alert and investigate IsPotentiallyMalicious = True - i.e rule action is an executable object.&lt;/li&gt;
   &lt;li&gt;Limitations are high privilege requirements - Global Admin role AND EWS ApplicationImpersonation.&lt;/li&gt;
 &lt;/ul&gt;
@@ -106,7 +106,7 @@
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h1&gt;
-&lt;p&gt;In this post I have covered detection points for hidden mailbox rules:&lt;/p&gt;
+&lt;p&gt;In this post I have covered detection points for hidden inbox rules:&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;Point in time query via Exchange Web Services (EWS).&lt;/li&gt;
   &lt;li&gt;Rule creation and modification inside the Unified Audit Log.&lt;/li&gt;
@@ -130,7 +130,7 @@
     &lt;p&gt;Lambert, John. &lt;a href=&quot;https://onedrive.live.com/view.aspx?resid=F32A9F4F1477E49!122&amp;amp;ithint=file,pptx&amp;amp;authkey=!ACC5Ztb5uVED22k&quot;&gt;Office 365 Attacks&lt;/a&gt;, May 2019&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;MSDN. &lt;a href=&quot;https://blogs.msdn.microsoft.com/hkong/2015/02/27/how-to-delete-corrupted-hidden-inbox-rules-from-a-mailbox-using-mfcmapi/&quot;&gt;How to delete corrupted, hidden inbox rules from a mailbox using MFCMAPI&lt;/a&gt;, FeFebruary015&lt;/p&gt;
+    &lt;p&gt;MSDN. &lt;a href=&quot;https://blogs.msdn.microsoft.com/hkong/2015/02/27/how-to-delete-corrupted-hidden-inbox-rules-from-a-mailbox-using-mfcmapi/&quot;&gt;How to delete corrupted, hidden inbox rules from a mailbox using MFCMAPI&lt;/a&gt;, February 2015&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
     &lt;p&gt;Pfammatter, Damian. &lt;a href=&quot;https://blog.compass-security.com/2018/09/hidden-inbox-rules-in-microsoft-exchange/&quot;&gt;Hidden Inbox Rules in Microsoft Exchange&lt;/a&gt;, September 2018&lt;/p&gt;
@@ -293,12 +293,14 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;further-reading&quot;&gt;Further reading&lt;/h1&gt;
-&lt;p&gt;1) Ballenthin,William. Graeber, Matt. Teodorescu Claudiu. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html&quot;&gt;Windows Management Instrumentation (WMI) Offense, Defense, and Forensics&lt;/a&gt;, 2015 &lt;br /&gt;
-2) Green, Matthew. &lt;a href=&quot;https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html&quot;&gt;Blue Team Hacks - WMI Eventing&lt;/a&gt;, 2017 &lt;br /&gt;
-3) The MITRE Corporation. &lt;a href=&quot;https://attack.mitre.org/techniques/T1036/&quot;&gt;Technique: Masquerading - MITRE ATT&amp;amp;CK™&lt;/a&gt; &lt;br /&gt;
-4) MSDN. &lt;a href=&quot;https://docs.microsoft.com/en-us/previous-versions/windows/desktop/krnlprov/win32-processstarttrace&quot;&gt;Win32_ProcessStartTrace class&lt;/a&gt; &lt;br /&gt;
-5) MSDN. &lt;a href=&quot;https://docs.microsoft.com/en-us/windows/desktop/properties/props-system-originalfilename&quot;&gt;System.OriginalFileName&lt;/a&gt; &lt;br /&gt;
-6) Parisi, Timothy. Pena, Evan. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html&quot;&gt;WMI vs. WMI: Monitoring for Malicious Activity&lt;/a&gt;, 2016 &lt;br /&gt;&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Ballenthin,William. Graeber, Matt. Teodorescu Claudiu. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html&quot;&gt;Windows Management Instrumentation (WMI) Offense, Defense, and Forensics&lt;/a&gt;, 2015 &lt;br /&gt;&lt;/li&gt;
+  &lt;li&gt;Green, Matthew. &lt;a href=&quot;https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html&quot;&gt;Blue Team Hacks - WMI Eventing&lt;/a&gt;, 2017 &lt;br /&gt;&lt;/li&gt;
+  &lt;li&gt;The MITRE Corporation. &lt;a href=&quot;https://attack.mitre.org/techniques/T1036/&quot;&gt;Technique: Masquerading - MITRE ATT&amp;amp;CK™&lt;/a&gt; &lt;br /&gt;&lt;/li&gt;
+  &lt;li&gt;MSDN. &lt;a href=&quot;https://docs.microsoft.com/en-us/previous-versions/windows/desktop/krnlprov/win32-processstarttrace&quot;&gt;Win32_ProcessStartTrace class&lt;/a&gt; &lt;br /&gt;&lt;/li&gt;
+  &lt;li&gt;MSDN. &lt;a href=&quot;https://docs.microsoft.com/en-us/windows/desktop/properties/props-system-originalfilename&quot;&gt;System.OriginalFileName&lt;/a&gt; &lt;br /&gt;&lt;/li&gt;
+  &lt;li&gt;Parisi, Timothy. Pena, Evan. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html&quot;&gt;WMI vs. WMI: Monitoring for Malicious Activity&lt;/a&gt;, 2016 &lt;br /&gt;&lt;/li&gt;
+&lt;/ol&gt;
 
 </description>
         <pubDate>Sun, 12 May 2019 00:00:00 +1000</pubDate>
@@ -687,25 +689,38 @@ Focusing on default event logs, the best source for detection of malicious downl
 Process command line visibility on the endpoints to spot evil process chains and unusual command lines or obfuscation that is abnormal for the environment.&lt;/p&gt;
 
 &lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
-&lt;p&gt;1) ANSSI. &lt;a href=&quot;https://github.com/ANSSI-FR/bits_parser&quot;&gt;Bits_Parser&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;2) Azouri, Dor. &lt;a href=&quot;https://media.defcon.org/DEF%20CON%2025/DEF%20CON%2025%20presentations/Dor%20Azouri/DEFCON-25-Dor-Azouri-BITSInject-WP.pdf&quot;&gt;BITSInject&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;3) Bohannon, Daniel. &lt;a href=&quot;https://github.com/danielbohannon/Invoke-CradleCrafter&quot;&gt;Invoke-CradleCrafter&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;4) Geiger,Matthew. &lt;a href=&quot;https://www.dfrws.org/sites/default/files/session-files/pres-finding_your_naughty_bits.pdf&quot;&gt;Finding Your Naughty BITS&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;5) Hexacorn. &lt;a href=&quot;http://www.hexacorn.com/blog/2017/07/12/beyond-good-ol-run-key-part-64/&quot;&gt;Beyond Good Old RUn Key part 64&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;6) Microsoft. &lt;a href=&quot;https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/cc753856(v=ws.11)&quot;&gt;Bitsadmin documentation&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;7) Microsoft. &lt;a href=&quot;https://github.com/MicrosoftDocs/windows-powershell-docs/tree/master/docset/windows/bitstransfer&quot;&gt;Powershell Bitstransfer documentation&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;8) Microsoft. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/windows/desktop/ee663885(v=vs.85).aspx&quot;&gt;Using Windows Powershell to create BITS Jobs&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;9) O’Day, Dan. &lt;a href=&quot;https://github.com/danzek/annotationis/blob/master/Operating%20Systems/Windows/BITS.md&quot;&gt;BITS annotationis&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;10) Secureworks, Counter Threat Unit. &lt;a href=&quot;https://www.secureworks.com/blog/malware-lingers-with-bits&quot;&gt;Malware Lingers with BITS&lt;/a&gt;&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;ANSSI. &lt;a href=&quot;https://github.com/ANSSI-FR/bits_parser&quot;&gt;Bits_Parser&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Azouri, Dor. &lt;a href=&quot;https://media.defcon.org/DEF%20CON%2025/DEF%20CON%2025%20presentations/Dor%20Azouri/DEFCON-25-Dor-Azouri-BITSInject-WP.pdf&quot;&gt;BITSInject&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Bohannon, Daniel. &lt;a href=&quot;https://github.com/danielbohannon/Invoke-CradleCrafter&quot;&gt;Invoke-CradleCrafter&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Geiger,Matthew. &lt;a href=&quot;https://www.dfrws.org/sites/default/files/session-files/pres-finding_your_naughty_bits.pdf&quot;&gt;Finding Your Naughty BITS&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Hexacorn. &lt;a href=&quot;http://www.hexacorn.com/blog/2017/07/12/beyond-good-ol-run-key-part-64/&quot;&gt;Beyond Good Old RUn Key part 64&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Microsoft. &lt;a href=&quot;https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/cc753856(v=ws.11)&quot;&gt;Bitsadmin documentation&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Microsoft. &lt;a href=&quot;https://github.com/MicrosoftDocs/windows-powershell-docs/tree/master/docset/windows/bitstransfer&quot;&gt;Powershell Bitstransfer documentation&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Microsoft. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/windows/desktop/ee663885(v=vs.85).aspx&quot;&gt;Using Windows Powershell to create BITS Jobs&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;O’Day, Dan. &lt;a href=&quot;https://github.com/danzek/annotationis/blob/master/Operating%20Systems/Windows/BITS.md&quot;&gt;BITS annotationis&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Secureworks, Counter Threat Unit. &lt;a href=&quot;https://www.secureworks.com/blog/malware-lingers-with-bits&quot;&gt;Malware Lingers with BITS&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
 
 </description>
         <pubDate>Sun, 18 Feb 2018 00:00:00 +1100</pubDate>
@@ -904,19 +919,29 @@ Invoke-LiveResponse -ComputerName WinRMtester -Credential &amp;lt;domain&amp;gt;
 &lt;p&gt;Overall it has been a great learning experience putting together, and optimising some of the Powershell features. Im hoping others can benefit from this post as much as I have enjoyed the research and writing it. Feel free to reach out if you have any questions, find any bugs or pull requests.&lt;/p&gt;
 
 &lt;h3 id=&quot;references&quot;&gt;References&lt;/h3&gt;
-&lt;p&gt;1) Atkinson, Jared. &lt;a href=&quot;http://www.invoke-ir.com/&quot;&gt;Invoke-IR / Powerforensics&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;2) Australian Signals Directorate. &lt;a href=&quot;http://www.asd.gov.au/publications/protect/Securing_PowerShell.pdf&quot;&gt;Securing PowerShell in the Enterprise&lt;/a&gt;, 2016&lt;/p&gt;
-
-&lt;p&gt;3) Dunwoody, Matthew. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/02/greater_visibilityt.htm&quot;&gt;Greater Visibility Through PowerShell Logging&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;4) Forensics wiki. &lt;a href=&quot;http://www.forensicswiki.org/wiki/New_Technology_File_System_NTFS&quot;&gt;New Technology File Systems (general NTFS information)&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;5) Green, Matthew. &lt;a href=&quot;https://www.linkedin.com/pulse/powershell-remoting-incident-response-matthew-green/&quot;&gt;Powershell Remoting and Incident Response (WinRM lab setup)&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;6) Invoke-LiveResponse &lt;a href=&quot;https://github.com/mgreen27/Powershell-IR&quot;&gt;https://github.com/mgreen27/Powershell-IR&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;7) Sayer, Matthew. &lt;a href=&quot;http://www.hecfblog.com/2017/05/contents-in-sparse-mirror-may-be.html&quot;&gt;Contents in sparse mirror may be smaller than they appear&lt;/a&gt;&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Atkinson, Jared. &lt;a href=&quot;http://www.invoke-ir.com/&quot;&gt;Invoke-IR / Powerforensics&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Australian Signals Directorate. &lt;a href=&quot;http://www.asd.gov.au/publications/protect/Securing_PowerShell.pdf&quot;&gt;Securing PowerShell in the Enterprise&lt;/a&gt;, 2016&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Dunwoody, Matthew. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/02/greater_visibilityt.htm&quot;&gt;Greater Visibility Through PowerShell Logging&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Forensics wiki. &lt;a href=&quot;http://www.forensicswiki.org/wiki/New_Technology_File_System_NTFS&quot;&gt;New Technology File Systems (general NTFS information)&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Green, Matthew. &lt;a href=&quot;https://www.linkedin.com/pulse/powershell-remoting-incident-response-matthew-green/&quot;&gt;Powershell Remoting and Incident Response (WinRM lab setup)&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Invoke-LiveResponse &lt;a href=&quot;https://github.com/mgreen27/Powershell-IR&quot;&gt;https://github.com/mgreen27/Powershell-IR&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Sayer, Matthew. &lt;a href=&quot;http://www.hecfblog.com/2017/05/contents-in-sparse-mirror-may-be.html&quot;&gt;Contents in sparse mirror may be smaller than they appear&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
 
 </description>
         <pubDate>Sun, 14 Jan 2018 00:00:00 +1100</pubDate>
@@ -1014,23 +1039,35 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
 &lt;p&gt;Hopefully this post has provided some good food for thought and pointed interested parties in the direction for further research and reference material. Feel free to reach out if you have any questions.&lt;/p&gt;
 
 &lt;h3 id=&quot;references&quot;&gt;References:&lt;/h3&gt;
-&lt;p&gt;1) Ballenthin,William. Graeber, Matt. Teodorescu Claudiu. &lt;a href=&quot;https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/wp-windows-management-instrumentation.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Windows Management Instrumentation (WMI) Offense, Defense, and Forensics&lt;/a&gt;, 2015&lt;/p&gt;
-
-&lt;p&gt;2) Distributed Management Task Force, &lt;a href=&quot;http://www.dmtf.org/standards/cim?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Common Information Model&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;3) Distributed Management Task Force, &lt;a href=&quot;http://www.dmtf.org/standards/wbem?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Web-Based Enterprise Management&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;4) Fireeye FLARE. &lt;a href=&quot;https://github.com/fireeye/flare-wmi/tree/master/WMI-IDS?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;WMI-IDS&lt;/a&gt;, 2015&lt;/p&gt;
-
-&lt;p&gt;5) Invoke IR. &lt;a href=&quot;https://github.com/Invoke-IR/Uproot?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Uproot&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;6) Kerr, &lt;a href=&quot;https://www.fireeye.com/content/dam/fireeye-www/services/pdfs/sans-dfir-2015.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Devon.There’s Something About WMI&lt;/a&gt;, 2015&lt;/p&gt;
-
-&lt;p&gt;7) MSDN. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/aa394582(v=vs.85).aspx?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Windows Management Instrumentation&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;8) Parisi, Timothy. Pena, Evan. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;WMI vs. WMI: Monitoring for Malicious Activity&lt;/a&gt;, 2016&lt;/p&gt;
-
-&lt;p&gt;9) US Department of Homeland Security. &lt;a href=&quot;https://ics-cert.us-cert.gov/sites/default/files/documents/WMI_for_Detection_and_Response_S508C.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;WMI for Detection and Response&lt;/a&gt;, 2016&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Ballenthin,William. Graeber, Matt. Teodorescu Claudiu. &lt;a href=&quot;https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/wp-windows-management-instrumentation.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Windows Management Instrumentation (WMI) Offense, Defense, and Forensics&lt;/a&gt;, 2015&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Distributed Management Task Force, &lt;a href=&quot;http://www.dmtf.org/standards/cim?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Common Information Model&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Distributed Management Task Force, &lt;a href=&quot;http://www.dmtf.org/standards/wbem?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Web-Based Enterprise Management&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Fireeye FLARE. &lt;a href=&quot;https://github.com/fireeye/flare-wmi/tree/master/WMI-IDS?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;WMI-IDS&lt;/a&gt;, 2015&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Invoke IR. &lt;a href=&quot;https://github.com/Invoke-IR/Uproot?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Uproot&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Kerr, &lt;a href=&quot;https://www.fireeye.com/content/dam/fireeye-www/services/pdfs/sans-dfir-2015.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Devon.There’s Something About WMI&lt;/a&gt;, 2015&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;MSDN. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/aa394582(v=vs.85).aspx?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;Windows Management Instrumentation&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Parisi, Timothy. Pena, Evan. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;WMI vs. WMI: Monitoring for Malicious Activity&lt;/a&gt;, 2016&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;US Department of Homeland Security. &lt;a href=&quot;https://ics-cert.us-cert.gov/sites/default/files/documents/WMI_for_Detection_and_Response_S508C.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D&quot;&gt;WMI for Detection and Response&lt;/a&gt;, 2016&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
 </description>
         <pubDate>Mon, 03 Apr 2017 00:00:00 +1000</pubDate>
         <link>https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html</link>
@@ -1170,23 +1207,35 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h3 id=&quot;references--further-reading&quot;&gt;References / Further reading&lt;/h3&gt;
-&lt;p&gt;1) Atkinson, &lt;a href=&quot;http://www.invoke-ir.com&quot;&gt;Jared. Invoke-IR&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;2) Australian Signals Directorate. &lt;a href=&quot;http://www.asd.gov.au/publications/protect/Securing_PowerShell.pdf&quot;&gt;Securing PowerShell in the Enterprise&lt;/a&gt;, 2016&lt;/p&gt;
-
-&lt;p&gt;3) Hofferle, Jason. &lt;a href=&quot;https://blogs.technet.microsoft.com/heyscriptingguy/2012/07/23/an-introduction-to-powershell-remoting-part-one/&quot;&gt;Hey Scripting Guy! An Introduction to PowerShell Remoting: Part One&lt;/a&gt;, 2012&lt;/p&gt;
-
-&lt;p&gt;4) Hull, Dave. &lt;a href=&quot;http://www.powershellmagazine.com/2014/07/18/kansa-a-powershell-based-incident-response-framework/&quot;&gt;PowerShell Magazine. Kansa overview &lt;/a&gt;, 2014&lt;/p&gt;
-
-&lt;p&gt;5) Kazanciyan, Ryan. Hastings, Matt. &lt;a href=&quot;https://www.blackhat.com/docs/us-14/materials/us-14-Kazanciyan-Investigating-Powershell-Attacks-WP.pdf&quot;&gt;Investigating Powershell Attacks&lt;/a&gt;, 2014&lt;/p&gt;
-
-&lt;p&gt;6) Metcalf, Sean. &lt;a href=&quot;https://adsecurity.org/wp-content/uploads/2015/01/&quot;&gt;PowerShell Security: Defending the Enterprise from the Latest Attack Platform&lt;/a&gt;, 2016.&lt;/p&gt;
-
-&lt;p&gt;7) MSDN. &lt;a href=&quot;https://blogs.msdn.microsoft.com/powershell/2015/06/09/powershell-the-blue-team/&quot;&gt;PowerShell for the Blue Team&lt;/a&gt;, 2015&lt;/p&gt;
-
-&lt;p&gt;8) MSDN. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx&quot;&gt;Windows Remote Management&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;9) Upguard. &lt;a href=&quot;https://support.upguard.com/upguard/winrm-configuration.html#enabling-https-winrm&quot;&gt;WinRM Configuration: Enabling HTTPS WinRM&lt;/a&gt;&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Atkinson, &lt;a href=&quot;http://www.invoke-ir.com&quot;&gt;Jared. Invoke-IR&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Australian Signals Directorate. &lt;a href=&quot;http://www.asd.gov.au/publications/protect/Securing_PowerShell.pdf&quot;&gt;Securing PowerShell in the Enterprise&lt;/a&gt;, 2016&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Hofferle, Jason. &lt;a href=&quot;https://blogs.technet.microsoft.com/heyscriptingguy/2012/07/23/an-introduction-to-powershell-remoting-part-one/&quot;&gt;Hey Scripting Guy! An Introduction to PowerShell Remoting: Part One&lt;/a&gt;, 2012&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Hull, Dave. &lt;a href=&quot;http://www.powershellmagazine.com/2014/07/18/kansa-a-powershell-based-incident-response-framework/&quot;&gt;PowerShell Magazine. Kansa overview &lt;/a&gt;, 2014&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Kazanciyan, Ryan. Hastings, Matt. &lt;a href=&quot;https://www.blackhat.com/docs/us-14/materials/us-14-Kazanciyan-Investigating-Powershell-Attacks-WP.pdf&quot;&gt;Investigating Powershell Attacks&lt;/a&gt;, 2014&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Metcalf, Sean. &lt;a href=&quot;https://adsecurity.org/wp-content/uploads/2015/01/&quot;&gt;PowerShell Security: Defending the Enterprise from the Latest Attack Platform&lt;/a&gt;, 2016.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;MSDN. &lt;a href=&quot;https://blogs.msdn.microsoft.com/powershell/2015/06/09/powershell-the-blue-team/&quot;&gt;PowerShell for the Blue Team&lt;/a&gt;, 2015&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;MSDN. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx&quot;&gt;Windows Remote Management&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Upguard. &lt;a href=&quot;https://support.upguard.com/upguard/winrm-configuration.html#enabling-https-winrm&quot;&gt;WinRM Configuration: Enabling HTTPS WinRM&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
 
 </description>
         <pubDate>Thu, 12 Jan 2017 00:00:00 +1100</pubDate>
