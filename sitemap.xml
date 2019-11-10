@@ -5,8 +5,8 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 10 Nov 2019 11:51:27 +0000</pubDate>
-    <lastBuildDate>Sun, 10 Nov 2019 11:51:27 +0000</lastBuildDate>
+    <pubDate>Sun, 10 Nov 2019 12:31:57 +0000</pubDate>
+    <lastBuildDate>Sun, 10 Nov 2019 12:31:57 +0000</lastBuildDate>
     <generator>Jekyll v3.8.5</generator>
     
       <item>
@@ -110,8 +110,8 @@ For example  &lt;br /&gt;
 
 &lt;p&gt;For those that are interested I have included below:&lt;/p&gt;
 &lt;ol&gt;
-  &lt;li&gt;&lt;a href=&quot;static/other/Velociraptor/VRaptorAPISetup.sh&quot;&gt;An install script for the API bindings and service install&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;static/other/Velociraptor/processing.py&quot;&gt;A POC processsing script&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/mgreen27/mgreen27.github.io/blob/master/static/other/Velociraptor/VRaptorAPISetup.sh&quot;&gt;An install script for the API bindings and service install&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/mgreen27/mgreen27.github.io/blob/master/static/other/Velociraptor/processing.py&quot;&gt;A POC processsing script&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;I hope you have gained some knowledge on Velociraptor API setup and one of the most important use cases for incident response. Please feel free to reach out and provide feedback or improvements.&lt;/p&gt;
