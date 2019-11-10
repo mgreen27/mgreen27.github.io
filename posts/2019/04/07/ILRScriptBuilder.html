@@ -29,7 +29,7 @@
     
 
     
-      <meta content="2019-04-07T00:00:00+11:00" property="article:published_time">
+      <meta content="2019-04-07T00:00:00+00:00" property="article:published_time">
       <meta content="http://localhost:4000/about/" property="article:author">
     
 
@@ -213,10 +213,10 @@ WriteScriptBlock writes a .ps1 file containing the Invoke-LiveResponse scriptblo
 <p>For installation please <a href="https://github.com/mgreen27/Invoke-LiveResponse/archive/master.zip">download Invoke-LiveResponse</a> and add to your Powershell profile. Detailed instructions can be found on the <a href="https://github.com/mgreen27/Invoke-LiveResponse/wiki/Installation">wiki</a>.</p>
 
 <p>To import the module:<br />
-<code class="highlighter-rouge">PS&gt; Import-Module Invoke-LiveResponse</code></p>
+<code class="language-plaintext highlighter-rouge">PS&gt; Import-Module Invoke-LiveResponse</code></p>
 
 <p>To view help:<br />
-<code class="highlighter-rouge">PS&gt; Get-Help Invoke-LiveResponse -detailed</code>
+<code class="language-plaintext highlighter-rouge">PS&gt; Get-Help Invoke-LiveResponse -detailed</code>
  <br /><br /></p>
 
 <h4 id="memory-and-custom-disk">Memory and custom disk</h4>
@@ -231,7 +231,7 @@ Firstly, I am interested in pagefile and swapfile collection targeting the root 
 <div style="text-align: center; font-size:70%"><img width="750" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/06setup.png" /><br />Custom Scrtipblock: add to custom folder and run Invoke-LiveResponse.</div>
 
 <p>Next, add the custom scriptblock into the Invoke-LiveResponse module folder, load and then execute Invoke-LiveResponse. The Command line is:
-<code class="highlighter-rouge">PS&gt; Invoke-LiveResponse -mem -custom -vss -WriteScriptblock -LocalOut:$True</code><br />
+<code class="language-plaintext highlighter-rouge">PS&gt; Invoke-LiveResponse -mem -custom -vss -WriteScriptblock -LocalOut:$True</code><br />
 This command will output the generated live response script, to which we need to add a copy of WinPMem to the root of the target location. In my case, this was a removable SSD drive mounted as E:.</p>
 
 <div style="text-align: center; font-size:70%"><img width="600" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/06execution.png" /><br />Invoke-LiveResponse: Local Execution from USB.</div>
@@ -265,6 +265,23 @@ This command will output the generated live response script, to which we need to
             <div class="panel-body">
               <h4>Related Posts</h4>
               <ul>
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html">Live response automation with Velociraptor</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
             
                 <li class="relatedPost">
                   <a href="https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html">O365: Hidden InboxRules</a>
@@ -357,16 +374,6 @@ This command will output the generated live response script, to which we need to
       
         
           
-            
-                <li class="relatedPost">
-                  <a href="https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html">Invoke-LiveResponse</a>
-                  
-                    (Categories: <a href="/category/posts">posts</a>)
-                  
-                </li>
-          
-          
-        
       
     
   

@@ -29,7 +29,7 @@
     
 
     
-      <meta content="2019-05-12T00:00:00+10:00" property="article:published_time">
+      <meta content="2019-05-12T00:00:00+00:00" property="article:published_time">
       <meta content="http://localhost:4000/about/" property="article:author">
     
 
@@ -186,7 +186,7 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
 <p><br /><br /></p>
 
 <h1 id="limitations">Limitations</h1>
-<p>One of the limitations of leveraging WMI Eventing as an event source is events typically do not hold all the appropriate data for a mature detection use case. To enrich the detection, we require to query the Win32_Process class. There is a slight delay in obtaining process metadata so very short-lived processes (fraction of a second) may cause missed results. In my testing, these very short-lived commands like renamed cmd: <code class="highlighter-rouge">cdm /c echo &lt;string&gt;</code> failed to generate wmi data however a slight pause during a local ping recorded the event. For the use case of a download cradle, access shell or other interactive commands typically of interest I do not foresee an issue but please keep this limitation in mind.</p>
+<p>One of the limitations of leveraging WMI Eventing as an event source is events typically do not hold all the appropriate data for a mature detection use case. To enrich the detection, we require to query the Win32_Process class. There is a slight delay in obtaining process metadata so very short-lived processes (fraction of a second) may cause missed results. In my testing, these very short-lived commands like renamed cmd: <code class="language-plaintext highlighter-rouge">cdm /c echo &lt;string&gt;</code> failed to generate wmi data however a slight pause during a local ping recorded the event. For the use case of a download cradle, access shell or other interactive commands typically of interest I do not foresee an issue but please keep this limitation in mind.</p>
 
 <p>A second limitation is performance. Although not particularly resource intensive in my testing (no visible resource utilisation), in production there may be unexpected constraints. I have filtered my Process Events with this in mind but testing is recommended. I have also specifically kept the binary attribute matching use case very simple with a eye on performance. This may mean less fidelity in alerting, however the POC is fairly simple to modify and add capabilities.</p>
 
@@ -231,6 +231,23 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
             <div class="panel-body">
               <h4>Related Posts</h4>
               <ul>
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html">Live response automation with Velociraptor</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
             
                 <li class="relatedPost">
                   <a href="https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html">O365: Hidden InboxRules</a>
@@ -323,16 +340,6 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
       
         
           
-            
-                <li class="relatedPost">
-                  <a href="https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html">Invoke-LiveResponse</a>
-                  
-                    (Categories: <a href="/category/posts">posts</a>)
-                  
-                </li>
-          
-          
-        
       
     
   

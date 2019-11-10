@@ -29,7 +29,7 @@
     
 
     
-      <meta content="2018-01-14T00:00:00+11:00" property="article:published_time">
+      <meta content="2018-01-14T00:00:00+00:00" property="article:published_time">
       <meta content="http://localhost:4000/about/" property="article:author">
     
 
@@ -186,19 +186,19 @@ implementation for live response and file collections over Powershell remoting. 
 <h3 id="setup">Setup</h3>
 <p>On a Powershell 4+ collector machine, assuming you trust me, run the following proxy aware powershell commands to download then install. The install places Invoke-LiveResponse into the running users profile.</p>
 
-<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c1"># Proxy aware download install of Invoke-LiveResponse</span>
-<span class="nb">Set-Executionpolicy</span> -ExecutionPolicy bypass -force
-<span class="nv">$url</span><span class="o">=</span><span class="s2">"https://raw.githubusercontent.com/mgreen27/Powershell-IR/master/Get-Forensicating.ps1"</span>
-<span class="nv">$WebClient</span><span class="o">=(</span><span class="nb">New-Object </span>System.Net.WebClient<span class="o">)</span>
-<span class="nv">$WebClient</span>.Proxy<span class="o">=[</span>System.Net.WebRequest]::GetSystemWebProxy<span class="o">()</span>
-<span class="nv">$WebClient</span>.Proxy.Credentials<span class="o">=[</span>System.Net.CredentialCache]::DefaultNetworkCredentials
-<span class="nb">Invoke-Expression</span> <span class="nv">$WebClient</span>.DownloadString<span class="o">(</span><span class="nv">$url</span><span class="o">)</span>
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c"># Proxy aware download install of Invoke-LiveResponse</span><span class="w">
+</span><span class="nf">Set-Executionpolicy</span><span class="w"> </span><span class="nt">-ExecutionPolicy</span><span class="w"> </span><span class="nx">bypass</span><span class="w"> </span><span class="nt">-force</span><span class="w">
+</span><span class="nv">$url</span><span class="o">=</span><span class="s2">"https://raw.githubusercontent.com/mgreen27/Powershell-IR/master/Get-Forensicating.ps1"</span><span class="w">
+</span><span class="nv">$WebClient</span><span class="o">=</span><span class="p">(</span><span class="nf">New-Object</span><span class="w"> </span><span class="nx">System.Net.WebClient</span><span class="p">)</span><span class="w">
+</span><span class="nv">$WebClient</span><span class="o">.</span><span class="nf">Proxy</span><span class="o">=</span><span class="p">[</span><span class="no">System.Net.</span><span class="kt">WebRequest</span><span class="p">]::</span><span class="nf">GetSystemWebProxy</span><span class="p">()</span><span class="w">
+</span><span class="nv">$WebClient</span><span class="o">.</span><span class="nf">Proxy</span><span class="o">.</span><span class="nf">Credentials</span><span class="o">=</span><span class="p">[</span><span class="no">System.Net.</span><span class="kt">CredentialCache</span><span class="p">]::</span><span class="nx">DefaultNetworkCredentials</span><span class="w">
+</span><span class="nf">Invoke-Expression</span><span class="w"> </span><span class="nv">$WebClient</span><span class="o">.</span><span class="nf">DownloadString</span><span class="p">(</span><span class="nv">$url</span><span class="p">)</span><span class="w">
 
-<span class="c1"># Once installed run to load</span>
-Import-Module Invoke-LiveResponse
+</span><span class="c"># Once installed run to load</span><span class="w">
+</span><span class="nf">Import-Module</span><span class="w"> </span><span class="nx">Invoke-LiveResponse</span><span class="w">
 
-<span class="c1"># View help</span>
-Get-Help Invoke-LiveResponse -detailed</code></pre></figure>
+</span><span class="c"># View help</span><span class="w">
+</span><span class="nf">Get-Help</span><span class="w"> </span><span class="nx">Invoke-LiveResponse</span><span class="w"> </span><span class="nt">-detailed</span></code></pre></figure>
 
 <h3 id="winrm">WinRM</h3>
 <p>I recommend setting WinRM up via Group policy for simplified deployment across all Powershell versions. Please see the resource section for some good resources and a detailed walkthrough, including a previous post of mine in setting up a lab.</p>
@@ -213,13 +213,13 @@ Get-Help Invoke-LiveResponse -detailed</code></pre></figure>
 <h3 id="memory">Memory</h3>
 <p>Powershell has a configuration option to restrict the amount of memory available in a shell. This value is called MaxMemoryPerShellMB, and depending on Powershell version may be set in both Shell and Plugin WSMan configurations. In Powershell 2.0, the default is 150MB, which will likely need to be increased or turned off. As later versions of Powershell have been released, the default values have risen appropriately for most WinRM use, for example in 3.0 MaxMemoryPerShellMB = 1024, which is multiples above required memory.</p>
 
-<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c1"># To view this setting locally</span>
-<span class="nb">Get-Item </span>WSMan:\localhost\Shell\MaxMemoryPerShellMB
-<span class="nb">Get-Item </span>WSMan:\localhost\Plugin\Microsoft.PowerShell\Quotas\MaxMemoryPerShellMB
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c"># To view this setting locally</span><span class="w">
+</span><span class="nf">Get-Item</span><span class="w"> </span><span class="nx">WSMan:\localhost\Shell\MaxMemoryPerShellMB</span><span class="w">
+</span><span class="nf">Get-Item</span><span class="w"> </span><span class="nx">WSMan:\localhost\Plugin\Microsoft.PowerShell\Quotas\MaxMemoryPerShellMB</span><span class="w">
 
-<span class="c1"># To edit this setting locally</span>
-<span class="nb">Set-Item </span>WSMan:\localhost\Shell\MaxMemoryPerShellMB -Value 1024 -Force
-<span class="nb">Set-Item </span>WSMan:\localhost\Plugin\Microsoft.PowerShell\Quotas\MaxMemoryPerShellMB -Value 1024 -Force</code></pre></figure>
+</span><span class="c"># To edit this setting locally</span><span class="w">
+</span><span class="nf">Set-Item</span><span class="w"> </span><span class="nx">WSMan:\localhost\Shell\MaxMemoryPerShellMB</span><span class="w"> </span><span class="nt">-Value</span><span class="w"> </span><span class="nx">1024</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
+</span><span class="nf">Set-Item</span><span class="w"> </span><span class="nx">WSMan:\localhost\Plugin\Microsoft.PowerShell\Quotas\MaxMemoryPerShellMB</span><span class="w"> </span><span class="nt">-Value</span><span class="w"> </span><span class="nx">1024</span><span class="w"> </span><span class="nt">-Force</span></code></pre></figure>
 
 <p>The simplest approach is to deploy WinRM via Group policy and configure these settings via GPO or logon script. For manual intervention, Invoke-MaxMemory will connect via WinRM and turn off this setting (set to 0). Powershell 2.0 has restrictions in remotely changing WinRM settings, although not ideal from a forensic standpoint, the “–Legacy” switch uses scheduled tasks to force a local configuration change.</p>
 
@@ -237,8 +237,8 @@ Get-Help Invoke-LiveResponse -detailed</code></pre></figure>
   <li>Depending on the selected switches, each selected capability is joined at run time to build the scriptblock pushed out to the target machine.</li>
 </ul>
 
-<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="nb">PS</span><span class="o">&gt;</span> Invoke-LiveResponse -ComputerName WinRMtester -Credential &lt;Domain&gt;\&lt;user&gt; 
--all -Map &lt;Drive&gt;: -UNC <span class="s2">"\\&lt;Server&gt;\&lt;folder&gt; /user:&lt;optional share credentials&gt;"</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="nf">PS</span><span class="err">&gt;</span><span class="w"> </span><span class="nx">Invoke-LiveResponse</span><span class="w"> </span><span class="nt">-ComputerName</span><span class="w"> </span><span class="nx">WinRMtester</span><span class="w"> </span><span class="nt">-Credential</span><span class="w"> </span><span class="err">&lt;</span><span class="nx">Domain</span><span class="err">&gt;</span><span class="nx">\</span><span class="err">&lt;</span><span class="nx">user</span><span class="err">&gt;</span><span class="w"> 
+</span><span class="nt">-all</span><span class="w"> </span><span class="nt">-Map</span><span class="w"> </span><span class="err">&lt;</span><span class="nf">Drive</span><span class="err">&gt;</span><span class="p">:</span><span class="w"> </span><span class="nt">-UNC</span><span class="w"> </span><span class="s2">"\\&lt;Server&gt;\&lt;folder&gt; /user:&lt;optional share credentials&gt;"</span></code></pre></figure>
 
 <p><br />
 Some of the available configuration options:</p>
@@ -254,8 +254,8 @@ Some of the switches available in ForensicCopy mode:</p>
   <li>The benefit of this method is the ability to operationalise new capability easily by dropping in new content with desired StdOut.</li>
 </ul>
 
-<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c1"># Command to run Powersell mode</span>
-Invoke-LiveResponse -ComputerName WinRMtester -Credential &lt;domain&gt;\&lt;user&gt; -LR  -Results &lt;results&gt; e.g C:\Cases&gt;</code></pre></figure>
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c"># Command to run Powersell mode</span><span class="w">
+</span><span class="nf">Invoke-LiveResponse</span><span class="w"> </span><span class="nt">-ComputerName</span><span class="w"> </span><span class="nx">WinRMtester</span><span class="w"> </span><span class="nt">-Credential</span><span class="w"> </span><span class="err">&lt;</span><span class="nx">domain</span><span class="err">&gt;</span><span class="nx">\</span><span class="err">&lt;</span><span class="nx">user</span><span class="err">&gt;</span><span class="w"> </span><span class="nt">-LR</span><span class="w">  </span><span class="nt">-Results</span><span class="w"> </span><span class="err">&lt;</span><span class="nx">results</span><span class="err">&gt;</span><span class="w"> </span><span class="nx">e.g</span><span class="w"> </span><span class="nx">C:\Cases</span><span class="err">&gt;</span></code></pre></figure>
 
 <div style="text-align: center;"><img src="/static/img/article_images/2018-01-14-Invoke-LiveResponse/09LiveResponse.png" width="600" /></div>
 
@@ -364,6 +364,23 @@ Invoke-LiveResponse -ComputerName WinRMtester -Credential &lt;domain&gt;\&lt;use
               <ul>
             
                 <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html">Live response automation with Velociraptor</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
                   <a href="https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html">O365: Hidden InboxRules</a>
                   
                     (Categories: <a href="/category/posts">posts</a>)
@@ -447,16 +464,6 @@ Invoke-LiveResponse -ComputerName WinRMtester -Credential &lt;domain&gt;\&lt;use
       
         
           
-            
-                <li class="relatedPost">
-                  <a href="https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html">Sharing my BITS</a>
-                  
-                    (Categories: <a href="/category/posts">posts</a>)
-                  
-                </li>
-          
-          
-        
       
     
   

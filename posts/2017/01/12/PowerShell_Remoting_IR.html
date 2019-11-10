@@ -29,7 +29,7 @@
     
 
     
-      <meta content="2017-01-12T00:00:00+11:00" property="article:published_time">
+      <meta content="2017-01-12T00:00:00+00:00" property="article:published_time">
       <meta content="http://localhost:4000/about/" property="article:author">
     
 
@@ -205,12 +205,12 @@
 
 <p>Alternatively, for those looking for a PowerShell command line version: Running the command below to setup WinRM locally on your test hosts is fairly painless. Options like Enterprise Deployment Tool, Logon Script, PSEXEC or WMIC can be used for deployment as required. It is also worth noting that to configure a custom listener port you are required to use a CLI based configuration.</p>
 
-<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c1"># Setup: </span>
-<span class="nb">PS</span><span class="o">&gt;</span> Enable-PSRemoting -Force
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c"># Setup: </span><span class="w">
+</span><span class="nf">PS</span><span class="err">&gt;</span><span class="w"> </span><span class="nx">Enable-PSRemoting</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
 
-<span class="c1"># Confirm WinRM is setup and responsive:</span>
-<span class="nb">PS</span><span class="o">&gt;</span> <span class="nb">Test-WSMan</span> &lt;ComputerName&gt; <span class="o">[</span>Options]
-<span class="nb">PS</span><span class="o">&gt;</span> <span class="nb">Test-WSMan</span> &lt;ComputerName&gt; -Credential &lt;Domain\User&gt; -Authentication Kerberos </code></pre></figure>
+</span><span class="c"># Confirm WinRM is setup and responsive:</span><span class="w">
+</span><span class="nf">PS</span><span class="err">&gt;</span><span class="w"> </span><span class="nx">Test-WSMan</span><span class="w"> </span><span class="err">&lt;</span><span class="nx">ComputerName</span><span class="err">&gt;</span><span class="w"> </span><span class="p">[</span><span class="kt">Options</span><span class="p">]</span><span class="w">
+</span><span class="nf">PS</span><span class="err">&gt;</span><span class="w"> </span><span class="nx">Test-WSMan</span><span class="w"> </span><span class="err">&lt;</span><span class="nx">ComputerName</span><span class="err">&gt;</span><span class="w"> </span><span class="nt">-Credential</span><span class="w"> </span><span class="err">&lt;</span><span class="nx">Domain\User</span><span class="err">&gt;</span><span class="w"> </span><span class="nt">-Authentication</span><span class="w"> </span><span class="nx">Kerberos</span><span class="w"> </span></code></pre></figure>
 
 <div style="text-align: center;"><img src="/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/04testnoauth.png" width="600" /></div>
 
@@ -312,6 +312,23 @@
               <ul>
             
                 <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html">Live response automation with Velociraptor</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
                   <a href="https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html">O365: Hidden InboxRules</a>
                   
                     (Categories: <a href="/category/posts">posts</a>)
@@ -395,16 +412,6 @@
       
         
           
-            
-                <li class="relatedPost">
-                  <a href="https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html">Sharing my BITS</a>
-                  
-                    (Categories: <a href="/category/posts">posts</a>)
-                  
-                </li>
-          
-          
-        
       
     
   

