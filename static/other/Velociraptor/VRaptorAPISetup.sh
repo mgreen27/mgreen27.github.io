@@ -113,8 +113,7 @@ sudo chown -R ${VUSER}:${VGROUP} $FOLDER
 # User message
 echo -e "\n***************************************************"
 echo -e "Velociraptor API POC install complete\n"
-echo -e "\nVelociraptor-Processing Service control:"
-echo -e "\tsudo systemctl status vraptor -l\n"
-echo -e "\tsudo systemctl start vraptor-processing"
-echo -e "\tsudo systemctl stop vraptor-processing"
-echo -e "\tsudo systemctl status vraptor-processing -l\n"
+echo -e "\nVelociraptor Processing Service control:"
+echo -e "\tsudo systemctl start velociraptor-processing"
+echo -e "\tsudo systemctl stop velociraptor-processing"
+echo -e "\tsudo systemctl status velociraptor-processing -l\n"
