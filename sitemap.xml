@@ -5,9 +5,121 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 11 Nov 2019 11:20:06 +0000</pubDate>
-    <lastBuildDate>Mon, 11 Nov 2019 11:20:06 +0000</lastBuildDate>
+    <pubDate>Mon, 09 Dec 2019 06:41:34 +0000</pubDate>
+    <lastBuildDate>Mon, 09 Dec 2019 06:41:34 +0000</lastBuildDate>
     <generator>Jekyll v3.8.5</generator>
+    
+      <item>
+        <title>Local Live Response with Velociraptor ++</title>
+        <description>&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;200&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/00title.png&quot; /&gt;&lt;/div&gt;
+&lt;p&gt;In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;background&quot;&gt;Background&lt;/h4&gt;
+&lt;p&gt;Live response collection is one of the most critical stages of modern incident response. A quick targeted collection of important artefacts means timely answers and more efficient results. Although I prefer a remote agent keeping the human element out of collection as much as possible, a common use case I encounter is needing to run a local collection from a USB or network share. Typically this means providing a script of some sort with a binaries folder and collection protocol, sometimes to less technical users with a margin for error.&lt;/p&gt;
+
+&lt;p&gt;Mike at Velocidex has posted recently about triage collection (local live response) with Velociraptor:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-1-253f57ce96c0&quot;&gt;Triage with Velociraptor — Pt 1&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-2-d0f79066ca0e&quot;&gt;Triage with Velociraptor — Pt 2&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-3-d6f63215f579&quot;&gt;Triage with Velociraptor — Pt 3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One undocumented feature is Velociraptor’s ability to append additional tools to the end of the binary and enable execution. This capability opens up some really nice use cases for ancillary data collection during a local Velociraptor triage. Im going to cover creating a Velicraptor local live binary with WinPMem for memory and Autoruns for autostart extensibility point (ASEP) collection.&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;what-do-i-need&quot;&gt;What do I need?&lt;/h4&gt;
+&lt;p&gt;I will be using the current Velociraptor release and building on a linux platform. Im looking at building both a x64 and x86 Windows version, so I want to download the relevant Velociraptor binaries to my staging folder.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/01Latest.png&quot; /&gt;&lt;br /&gt;Download Velociraptor binaries&lt;/div&gt;
+
+&lt;p&gt;We will also download both x86 and x64 third party binaries supporting my use cases. In this instance Autoruns and WinPMem, which I then add to the relevant “bitness” payload zip files.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/01Other.png&quot; /&gt;&lt;br /&gt;payload.zip: x64 binaries, payload_x86.zip: x86 binaries&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;velociraptor-configuration&quot;&gt;Velociraptor configuration&lt;/h4&gt;
+&lt;p&gt;Setting up for local live response requires setting up an autoexecution object and output configuration. In my case, I setup artifact called “MultiCollection” with a zipfile output “collection_HOSTNAME.zip”. As there is no folder path specified, the zip will end up in the “start in folder”.&lt;/p&gt;
+
+&lt;p&gt;Once the structure of VQL is understood it is trivial to add in additional use cases. Under the parameters section, I also have included an “uploadTable” parameter to add additional direct file downloads not covered by other components. In this case, im adding pagefile, swapfile and hybernation files if they exist as default. This table is helpful for quick collection and can also be represented in a glob style search.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config.png&quot; /&gt;&lt;br /&gt;Autoexecution VQL object&lt;/div&gt;
+
+&lt;p&gt;Next component is the “sources” section which outlines the VQL queries to run. In my screenshot below, supporting order of volatility, I am running memory collection first then supporting file uploads. Worthy to note: my VQL does not “upload” to the output zip file, instead I have decided to output to “HOSTNAME.aff4” to the same folder as the binary to optimise resouce use and remove the need to push the aff4 to a temporary location prior to adding to the zip.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;550&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config2.png&quot; /&gt;&lt;br /&gt;Memory acquisition&lt;/div&gt;
+
+&lt;p&gt;Velociraptor allows modular use of the collection profiles from Eric Zimmerman’s KapeFiles project. I have chosen KapeFiles.Targets _BasicCollection and some supporting items is my next VQL sources. I have also included a version of &lt;a href=&quot;https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local_all-yaml&quot;&gt;all currently available switches&lt;/a&gt; (at time of writing), to use as a template and remove unwanted items prior to build.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;550&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config3.png&quot; /&gt;&lt;br /&gt;KapeFiles acquisition&lt;/div&gt;
+
+&lt;p&gt;Finally, I am collecting an Autoruns output for autostart extensibility point (ASEP) collection. In my VQL I have specifically used wildcards to cover both x86 and x64 binaries and enable use of the same configuration across bitness. I am also using the same trick as my WinPMem execution and output to the binary root folder as “HOSTNAME_autoruns.csv”&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config4.png&quot; /&gt;&lt;br /&gt;Autoruns aquisition&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;how-do-i-build-it&quot;&gt;How do I build it?&lt;/h4&gt;
+&lt;p&gt;To build we run velociraptor in “repack” mode. That is specifying: the input binary, relevant payload zip, configuration file and output binary.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/03Build.png&quot; /&gt;&lt;br /&gt;Velociraptor repack&lt;/div&gt;
+
+&lt;p&gt;One thing to note, is that using this technique the created binary will not contain a valid certificate as the binary is modified with the “repack” command. This condition occurs through any of the Velociraptor customisations and typically is not a problem during live response.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;how-do-i-run-it&quot;&gt;How do I run it?&lt;/h4&gt;
+&lt;p&gt;Copy the relevant binaries to your collection USB, folder or share and execute with administrator privilege.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run.png&quot; /&gt;&lt;br /&gt;...SNIP...&lt;/div&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run2.png&quot; /&gt;&lt;br /&gt;Local live response execution&lt;/div&gt;
+
+&lt;p&gt;Output will be to the binary folder.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run3.png&quot; /&gt;&lt;br /&gt;Live response output&lt;/div&gt;
+
+&lt;p&gt;Opening collection_HOSTNAME.zip we can see all files that were configured for collection / upload.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run4.png&quot; /&gt;&lt;br /&gt;collection zip contents&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h4&gt;
+&lt;p&gt;In this post I have walked through using Velociraptor to wrap third party binaries into an easy to use local live response tool. Velociraptor’s modular architecture enables rolling in and out capabilities fast for a simple end user experience.&lt;/p&gt;
+
+&lt;p&gt;For those that are interested I have included below:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-buildlocallr-sh&quot;&gt;A build script for building x86 and x64 versions of my local live response tool&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local_all-yaml&quot;&gt;A configuration file with ALL KapeFiles switches&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local-yaml&quot;&gt;The reduced configuration from my example&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I hope you have gained some knowledge on Velociraptor for local live response. Please feel free to reach out and provide feedback or improvements.&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;further-resources&quot;&gt;Further resources&lt;/h4&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.velocidex.com/about/&quot;&gt;Velociraptor Documentation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-1-253f57ce96c0&quot;&gt;Triage with Velociraptor — Pt 1&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-2-d0f79066ca0e&quot;&gt;Triage with Velociraptor — Pt 2&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-3-d6f63215f579&quot;&gt;Triage with Velociraptor — Pt 3&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 08 Dec 2019 00:00:00 +0000</pubDate>
+        <link>https://mgreen27.github.io/posts/2019/12/08/LocalLRwithVRaptor.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/12/08/LocalLRwithVRaptor.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>Velociraptor</category>
+        
+        <category>VQL</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
     
       <item>
         <title>Live response automation with Velociraptor</title>
@@ -110,8 +222,8 @@ For example  &lt;br /&gt;
 
 &lt;p&gt;For those that are interested I have included below:&lt;/p&gt;
 &lt;ol&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/mgreen27/mgreen27.github.io/blob/master/static/other/Velociraptor/VRaptorAPISetup.sh&quot;&gt;An install script for the API bindings and service install&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/mgreen27/mgreen27.github.io/blob/master/static/other/Velociraptor/processing.py&quot;&gt;A POC processsing script&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;other/Velociraptor/VRaptorAPISetup.sh&quot;&gt;An install script for the API bindings and service install&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;other/Velociraptor/processing.py&quot;&gt;A POC processsing script&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;I hope you have gained some knowledge on Velociraptor API setup and one of the most important use cases for incident response. Please feel free to reach out and provide feedback or improvements.&lt;/p&gt;

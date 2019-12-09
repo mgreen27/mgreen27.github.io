@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/static/img/favicon.ico" />
+    <title>Local Live Response with Velociraptor ++ - Matt's DFIR Blog</title>
+    <meta name="author" content="Matthew Green" />
+    <meta name="description" content="Local Live Response with Velociraptor ++" />
+    <meta name="keywords" content="Local Live Response with Velociraptor ++, Matt's DFIR Blog, posts" />
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+    <meta content="" property="fb:app_id">
+    <meta content="Matt's DFIR Blog" property="og:site_name">
+
+    
+
+    
+      <meta content="Local Live Response with Velociraptor ++" property="og:title">
+      <meta content="article" property="og:type">
+    
+
+    
+      <meta content="A blog for DFIR thoughts, research and for my future reference" property="og:description">
+    
+
+    
+      <meta content="http://localhost:4000/posts/2019/12/08/LocalLRwithVRaptor.html" property="og:url">
+    
+
+    
+      <meta content="2019-12-08T00:00:00+00:00" property="article:published_time">
+      <meta content="http://localhost:4000/about/" property="article:author">
+    
+
+    
+      <meta content="http://localhost:4000/static/img/avatar.jpg" property="og:image">
+    
+
+    
+      
+        <meta content="posts" property="article:section">
+      
+    
+
+    
+      
+        <meta content="DFIR" property="article:tag">
+      
+        <meta content="Velociraptor" property="article:tag">
+      
+        <meta content="VQL" property="article:tag">
+      
+    
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@mgreen27">
+    <meta name="twitter:creator" content="@mgreen27">
+
+    
+      <meta name="twitter:title" content="Local Live Response with Velociraptor ++">
+    
+
+    
+      <meta name="twitter:url" content="http://localhost:4000/posts/2019/12/08/LocalLRwithVRaptor.html">
+    
+
+    
+      <meta name="twitter:description" content="A blog for DFIR thoughts, research and for my future reference">
+    
+
+    
+
+    <!-- Font awesome icons -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+    <!-- syntax highlighting CSS -->
+    <link rel="stylesheet" href="/static/css/syntax.css">
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/super-search.css">
+    <link rel="stylesheet" href="/static/css/thickbox.css">
+    <link rel="stylesheet" href="/static/css/projects.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="col-sm-3">
+        <div class="fixed-condition">
+          <a href="/"><img class="profile-avatar" src="/static/img/avatar.jpg" height="75px" width="75px" /></a>
+          <h1 class="author-name">Matthew Green</h1>
+          
+            <div class="profile-about">
+              I am a DFIR and detection guy from Sydney Australia.
+            </div>
+          
+          <div class="social">
+            <ul>
+              
+                <li><a href="https://www.twitter.com/mgreen27" target="_blank"><i class="fa fa-twitter"></i></a></li>
+              
+                <li><a href="https://www.linkedin.com/in/mgreen27/" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+              
+                <li><a href="https://github.com/mgreen27" target="_blank"><i class="fa fa-github"></i></a></li>
+              
+            </ul>
+          </div>
+          <div class="search" id="js-search">
+            <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+            <ul class="search__results" id="js-search__results"></ul>
+          </div>
+          <hr />
+          <ul class="sidebar-nav">
+            <strong>Navigation</strong>
+            <li><a href="/">Home</a></li>
+            
+              <li><a class="about" href="/about/">About Me</a></li>
+            
+              <li><a class="about" href="/projects/">My Projects</a></li>
+            
+              <li><a class="about" href="/feed.xml">XML Feed</a></li>
+            
+          </ul>
+        </div>
+        <!-- end /.fixed-condition -->
+      </div>
+      <div class="col-sm-8 col-offset-1 main-layout">
+        <header class="post-header">
+  <h1 class="post-title">Local Live Response with Velociraptor ++</h1>
+</header>
+
+<span class="time">08 Dec 2019</span>
+
+  <span class="categories">
+    &raquo; <a href="/category/posts">posts</a>
+  </span>
+
+
+<div class="content">
+  <div class="post"><div style="text-align: center; font-size:70%;"><img width="200" src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/00title.png" /></div>
+<p>In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.<br />
+<br /></p>
+
+<h4 id="background">Background</h4>
+<p>Live response collection is one of the most critical stages of modern incident response. A quick targeted collection of important artefacts means timely answers and more efficient results. Although I prefer a remote agent keeping the human element out of collection as much as possible, a common use case I encounter is needing to run a local collection from a USB or network share. Typically this means providing a script of some sort with a binaries folder and collection protocol, sometimes to less technical users with a margin for error.</p>
+
+<p>Mike at Velocidex has posted recently about triage collection (local live response) with Velociraptor:</p>
+<ul>
+  <li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-1-253f57ce96c0">Triage with Velociraptor — Pt 1</a></li>
+  <li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-2-d0f79066ca0e">Triage with Velociraptor — Pt 2</a></li>
+  <li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-3-d6f63215f579">Triage with Velociraptor — Pt 3</a></li>
+</ul>
+
+<p>One undocumented feature is Velociraptor’s ability to append additional tools to the end of the binary and enable execution. This capability opens up some really nice use cases for ancillary data collection during a local Velociraptor triage. Im going to cover creating a Velicraptor local live binary with WinPMem for memory and Autoruns for autostart extensibility point (ASEP) collection.<br />
+<br /></p>
+
+<h4 id="what-do-i-need">What do I need?</h4>
+<p>I will be using the current Velociraptor release and building on a linux platform. Im looking at building both a x64 and x86 Windows version, so I want to download the relevant Velociraptor binaries to my staging folder.</p>
+
+<div style="text-align: center; font-size:70%;"><img src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/01Latest.png" /><br />Download Velociraptor binaries</div>
+
+<p>We will also download both x86 and x64 third party binaries supporting my use cases. In this instance Autoruns and WinPMem, which I then add to the relevant “bitness” payload zip files.</p>
+
+<div style="text-align: center; font-size:70%;"><img width="400" src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/01Other.png" /><br />payload.zip: x64 binaries, payload_x86.zip: x86 binaries</div>
+<p><br /></p>
+
+<h4 id="velociraptor-configuration">Velociraptor configuration</h4>
+<p>Setting up for local live response requires setting up an autoexecution object and output configuration. In my case, I setup artifact called “MultiCollection” with a zipfile output “collection_HOSTNAME.zip”. As there is no folder path specified, the zip will end up in the “start in folder”.</p>
+
+<p>Once the structure of VQL is understood it is trivial to add in additional use cases. Under the parameters section, I also have included an “uploadTable” parameter to add additional direct file downloads not covered by other components. In this case, im adding pagefile, swapfile and hybernation files if they exist as default. This table is helpful for quick collection and can also be represented in a glob style search.</p>
+
+<div style="text-align: center; font-size:70%;"><img width="500" src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config.png" /><br />Autoexecution VQL object</div>
+
+<p>Next component is the “sources” section which outlines the VQL queries to run. In my screenshot below, supporting order of volatility, I am running memory collection first then supporting file uploads. Worthy to note: my VQL does not “upload” to the output zip file, instead I have decided to output to “HOSTNAME.aff4” to the same folder as the binary to optimise resouce use and remove the need to push the aff4 to a temporary location prior to adding to the zip.</p>
+
+<div style="text-align: center; font-size:70%;"><img width="550" src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config2.png" /><br />Memory acquisition</div>
+
+<p>Velociraptor allows modular use of the collection profiles from Eric Zimmerman’s KapeFiles project. I have chosen KapeFiles.Targets _BasicCollection and some supporting items is my next VQL sources. I have also included a version of <a href="https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local_all-yaml">all currently available switches</a> (at time of writing), to use as a template and remove unwanted items prior to build.</p>
+
+<div style="text-align: center; font-size:70%;"><img width="550" src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config3.png" /><br />KapeFiles acquisition</div>
+
+<p>Finally, I am collecting an Autoruns output for autostart extensibility point (ASEP) collection. In my VQL I have specifically used wildcards to cover both x86 and x64 binaries and enable use of the same configuration across bitness. I am also using the same trick as my WinPMem execution and output to the binary root folder as “HOSTNAME_autoruns.csv”</p>
+
+<div style="text-align: center; font-size:70%;"><img width="500" src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config4.png" /><br />Autoruns aquisition</div>
+<p><br /></p>
+
+<h4 id="how-do-i-build-it">How do I build it?</h4>
+<p>To build we run velociraptor in “repack” mode. That is specifying: the input binary, relevant payload zip, configuration file and output binary.</p>
+
+<div style="text-align: center; font-size:70%;"><img src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/03Build.png" /><br />Velociraptor repack</div>
+
+<p>One thing to note, is that using this technique the created binary will not contain a valid certificate as the binary is modified with the “repack” command. This condition occurs through any of the Velociraptor customisations and typically is not a problem during live response.</p>
+
+<p><br /></p>
+
+<h4 id="how-do-i-run-it">How do I run it?</h4>
+<p>Copy the relevant binaries to your collection USB, folder or share and execute with administrator privilege.</p>
+
+<div style="text-align: center; font-size:70%;"><img src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run.png" /><br />...SNIP...</div>
+
+<div style="text-align: center; font-size:70%;"><img src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run2.png" /><br />Local live response execution</div>
+
+<p>Output will be to the binary folder.</p>
+
+<div style="text-align: center; font-size:70%;"><img width="500" src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run3.png" /><br />Live response output</div>
+
+<p>Opening collection_HOSTNAME.zip we can see all files that were configured for collection / upload.</p>
+
+<div style="text-align: center; font-size:70%;"><img width="500" src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run4.png" /><br />collection zip contents</div>
+<p><br /></p>
+
+<h4 id="final-thoughts">Final Thoughts</h4>
+<p>In this post I have walked through using Velociraptor to wrap third party binaries into an easy to use local live response tool. Velociraptor’s modular architecture enables rolling in and out capabilities fast for a simple end user experience.</p>
+
+<p>For those that are interested I have included below:</p>
+<ol>
+  <li><a href="https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-buildlocallr-sh">A build script for building x86 and x64 versions of my local live response tool</a></li>
+  <li><a href="https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local_all-yaml">A configuration file with ALL KapeFiles switches</a></li>
+  <li><a href="https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local-yaml">The reduced configuration from my example</a></li>
+</ol>
+
+<p>I hope you have gained some knowledge on Velociraptor for local live response. Please feel free to reach out and provide feedback or improvements.<br />
+<br /></p>
+
+<h4 id="further-resources">Further resources</h4>
+<ol>
+  <li><a href="https://www.velocidex.com/about/">Velociraptor Documentation</a></li>
+  <li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-1-253f57ce96c0">Triage with Velociraptor — Pt 1</a></li>
+  <li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-2-d0f79066ca0e">Triage with Velociraptor — Pt 2</a></li>
+  <li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-3-d6f63215f579">Triage with Velociraptor — Pt 3</a></li>
+</ol>
+
+<p><br /><br /></p>
+</div>
+  <div class="share-page">
+  <span style="float: left;">Share by: &nbsp;&nbsp;</span>
+
+  <!-- Twitter -->
+  <a href="https://twitter.com/share" class="twitter-share-button" data-via="mgreen27">Tweet</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+</div>
+
+
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+            
+            <div class="panel-body">
+              <h4>Related Posts</h4>
+              <ul>
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html">Live response automation with Velociraptor</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html">O365: Hidden InboxRules</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html">Binary Rename 2</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/04/07/ILRScriptBuilder.html">Live Response Script Builder</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html">Powershell Download Cradles</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+  
+  </ul>
+</div>
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/posts/2019/11/10/LRwithVRaptor.html">&laquo; Live response automation with Velociraptor</a>
+  
+  
+</div>
+
+<div class="disqus-comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    /* <![CDATA[ */
+    var disqus_shortname = "";
+    var disqus_identifier = "http://localhost:4000_Local Live Response with Velociraptor ++";
+    var disqus_title = "Local Live Response with Velociraptor ++";
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    /* ]]> */
+  </script>
+</div>
+
+        <footer>
+          &copy; Matthew Green
+          
+            - <a href="https://github.com/mgreen27">https://github.com/mgreen27</a> - Powered by Jekyll.
+          
+        </footer>
+      </div>
+      <!-- end /.col-sm-8 -->
+    </div>
+    <!-- end /.container -->
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/super-search.js"></script>
+    <script src="/static/js/thickbox-compressed.js"></script>
+    <script src="/static/js/projects.js"></script>
+  </body>
+</html>
+

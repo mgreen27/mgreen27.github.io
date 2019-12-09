@@ -5,9 +5,121 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 11 Nov 2019 11:20:06 +0000</pubDate>
-    <lastBuildDate>Mon, 11 Nov 2019 11:20:06 +0000</lastBuildDate>
+    <pubDate>Mon, 09 Dec 2019 06:41:34 +0000</pubDate>
+    <lastBuildDate>Mon, 09 Dec 2019 06:41:34 +0000</lastBuildDate>
     <generator>Jekyll v3.8.5</generator>
+    
+      <item>
+        <title>Local Live Response with Velociraptor ++</title>
+        <description>&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;200&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/00title.png&quot; /&gt;&lt;/div&gt;
+&lt;p&gt;In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;background&quot;&gt;Background&lt;/h4&gt;
+&lt;p&gt;Live response collection is one of the most critical stages of modern incident response. A quick targeted collection of important artefacts means timely answers and more efficient results. Although I prefer a remote agent keeping the human element out of collection as much as possible, a common use case I encounter is needing to run a local collection from a USB or network share. Typically this means providing a script of some sort with a binaries folder and collection protocol, sometimes to less technical users with a margin for error.&lt;/p&gt;
+
+&lt;p&gt;Mike at Velocidex has posted recently about triage collection (local live response) with Velociraptor:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-1-253f57ce96c0&quot;&gt;Triage with Velociraptor — Pt 1&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-2-d0f79066ca0e&quot;&gt;Triage with Velociraptor — Pt 2&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-3-d6f63215f579&quot;&gt;Triage with Velociraptor — Pt 3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One undocumented feature is Velociraptor’s ability to append additional tools to the end of the binary and enable execution. This capability opens up some really nice use cases for ancillary data collection during a local Velociraptor triage. Im going to cover creating a Velicraptor local live binary with WinPMem for memory and Autoruns for autostart extensibility point (ASEP) collection.&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;what-do-i-need&quot;&gt;What do I need?&lt;/h4&gt;
+&lt;p&gt;I will be using the current Velociraptor release and building on a linux platform. Im looking at building both a x64 and x86 Windows version, so I want to download the relevant Velociraptor binaries to my staging folder.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/01Latest.png&quot; /&gt;&lt;br /&gt;Download Velociraptor binaries&lt;/div&gt;
+
+&lt;p&gt;We will also download both x86 and x64 third party binaries supporting my use cases. In this instance Autoruns and WinPMem, which I then add to the relevant “bitness” payload zip files.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/01Other.png&quot; /&gt;&lt;br /&gt;payload.zip: x64 binaries, payload_x86.zip: x86 binaries&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;velociraptor-configuration&quot;&gt;Velociraptor configuration&lt;/h4&gt;
+&lt;p&gt;Setting up for local live response requires setting up an autoexecution object and output configuration. In my case, I setup artifact called “MultiCollection” with a zipfile output “collection_HOSTNAME.zip”. As there is no folder path specified, the zip will end up in the “start in folder”.&lt;/p&gt;
+
+&lt;p&gt;Once the structure of VQL is understood it is trivial to add in additional use cases. Under the parameters section, I also have included an “uploadTable” parameter to add additional direct file downloads not covered by other components. In this case, im adding pagefile, swapfile and hybernation files if they exist as default. This table is helpful for quick collection and can also be represented in a glob style search.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config.png&quot; /&gt;&lt;br /&gt;Autoexecution VQL object&lt;/div&gt;
+
+&lt;p&gt;Next component is the “sources” section which outlines the VQL queries to run. In my screenshot below, supporting order of volatility, I am running memory collection first then supporting file uploads. Worthy to note: my VQL does not “upload” to the output zip file, instead I have decided to output to “HOSTNAME.aff4” to the same folder as the binary to optimise resouce use and remove the need to push the aff4 to a temporary location prior to adding to the zip.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;550&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config2.png&quot; /&gt;&lt;br /&gt;Memory acquisition&lt;/div&gt;
+
+&lt;p&gt;Velociraptor allows modular use of the collection profiles from Eric Zimmerman’s KapeFiles project. I have chosen KapeFiles.Targets _BasicCollection and some supporting items is my next VQL sources. I have also included a version of &lt;a href=&quot;https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local_all-yaml&quot;&gt;all currently available switches&lt;/a&gt; (at time of writing), to use as a template and remove unwanted items prior to build.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;550&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config3.png&quot; /&gt;&lt;br /&gt;KapeFiles acquisition&lt;/div&gt;
+
+&lt;p&gt;Finally, I am collecting an Autoruns output for autostart extensibility point (ASEP) collection. In my VQL I have specifically used wildcards to cover both x86 and x64 binaries and enable use of the same configuration across bitness. I am also using the same trick as my WinPMem execution and output to the binary root folder as “HOSTNAME_autoruns.csv”&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config4.png&quot; /&gt;&lt;br /&gt;Autoruns aquisition&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;how-do-i-build-it&quot;&gt;How do I build it?&lt;/h4&gt;
+&lt;p&gt;To build we run velociraptor in “repack” mode. That is specifying: the input binary, relevant payload zip, configuration file and output binary.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/03Build.png&quot; /&gt;&lt;br /&gt;Velociraptor repack&lt;/div&gt;
+
+&lt;p&gt;One thing to note, is that using this technique the created binary will not contain a valid certificate as the binary is modified with the “repack” command. This condition occurs through any of the Velociraptor customisations and typically is not a problem during live response.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;how-do-i-run-it&quot;&gt;How do I run it?&lt;/h4&gt;
+&lt;p&gt;Copy the relevant binaries to your collection USB, folder or share and execute with administrator privilege.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run.png&quot; /&gt;&lt;br /&gt;...SNIP...&lt;/div&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run2.png&quot; /&gt;&lt;br /&gt;Local live response execution&lt;/div&gt;
+
+&lt;p&gt;Output will be to the binary folder.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run3.png&quot; /&gt;&lt;br /&gt;Live response output&lt;/div&gt;
+
+&lt;p&gt;Opening collection_HOSTNAME.zip we can see all files that were configured for collection / upload.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;500&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/04Run4.png&quot; /&gt;&lt;br /&gt;collection zip contents&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h4&gt;
+&lt;p&gt;In this post I have walked through using Velociraptor to wrap third party binaries into an easy to use local live response tool. Velociraptor’s modular architecture enables rolling in and out capabilities fast for a simple end user experience.&lt;/p&gt;
+
+&lt;p&gt;For those that are interested I have included below:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-buildlocallr-sh&quot;&gt;A build script for building x86 and x64 versions of my local live response tool&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local_all-yaml&quot;&gt;A configuration file with ALL KapeFiles switches&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local-yaml&quot;&gt;The reduced configuration from my example&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I hope you have gained some knowledge on Velociraptor for local live response. Please feel free to reach out and provide feedback or improvements.&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;further-resources&quot;&gt;Further resources&lt;/h4&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.velocidex.com/about/&quot;&gt;Velociraptor Documentation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-1-253f57ce96c0&quot;&gt;Triage with Velociraptor — Pt 1&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-2-d0f79066ca0e&quot;&gt;Triage with Velociraptor — Pt 2&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-3-d6f63215f579&quot;&gt;Triage with Velociraptor — Pt 3&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 08 Dec 2019 00:00:00 +0000</pubDate>
+        <link>https://mgreen27.github.io//posts/2019/12/08/LocalLRwithVRaptor.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/12/08/LocalLRwithVRaptor.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>Velociraptor</category>
+        
+        <category>VQL</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
     
       <item>
         <title>Live response automation with Velociraptor</title>
@@ -110,8 +222,8 @@ For example  &lt;br /&gt;
 
 &lt;p&gt;For those that are interested I have included below:&lt;/p&gt;
 &lt;ol&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/mgreen27/mgreen27.github.io/blob/master/static/other/Velociraptor/VRaptorAPISetup.sh&quot;&gt;An install script for the API bindings and service install&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/mgreen27/mgreen27.github.io/blob/master/static/other/Velociraptor/processing.py&quot;&gt;A POC processsing script&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;other/Velociraptor/VRaptorAPISetup.sh&quot;&gt;An install script for the API bindings and service install&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;other/Velociraptor/processing.py&quot;&gt;A POC processsing script&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;I hope you have gained some knowledge on Velociraptor API setup and one of the most important use cases for incident response. Please feel free to reach out and provide feedback or improvements.&lt;/p&gt;
@@ -1224,173 +1336,6 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
         <category>Powershell</category>
         
         <category>WMI</category>
-        
-        
-        <category>posts</category>
-        
-      </item>
-    
-      <item>
-        <title>PowerShell Remoting and Incident Response</title>
-        <description>&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/00PowerShellthumb.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
-&lt;h2 id=&quot;powershell-remoting-and-incident-response&quot;&gt;PowerShell Remoting and Incident Response&lt;/h2&gt;
-&lt;p&gt;PowerShell is quickly becoming a tool of choice for many IT Operations staff and Security Practitioners alike. This post is a quick overview of using Windows Remote Management and PowerShell for Incident Response. I will also provide some proof of concept setup instructions and general themes for those interested in further research on this topic.&lt;/p&gt;
-
-&lt;h3 id=&quot;so-what-is-windows-remote-management&quot;&gt;So what is Windows Remote Management?&lt;/h3&gt;
-&lt;p&gt;PowerShell is a powerful scripting language for systems management due to its ability to run on remote systems, automation capability and ability to scale. The component enabling this capability is called the Windows Remote Management service (WinRM), which works over a standardised Simple Object Access Protocol (SOAP) based, firewall friendly protocol – WS Management. PowerShell is just one consumer of this service/protocol combo and with all Windows management communications heading down this path, this capability is only going to be further entrenched moving forward.&lt;/p&gt;
-
-&lt;p&gt;Windows Remote Management has been available since PowerShell 2.0 and Windows 7 through to the most recent incarnation in Windows Management Framework (WMF) 5.1. WinRM is enabled by default in Windows Server 2012 and 2016 but, as you’ll see below, simple to enable back to Windows 7 running PowerShell 2.0.&lt;/p&gt;
-
-&lt;h3 id=&quot;why-do-i-care&quot;&gt;Why do I care?&lt;/h3&gt;
-&lt;p&gt;There are six primary reasons why you should care about PowerShell Remoting for Incident Response:&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Data available for Collection&lt;/strong&gt; - PowerShell has access to WMI, COM, .NET as well as to the Windows API. When combined with the capability to run some smart 3rd party or open source tools there really isn’t much you can’t do with PowerShell. Data collection is possible from: static disk, registry, log and configuration data; or any volatile process, network connection, or other in memory artefact. Historical data can be collected with timeline collection tools or pre-deployment of a process monitoring tool or Event Tracing for Windows.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Analysis&lt;/strong&gt; - PowerShell is an object based language making analysis fairly simple once the dataset and methods of sorting / searching are understood. There is much integration readily available for common use cases like: live response, outlier analysis, baseline comparisons or building a timeline&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Performance&lt;/strong&gt; - PowerShell Remoting can significantly improve performance when scripting collections at scale. Execution of the command occurs in parallel on each target machine reporting the results, opposed to the source machine running through commands in an iterative scripted loop.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/01performance.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;Strategic&lt;/strong&gt; - Windows Remote Management is Microsoft’s strategic direction for all Windows management communications moving forward. Many operations teams are already considering or currently using WinRM so it is worthwhile to understand points of leverage and weaknesses. Interestingly, PowerShell is also now open source with both OSX and Linux versions available.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Agentless&lt;/strong&gt; - PowerShell remoting provides capability without needing to install “yet another agent”.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Cost&lt;/strong&gt; – It is hard to argue with free, especially if there are skillsets in house already taking advantage of WinRM / PowerShell remoting.&lt;/p&gt;
-
-&lt;h3 id=&quot;what-is-the-catch&quot;&gt;What is the catch?&lt;/h3&gt;
-&lt;p&gt;The benefits of PowerShell remoting seem quite compelling but there are two main catches:&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Operational overhead&lt;/strong&gt; - Traditional open source issues of cost to build and maintain capability rather than going down a COTS path. Most organisations are not really mature enough to fully embrace building a complete solution in this space beyond simple collections (not everyone is a well resourced Fortune 500).&lt;/p&gt;
-
-&lt;p&gt;A great example here is process monitoring solutions - i.e. collection and analysis of historical data. While open source collection via Sysmon or other tools is available and better than the status quo in most organisations (i.e. nothing), a paid solution may provide much more capability at lower overall cost. When deciding to build, buy or outsource it is important not only understanding requirements, but also workflow underpinning those requirements, as well as technology and architecture.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Security perceptions&lt;/strong&gt; - There are concerns around PowerShell security. Increased in-wild threats and popularity of offensive research in the past few years have driven this concern. Although most definitely not infallible, a properly configured PowerShell network will arguably lead to a much more secure environment than default - “properly configured” being the key word. With that in mind, similar to operational overhead, maturity may be the major driver for concerns about turning on WinRM.&lt;/p&gt;
-
-&lt;p&gt;It’s also worthy to note Microsoft has come a long way in recent editions of Windows and PowerShell from the original WinRM version included in Windows 7. Modern Windows 10 / PowerShell 5.0 versions feature comprehensive auditing capabilities for PowerShell and additional OS level security features. Features like Credential Guard, Device Guard, Applocker and AntiMalware ScanInterface (when used mainstream); combined with the Microsoft concept of “constrained endpoints” will really help reduce options for attackers.&lt;/p&gt;
-
-&lt;h1 id=&quot;so-how-do-i-start&quot;&gt;So how do I start?&lt;/h1&gt;
-&lt;p&gt;There are a few ways to setup WinRM. Group Policy, you can use a command line tool (Winrm), or PowerShell cmdlets. I have pointed at some good resources including ideas to lock down Windows Remote Management and how to configure WinRM over HTTPS in the reference section below.&lt;/p&gt;
-
-&lt;p&gt;A useful method for Lab / Proof of Concept testing is via group policy; also consider turning on PowerShell script block logging and process monitoring to list a couple of other generic recommendations. In a nutshell for a basic WinRM configuration you are required to:&lt;/p&gt;
-
-&lt;h4 id=&quot;1-configure-a-winrm-listener&quot;&gt;1. Configure a WinRM listener&lt;/h4&gt;
-&lt;p&gt;Note: Examples are referencing Windows 2012R2 Domain with client machines running PowerShell 2.0 (WinRM minimum requirement) through 5.0. Recommendations are to upgrade to WMF5.0 to take advantage of capabilities like PowerShell Script Block logging and additional built-in PowerShell cmdlets.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/02config1.png&quot; width=&quot;400&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;Group Policy &amp;gt; Computer Configuration &amp;gt; Policies &amp;gt; Administrative Templates &amp;gt; Windows Components &amp;gt; Windows Remote Management &amp;gt; WinRM Service &amp;gt; Allow Remote server management through WinRM &amp;gt; Here you are required to Enable WinRM and set service listening IP to * or IP of listening interface.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/03config2.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;h4 id=&quot;2-configure-the-winrm-service-to-start-automatically&quot;&gt;2. Configure the WinRM service to start automatically&lt;/h4&gt;
-&lt;p&gt;Group Policy &amp;gt; Computer Configuration &amp;gt; Policies &amp;gt; Windows Settings &amp;gt; Security Settings &amp;gt; System Services &amp;gt; Windows Remote Management (WS-Management) &amp;gt; set to automatic&lt;/p&gt;
-
-&lt;p&gt;Note: a client reboot is required to start Windows Remote Management Service automatically from Group Policy.&lt;/p&gt;
-
-&lt;h4 id=&quot;3-allow-winrm-traffic-through-the-firewall&quot;&gt;3. Allow WinRM traffic through the firewall&lt;/h4&gt;
-&lt;p&gt;Group Policy &amp;gt; Computer Configuration &amp;gt; Policies &amp;gt; Windows Settings &amp;gt; Security Settings &amp;gt; Windows Firewall… &amp;gt; Windows Firewall… &amp;gt; Inbound Rule &amp;gt; Create rule using predefined Windows Remote Management (HTTP-In)&lt;/p&gt;
-
-&lt;h4 id=&quot;4-ensure-local-admin-privileges-on-the-target-machine&quot;&gt;4. Ensure local admin privileges on the target machine.&lt;/h4&gt;
-&lt;p&gt;Note: WinRM can be configured to NOT require local admin however some of the collections your going to want to run will likely require administrator privilege. Credential risk is minimised using the default WinRM Kerberos authentication.&lt;/p&gt;
-
-&lt;p&gt;Group Policy &amp;gt; Computer Configuration &amp;gt; Policies &amp;gt; Preferences &amp;gt; Control Panel Settings &amp;gt; Local Users and Groups &amp;gt; right click &amp;gt; All Tasks &amp;gt; Add &amp;gt; add User or Group to local administrators group.&lt;/p&gt;
-
-&lt;p&gt;Alternatively, for those looking for a PowerShell command line version: Running the command below to setup WinRM locally on your test hosts is fairly painless. Options like Enterprise Deployment Tool, Logon Script, PSEXEC or WMIC can be used for deployment as required. It is also worth noting that to configure a custom listener port you are required to use a CLI based configuration.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Setup: &lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Enable-PSRemoting&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Force&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;# Confirm WinRM is setup and responsive:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Test-WSMan&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ComputerName&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Test-WSMan&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ComputerName&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Credential&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Domain\User&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Authentication&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Kerberos&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/04testnoauth.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/05testwithauth.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;h1 id=&quot;authentication&quot;&gt;Authentication&lt;/h1&gt;
-&lt;p&gt;When using PowerShell Remoting you have the capability to configure authentication methods. The default and recommended when joined to a domain is PowerShell’s non-delegated Kerberos network logons. These authentication attempts result in network type 3 logons and no credential exposure. Other available options are Basic, CredSSP, Default, Digest, Kerberos, and Negotiate; Negotiate being recommended for non domain machines.&lt;/p&gt;
-
-&lt;p&gt;Note: make a point not to use CredSSP as there are credential risks associated with delegating credentials.&lt;/p&gt;
-
-&lt;p&gt;When testing in a domain to use default Kerberos authentication you do not need to specify the authentication method. There are a couple of ways to initiate a session, the simplest being a singular: “Invoke-Command” with parameters included.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/06simpleexampleNEW.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Reusable sessions can also be configured using the “New-PSSession” cmdlet then calling the open session. As seen in my animation below I can invoke a session then run several commands through the open session.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/gif01.gif&quot; alt=&quot;PS-Session&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Finally the “Enter-PSSession” cmdlet can be used for SSH like connectivity on the remote machine. In the animated example below I show some basic queries and filtering then query Sysmon logs.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/gif02.gif&quot; alt=&quot;PS-Session Sysmon&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;In my test environment I used a specifically allocated Active Directory service account for my PowerShell Remoting use, which I then allocated into a local administrator role via group policy. Similar actions could be taken with an appropriate group with local admin rights across all machines. This is much easier to control as well as audit in Security and Windows Remote Management Event logs.&lt;/p&gt;
-
-&lt;h1 id=&quot;whats-next&quot;&gt;What’s next?&lt;/h1&gt;
-&lt;p&gt;Some good areas to start to understand capabilities or implementation code reference are the following interesting frameworks and capabilities able to leverage WinRM:&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;1) Kansa&lt;/strong&gt; - Written by Dave Hull, Kansa is a modular incident response framework that takes advantage of PowerShell remoting to enable surprisingly simple and scalable, current state data collections from Windows machines. Kansa can facilitate incident response, an environment baseline, intrusion hunting analysis, or even remediation across thousands of machines with ease. Kansa enables fairly easy way to write additional modules and a prebuilt framework to run 3rd party binaries inside its workflow.&lt;/p&gt;
-
-&lt;p&gt;Get-Kansa: &lt;a href=&quot;https://github.com/davehull/Kansa&quot; title=&quot;Get Kansa&quot;&gt;https://github.com/davehull/Kansa&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;2) PowerForensics&lt;/strong&gt; - Written by Jared Atkinson, PowerForensics is a comprehensive disk forensic framework proving raw access to disk from PowerShell. Working with PowerForensics a typical analysis would occur locally, for a local or mounted drive.&lt;/p&gt;
-
-&lt;p&gt;Jared has recently been working on a remoting solution that leverages the Assembly class’ Load method to load the PowerForensics DLL in memory. The general idea is when running a command over WinRM the local machine checks if PowerForensics is loaded, if not, the appropriate PowerForensics assembly dll is loaded in memory for the duration of the WinRM session. This capability enables remote raw drive analysis and would significantly speed up analysis times removing the need for imaging or pushing an agent.&lt;/p&gt;
-
-&lt;p&gt;Get-PowerForensics: &lt;a href=&quot;https://github.com/Invoke-IR/PowerForensics&quot; title=&quot;Get Powerforensics&quot;&gt;https://github.com/Invoke-IR/PowerForensics&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2017-01-12-PowerShell_Remoting_IR/07Powerforensics.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The Remoting capability via “Invoke-Command” is very new and still in development. Current requirement is to run “Add-PowerForensicsType” in your PS-Session although the goal is to eventually make this transparent to the user. In my testing limitations around versioning of PowerForensics appear to require ironing out so testing and tool validation are essential.&lt;/p&gt;
-
-&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
-&lt;p&gt;With PowerShell Remoting over WinRM we have a flexible, yet powerful scripting language that can be used to query endpoints to collect relevant data points that an Incident Responder or Security team may require. Capable at scale, and over a communications framework included free in all modern Windows Operating systems. Although actually turning on WinRM may be difficult, it is worth some research to understand PowerShell remoting capabilities when considering future needs. A great strategy, but one used too infrequently is justifying a paid solution through showing benefits of open source capability, and comparing to relevant capability provided from a vendor.&lt;/p&gt;
-
-&lt;p&gt;The above should provide a some food for thought and point you in the right direction for further research. Feel free to reach out if you have any questions.&lt;/p&gt;
-
-&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;references--further-reading&quot;&gt;References / Further reading&lt;/h3&gt;
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;Atkinson, &lt;a href=&quot;http://www.invoke-ir.com&quot;&gt;Jared. Invoke-IR&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Australian Signals Directorate. &lt;a href=&quot;http://www.asd.gov.au/publications/protect/Securing_PowerShell.pdf&quot;&gt;Securing PowerShell in the Enterprise&lt;/a&gt;, 2016&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Hofferle, Jason. &lt;a href=&quot;https://blogs.technet.microsoft.com/heyscriptingguy/2012/07/23/an-introduction-to-powershell-remoting-part-one/&quot;&gt;Hey Scripting Guy! An Introduction to PowerShell Remoting: Part One&lt;/a&gt;, 2012&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Hull, Dave. &lt;a href=&quot;http://www.powershellmagazine.com/2014/07/18/kansa-a-powershell-based-incident-response-framework/&quot;&gt;PowerShell Magazine. Kansa overview &lt;/a&gt;, 2014&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Kazanciyan, Ryan. Hastings, Matt. &lt;a href=&quot;https://www.blackhat.com/docs/us-14/materials/us-14-Kazanciyan-Investigating-Powershell-Attacks-WP.pdf&quot;&gt;Investigating Powershell Attacks&lt;/a&gt;, 2014&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Metcalf, Sean. &lt;a href=&quot;https://adsecurity.org/wp-content/uploads/2015/01/&quot;&gt;PowerShell Security: Defending the Enterprise from the Latest Attack Platform&lt;/a&gt;, 2016.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;MSDN. &lt;a href=&quot;https://blogs.msdn.microsoft.com/powershell/2015/06/09/powershell-the-blue-team/&quot;&gt;PowerShell for the Blue Team&lt;/a&gt;, 2015&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;MSDN. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx&quot;&gt;Windows Remote Management&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Upguard. &lt;a href=&quot;https://support.upguard.com/upguard/winrm-configuration.html#enabling-https-winrm&quot;&gt;WinRM Configuration: Enabling HTTPS WinRM&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-</description>
-        <pubDate>Thu, 12 Jan 2017 00:00:00 +0000</pubDate>
-        <link>https://mgreen27.github.io//posts/2017/01/12/PowerShell_Remoting_IR.html</link>
-        <guid isPermaLink="true">https://mgreen27.github.io/posts/2017/01/12/PowerShell_Remoting_IR.html</guid>
-        
-        <category>DFIR</category>
-        
-        <category>Powershell</category>
         
         
         <category>posts</category>
