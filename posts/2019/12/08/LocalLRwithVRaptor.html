@@ -29,7 +29,7 @@
     
 
     
-      <meta content="2019-12-08T00:00:00+00:00" property="article:published_time">
+      <meta content="2019-12-08T00:00:00+11:00" property="article:published_time">
       <meta content="http://localhost:4000/about/" property="article:author">
     
 
@@ -142,7 +142,9 @@
 
 <div class="content">
   <div class="post"><div style="text-align: center; font-size:70%;"><img width="200" src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/00title.png" /></div>
-<p>In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.<br />
+<p>In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.</p>
+
+<p>EDIT: Please use this post for education only. Although the content and themes of this post are valid, the examples included have been superseeded by a GUI based local collector builder from the Velociraptor server.
 <br /></p>
 
 <h4 id="background">Background</h4>
@@ -171,7 +173,7 @@
 <h4 id="velociraptor-configuration">Velociraptor configuration</h4>
 <p>Setting up for local live response requires setting up an autoexecution object and output configuration. In my case, I setup artifact called “MultiCollection” with a zipfile output “collection_HOSTNAME.zip”. As there is no folder path specified, the zip will end up in the “start in folder”.</p>
 
-<p>Once the structure of VQL is understood it is trivial to add in additional use cases. Under the parameters section, I also have included an “uploadTable” parameter to add additional direct file downloads not covered by other components. In this case, im adding pagefile, swapfile and hibernation files if they exist as default. This table is helpful for quick collection and can also be represented in a glob style search.</p>
+<p>Once the structure of VQL is understood it is trivial to add in additional use cases. Under the parameters section, I also have included an “uploadTable” parameter to add additional direct file downloads not covered by other components. In this case, im adding pagefile, swapfile and hybernation files if they exist as default. This table is helpful for quick collection and can also be represented in a glob style search.</p>
 
 <div style="text-align: center; font-size:70%;"><img width="500" src="/static/img/article_images/2019-12-08-LocalLRwithVRaptor/02Config.png" /><br />Autoexecution VQL object</div>
 

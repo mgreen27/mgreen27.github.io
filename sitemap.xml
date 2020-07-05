@@ -5,14 +5,16 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 09 Dec 2019 06:41:34 +0000</pubDate>
-    <lastBuildDate>Mon, 09 Dec 2019 06:41:34 +0000</lastBuildDate>
+    <pubDate>Sun, 05 Jul 2020 11:55:29 +1000</pubDate>
+    <lastBuildDate>Sun, 05 Jul 2020 11:55:29 +1000</lastBuildDate>
     <generator>Jekyll v3.8.5</generator>
     
       <item>
         <title>Local Live Response with Velociraptor ++</title>
         <description>&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;200&quot; src=&quot;/static/img/article_images/2019-12-08-LocalLRwithVRaptor/00title.png&quot; /&gt;&lt;/div&gt;
-&lt;p&gt;In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.&lt;br /&gt;
+&lt;p&gt;In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.&lt;/p&gt;
+
+&lt;p&gt;EDIT: Please use this post for education only. Although the content and themes of this post are valid, the examples included have been superseeded by a GUI based local collector builder from the Velociraptor server.
 &lt;br /&gt;&lt;/p&gt;
 
 &lt;h4 id=&quot;background&quot;&gt;Background&lt;/h4&gt;
@@ -106,7 +108,7 @@
 
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 </description>
-        <pubDate>Sun, 08 Dec 2019 00:00:00 +0000</pubDate>
+        <pubDate>Sun, 08 Dec 2019 00:00:00 +1100</pubDate>
         <link>https://mgreen27.github.io/posts/2019/12/08/LocalLRwithVRaptor.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/12/08/LocalLRwithVRaptor.html</guid>
         
@@ -127,6 +129,13 @@
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;p&gt;This post is going to talk about the Velociraptor project. Specifically, live response and automation I have built for my own engagements. Im going to provide some background and walk through a proof of concept, then share the code.&lt;/p&gt;
+
+&lt;p&gt;EDIT: Please use this post for historical education only. Although the content and themes of this post are valid, the examples included are no longer valid for the current Velociraptor version. For current API configuration, please refer to the following links or feel free to contact me directly.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.velocidex.com/discord&quot;&gt;Chat with us on Discord&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.velocidex.com/docs/user-interface/api/&quot;&gt;Documentation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.velocidex.com/blog/medium/2020-03-06-velociraptor-post-processing-with-jupyter-notebook-and-pandas-8a344d05ee8c/&quot;&gt;Blog Post&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h3 id=&quot;background&quot;&gt;Background&lt;/h3&gt;
 &lt;p&gt;Velociraptor is an endpoint collection tool developed by Michel Cohen at Velocidex. Mike was the lead developer on many open source tools we know pretty well in our industry: for example Rekall/WinPMem, AFF4 and GRR. Velociraptor was created to simplify the GRR architecture and some of the complexity poblems of clunky back end and bloated data models. The result is a robust query language (VQL) and open source collection framework that is the building blocks of greatness.&lt;/p&gt;
@@ -252,7 +261,7 @@ For example  &lt;br /&gt;
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Sun, 10 Nov 2019 00:00:00 +0000</pubDate>
+        <pubDate>Sun, 10 Nov 2019 00:00:00 +1100</pubDate>
         <link>https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html</guid>
         
@@ -400,7 +409,7 @@ For example  &lt;br /&gt;
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Sun, 09 Jun 2019 00:00:00 +0000</pubDate>
+        <pubDate>Sun, 09 Jun 2019 00:00:00 +1000</pubDate>
         <link>https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html</guid>
         
@@ -473,7 +482,7 @@ Then execution via a bat file or commandline as below:&lt;/li&gt;
 6) YARA v3.10.0. &lt;a href=&quot;https://yara.readthedocs.io/en/v3.10.0/modules/pe.html&quot;&gt;PE Module&lt;/a&gt;
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 </description>
-        <pubDate>Wed, 29 May 2019 00:00:00 +0000</pubDate>
+        <pubDate>Wed, 29 May 2019 00:00:00 +1000</pubDate>
         <link>https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html</guid>
         
@@ -561,7 +570,7 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Sun, 12 May 2019 00:00:00 +0000</pubDate>
+        <pubDate>Sun, 12 May 2019 00:00:00 +1000</pubDate>
         <link>https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html</guid>
         
@@ -687,7 +696,7 @@ This command will output the generated live response script, to which we need to
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Sun, 07 Apr 2019 00:00:00 +0000</pubDate>
+        <pubDate>Sun, 07 Apr 2019 00:00:00 +1100</pubDate>
         <link>https://mgreen27.github.io/posts/2019/04/07/ILRScriptBuilder.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/04/07/ILRScriptBuilder.html</guid>
         
@@ -825,7 +834,7 @@ Microsoft BITS also has some specific forensic artefacts I have previously cover
 &lt;p&gt;8) Green, Matthew. &lt;a href=&quot;https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html&quot;&gt;Sharing my BITS&lt;/a&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Mon, 02 Apr 2018 00:00:00 +0000</pubDate>
+        <pubDate>Mon, 02 Apr 2018 00:00:00 +1000</pubDate>
         <link>https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html</guid>
         
@@ -939,13 +948,6 @@ Focusing on default event logs, the best source for detection of malicious downl
 
 &lt;p&gt;I hope this post has provided some good food for thought and pointed anyone interested in the direction for further research and reference material. Feel free to reach out if you have any questions.&lt;/p&gt;
 
-&lt;p&gt;I couldn’t finish this post without talking a little about capabilities all organisations should aspire to. Gold standard should be a mix of network and endpoint based visibility, with the ability to cover all gaps from each single source.&lt;/p&gt;
-
-&lt;p&gt;Critical for a modern blue team, some of my recommendations are:&lt;/p&gt;
-
-&lt;p&gt;Network based visibility around encrypted web traffic with content inspection.
-Process command line visibility on the endpoints to spot evil process chains and unusual command lines or obfuscation that is abnormal for the environment.&lt;/p&gt;
-
 &lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
 &lt;ol&gt;
   &lt;li&gt;
@@ -981,7 +983,7 @@ Process command line visibility on the endpoints to spot evil process chains and
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Sun, 18 Feb 2018 00:00:00 +0000</pubDate>
+        <pubDate>Sun, 18 Feb 2018 00:00:00 +1100</pubDate>
         <link>https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html</guid>
         
@@ -1202,7 +1204,7 @@ Some of the switches available in ForensicCopy mode:&lt;/p&gt;
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Sun, 14 Jan 2018 00:00:00 +0000</pubDate>
+        <pubDate>Sun, 14 Jan 2018 00:00:00 +1100</pubDate>
         <link>https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html</guid>
         
@@ -1327,7 +1329,7 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
   &lt;/li&gt;
 &lt;/ol&gt;
 </description>
-        <pubDate>Mon, 03 Apr 2017 00:00:00 +0000</pubDate>
+        <pubDate>Mon, 03 Apr 2017 00:00:00 +1000</pubDate>
         <link>https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html</guid>
         
@@ -1496,7 +1498,7 @@ In my use case I used a a WQL query that polls every 30 seconds to report on all
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Thu, 12 Jan 2017 00:00:00 +0000</pubDate>
+        <pubDate>Thu, 12 Jan 2017 00:00:00 +1100</pubDate>
         <link>https://mgreen27.github.io/posts/2017/01/12/PowerShell_Remoting_IR.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2017/01/12/PowerShell_Remoting_IR.html</guid>
         
