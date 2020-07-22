@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/static/img/favicon.ico" />
+    <title>Binary Rename 2 - Matt's DFIR Blog</title>
+    <meta name="author" content="Matthew Green" />
+    <meta name="description" content="Binary Rename 2" />
+    <meta name="keywords" content="Binary Rename 2, Matt's DFIR Blog, posts" />
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+    <meta content="" property="fb:app_id">
+    <meta content="Matt's DFIR Blog" property="og:site_name">
+
+    
+
+    
+      <meta content="Binary Rename 2" property="og:title">
+      <meta content="article" property="og:type">
+    
+
+    
+      <meta content="A blog for DFIR thoughts, research and for my future reference" property="og:description">
+    
+
+    
+      <meta content="http://localhost:4000/posts/2019/05/29/BinaryRename2.html" property="og:url">
+    
+
+    
+      <meta content="2019-05-29T00:00:00+10:00" property="article:published_time">
+      <meta content="http://localhost:4000/about/" property="article:author">
+    
+
+    
+      <meta content="http://localhost:4000/static/img/posts//static/img/article_images/2019-05-29-BinaryRename2/hello.png" property="og:image">
+    
+
+    
+      
+        <meta content="posts" property="article:section">
+      
+    
+
+    
+      
+        <meta content="DFIR" property="article:tag">
+      
+        <meta content="Powershell" property="article:tag">
+      
+        <meta content="Yara" property="article:tag">
+      
+        <meta content="T1036" property="article:tag">
+      
+        <meta content=""Defence" property="article:tag">
+      
+        <meta content="Evasion"" property="article:tag">
+      
+    
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@mgreen27">
+    <meta name="twitter:creator" content="@mgreen27">
+
+    
+      <meta name="twitter:title" content="Binary Rename 2">
+    
+
+    
+      <meta name="twitter:url" content="http://localhost:4000/posts/2019/05/29/BinaryRename2.html">
+    
+
+    
+      <meta name="twitter:description" content="A blog for DFIR thoughts, research and for my future reference">
+    
+
+    
+
+    <!-- Font awesome icons -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+    <!-- syntax highlighting CSS -->
+    <link rel="stylesheet" href="/static/css/syntax.css">
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/super-search.css">
+    <link rel="stylesheet" href="/static/css/thickbox.css">
+    <link rel="stylesheet" href="/static/css/projects.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="col-sm-3">
+        <div class="fixed-condition">
+          <a href="/"><img class="profile-avatar" src="/static/img/avatar.jpg" height="75px" width="75px" /></a>
+          <h1 class="author-name">Matthew Green</h1>
+          
+            <div class="profile-about">
+              I am a DFIR and detection guy from Sydney Australia.
+            </div>
+          
+          <div class="social">
+            <ul>
+              
+                <li><a href="https://www.twitter.com/mgreen27" target="_blank"><i class="fa fa-twitter"></i></a></li>
+              
+                <li><a href="https://www.linkedin.com/in/mgreen27/" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+              
+                <li><a href="https://github.com/mgreen27" target="_blank"><i class="fa fa-github"></i></a></li>
+              
+            </ul>
+          </div>
+          <div class="search" id="js-search">
+            <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+            <ul class="search__results" id="js-search__results"></ul>
+          </div>
+          <hr />
+          <ul class="sidebar-nav">
+            <strong>Navigation</strong>
+            <li><a href="/">Home</a></li>
+            
+              <li><a class="about" href="/about/">About Me</a></li>
+            
+              <li><a class="about" href="/projects/">My Projects</a></li>
+            
+              <li><a class="about" href="/feed.xml">XML Feed</a></li>
+            
+          </ul>
+        </div>
+        <!-- end /.fixed-condition -->
+      </div>
+      <div class="col-sm-8 col-offset-1 main-layout">
+        <header class="post-header">
+  <h1 class="post-title">Binary Rename 2</h1>
+</header>
+
+<span class="time">29 May 2019</span>
+
+  <span class="categories">
+    &raquo; <a href="/category/posts">posts</a>
+  </span>
+
+
+<div class="content">
+  <div class="post"><p>This is my second Binary Rename post, for the first and a detailed description of what Binary Rename is, please see: <a href="https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename</a>.</p>
+
+<p>In my first post, I talked about telemetry and how we could leverage WMI Eventing for a niche detection usecase. In this post I am focusing on static detection, that is assessing files on disk. I am going to describe differences between both Yara and Powershell based detections, then share the code.</p>
+
+<h1 id="yara-detection">Yara Detection</h1>
+<p>Firstly Yara - Yara is a command line driven tool used mainly for pattern matching in malware or detection use cases. Rule based, though strings or binary patterns - matching can be leveraged with logic like boolean, counts or regular expressions. Although traditionally pattern based, Yara is modular and expandable such that a “PE” module is available focusing on querying common binary attributes. The PE module allows you to create rules targeted specifically to the PE file format and file headers, providing functions which can be used to write more effective rules for PE file use cases.</p>
+
+<p>The example I am using is leveraging pe.versioninfo InternalName attribute:</p>
+
+<div style="text-align: center; font-size:70%;"><img width="350" src="/static/img/article_images/2019-05-29-BinaryRename2/01yara.png" /><br />PE module import and InternalName rule for renamed cmd.exe</div>
+
+<p>Our Yara use case is interesting as we require to compare an expected filename with the actual filename which is not typically a Yara capability. Florian Roth wrote about an “inverse” technique back in 2014 leveraging a Powershell script to obtain all files to be scanned and pass each filename into a yara scan as an external variable. The idea is a new yara instance is created for each file, passing in the relevant filename as the variable to allow comparison. In my code below I have expanded out the use case to cover x32 and x64 bit machines.</p>
+
+<div style="text-align: center; font-size:70%;"><img width="600" src="/static/img/article_images/2019-05-29-BinaryRename2/01inversePS.png" /><br />Powershell: inverseYara.ps1</div>
+
+<p>For execution we require the following files in our execution path:</p>
+<ul>
+  <li>inverseYara.ps1</li>
+  <li>yara binaries x86 or x64</li>
+  <li>rename.yar<br />
+<br />
+Then execution via a bat file or commandline as below:</li>
+</ul>
+
+<div style="text-align: center; font-size:70%;"><img width="600" src="/static/img/article_images/2019-05-29-BinaryRename2/01yararesults.png" /><br />Yara: Binary Rename detection results</div>
+
+<p>This technique works very well from a detection standpoint, however in my testing performance does not appear to be optimal due to the overhead of generating a new yara process for each file scanned. It is worthy to note, the yara scan could be targeted without the filename match focusing on unexpected locations for the files in scope, but this doesn’t match the binary rename usecase as required.</p>
+
+<h1 id="powershell-detection">Powershell Detection</h1>
+<p>In this case, the preferred detection is moving to Powershell only. The Windows API provides access to PE attributes via the FileVersionInfo Class with support back to Powershell 2.0 /.NET 2. Speed is significantly improved and logic can be optimised adding additional items in the output that may aid analysis. In my script output below you can see I have added a sha1 hash to the output object.</p>
+
+<div style="text-align: center; font-size:70%;"><img width="600" src="/static/img/article_images/2019-05-29-BinaryRename2/02psresults.png" /><br />Powershell results: 6 times faster than yara!</div>
+
+<h1 id="limitations">Limitations</h1>
+<p>The biggest limitation with any static detection capability that queries the whole disk is performance. Leveraging Powershell and native Windows API seems to optimise performance significantly. Other optimisations added are setting CPU priority to Idle only and configuring logic to filter effectively to minimise processing footprint. Additional optimisations around performance, could be targeted queries for specific staging locations of interest as part of a targeted detection.</p>
+
+<p>One consideration to keep in mind is the Powershell method leverages the Windows API. Although not a huge concern for my usecase of renamed binaries in a living off the land scenario, if there was tampering with rootkit like functionality a raw collection would be preferred.
+<br /><br /></p>
+
+<h1 id="final-thoughts">Final Thoughts</h1>
+<p>Hopefully you will find this summary useful, closing the loop on an open source detection capability for the Binary Rename use case. Feel free to reach out if you have any feedback, questions, or improvements.</p>
+
+<p>Powershell and Yara detection code can be found here - <a href="https://gist.github.com/mgreen27/036c2b33f928d188ddc60f26b4c9a097">Get-BinaryRename</a>
+<br /><br /></p>
+
+<h1 id="further-reading">Further reading</h1>
+<p>1) Green, Matthew. <a href="https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename</a>, 2019 <br />
+2) The MITRE Corporation. <a href="https://attack.mitre.org/techniques/T1036/">Technique: Masquerading - MITRE ATT&amp;CK™</a> <br />
+3) MSDN. <a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.fileversioninfo?view=netframework-2.0">FileVersionInfo</a> <br />
+4) Roth, Florian. <a href="https://www.bsk-consulting.de/2014/05/27/inverse-yara-signature-matching/">Inverse Yara Signature Matching (Part 1/2)</a>, 2014 <br />
+5) Roth, Florian. <a href="https://www.bsk-consulting.de/2014/08/28/scan-system-files-manipulations-yara-inverse-matching-22/">Inverse Yara Signature Matching (Part 2/2)</a>, 2014 <br />
+6) YARA v3.10.0. <a href="https://yara.readthedocs.io/en/v3.10.0/modules/pe.html">PE Module</a>
+<br /><br /></p>
+</div>
+  <div class="share-page">
+  <span style="float: left;">Share by: &nbsp;&nbsp;</span>
+
+  <!-- Twitter -->
+  <a href="https://twitter.com/share" class="twitter-share-button" data-via="mgreen27">Tweet</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+</div>
+
+
+  
+    
+      
+        
+          
+            
+            <div class="panel-body">
+              <h4>Related Posts</h4>
+              <ul>
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2020/07/23/IPSEC.html">Windows IPSEC for endpoint quarantine</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/12/08/LocalLRwithVRaptor.html">Local Live Response with Velociraptor ++</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html">Live response automation with Velociraptor</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html">O365: Hidden InboxRules</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/04/07/ILRScriptBuilder.html">Live Response Script Builder</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+  
+  </ul>
+</div>
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/posts/2019/05/12/BinaryRename.html">&laquo; Blue Team Hacks - Binary Rename</a>
+  
+  
+    <a class="next" href="/posts/2019/06/09/O365HiddenRules.html">O365: Hidden InboxRules &raquo;</a>
+  
+</div>
+
+<div class="disqus-comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    /* <![CDATA[ */
+    var disqus_shortname = "";
+    var disqus_identifier = "http://localhost:4000_Binary Rename 2";
+    var disqus_title = "Binary Rename 2";
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    /* ]]> */
+  </script>
+</div>
+
+        <footer>
+          &copy; Matthew Green
+          
+            - <a href="https://github.com/mgreen27">https://github.com/mgreen27</a> - Powered by Jekyll.
+          
+        </footer>
+      </div>
+      <!-- end /.col-sm-8 -->
+    </div>
+    <!-- end /.container -->
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/super-search.js"></script>
+    <script src="/static/js/thickbox-compressed.js"></script>
+    <script src="/static/js/projects.js"></script>
+  </body>
+</html>
+

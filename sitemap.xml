@@ -5,9 +5,161 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 05 Jul 2020 11:55:29 +1000</pubDate>
-    <lastBuildDate>Sun, 05 Jul 2020 11:55:29 +1000</lastBuildDate>
+    <pubDate>Thu, 23 Jul 2020 00:34:47 +1000</pubDate>
+    <lastBuildDate>Thu, 23 Jul 2020 00:34:47 +1000</lastBuildDate>
     <generator>Jekyll v3.8.5</generator>
+    
+      <item>
+        <title>Windows IPSEC for endpoint quarantine</title>
+        <description>&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2020-07-23-IPSEC/00quarantine.png&quot; /&gt;&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;This post is going to talk about using Windows IPSec for a quarantine use case. Im going to explain the background, how to configure a policy and some of the design decisions as I was initially looking at building an endpoint based containment capability for Velociraptor.&lt;/p&gt;
+
+&lt;h3 id=&quot;background&quot;&gt;Background&lt;/h3&gt;
+&lt;p&gt;As a consultant part of our workflow may be to contain a machine whilst we carry out an investigation. There are often complexities when carrying out cross team tasks so any capability that enables remote management typically saves time and resources. Most modern EDR has some kind of quarantine capability built in, however my current goto endpoint IR tool does not. Im looking for a scriptable, native tool based containment capability that can be deployed via Velociraptor.&lt;/p&gt;
+
+&lt;p&gt;IPSec has been included in every Microsoft Windows operating system since Windows 2000. Most practitioners believe IPSec as a purely VPN based technology, however the Windows implementation enables additional endpoint focused IP Security. In addition to encryption and authentication, IPSec uses the same engine as Windows Firewall so can be used for packet filtering. With these capabilities in mind, IPSec adds some nice options for teams looking to implement best practices in host based segmentation.&lt;/p&gt;
+
+&lt;p&gt;IPSec can be configured via Group Policy Object, Local Security Policy, Powershell, or Netsh in modern windows versions. This post will only focus on my use case of IPSec as a local policy deployment. Although Powershell is the goto tool for administration of Windows systems, its support is lacking for IPSec configuration prior to Windows 2012R2. For this reason, I decided to use the built in Netsh tool which has support for IPsec from Windows 7 through to the current iterations of Windows 10 / Server.&lt;/p&gt;
+
+&lt;p&gt;Even though this post is not covering all the IPSec use cases. I have included some links in my resources section for anyone interested in more information and best practice around centralised group policy based configuration.&lt;/p&gt;
+
+&lt;h3 id=&quot;ipsec-policy-definitions&quot;&gt;IPSec policy definitions&lt;/h3&gt;
+&lt;p&gt;First of all, we need to understand what makes up an IPSec policy.&lt;/p&gt;
+
+&lt;p&gt;Netsh IPSec can be deployed in 2 different modes - Dynamic and Static:  &lt;br /&gt;
+&lt;strong&gt;Dynamic&lt;/strong&gt; - Is applied to current state and is not a persistent configuration.&lt;br /&gt;
+&lt;strong&gt;Static&lt;/strong&gt; - Is applied as a policy and is simply a container for one or more rules. When enabled the policy populates the dynamic configuration and persists across reboot. When deleted, all objects attached to the policy are removed.&lt;/p&gt;
+
+&lt;p&gt;One of my requirements was to enable policy removal with minimal changes to current configuration. Using netsh static IPSec policies, we have a simplified process that can be built, applied and removed cleanly.&lt;/p&gt;
+
+&lt;p&gt;To create a policy: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static add policy name=&amp;lt;string&amp;gt; description=&amp;lt;string&amp;gt;&lt;/code&gt;&lt;br /&gt;
+To enable a policy:&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static set policy name=&amp;lt;string&amp;gt; assign=[y|n]&lt;/code&gt;&lt;br /&gt;
+To delete a policy: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static delete policy name=&amp;lt;string&amp;gt;&lt;/code&gt;&lt;br /&gt;
+NOTE: when deleting a policy it is disabled and all policy objects are also deleted.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Filter List&lt;/strong&gt; - Is simply a named container for one or more filters.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Filter&lt;/strong&gt; - Filters determine when to activate IPSec Rules.&lt;/p&gt;
+
+&lt;p&gt;To create a filter:&lt;br /&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static add filter filterlist=&amp;lt;string&amp;gt;&lt;/code&gt;  &lt;br /&gt;
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;srcaddr=[me|any|&amp;lt;dns&amp;gt;|&amp;lt;server&amp;gt;|&amp;lt;ipv4&amp;gt;|&amp;lt;ipv6&amp;gt;|&amp;lt;ipv4-ipv4&amp;gt;|&amp;lt;ipv6-ipv6&amp;gt;]&lt;/code&gt; - source address.&lt;br /&gt;
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;srcmask=[&amp;lt;mask&amp;gt;|&amp;lt;prefix&amp;gt;]&lt;/code&gt; - source netmask, only needed if network IP specified.  &lt;br /&gt;
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;srcport=[&amp;lt;port&amp;gt;]&lt;/code&gt; - source port as integer. 0 for all.&lt;br /&gt;
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dstaddr=[me|any|&amp;lt;dns&amp;gt;|&amp;lt;server&amp;gt;|&amp;lt;ipv4&amp;gt;|&amp;lt;ipv6&amp;gt;|&amp;lt;ipv4-ipv4&amp;gt;|&amp;lt;ipv6-ipv6&amp;gt;]&lt;/code&gt; - destination. 
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dstmask=[&amp;lt;mask&amp;gt;|&amp;lt;prefix&amp;gt;]&lt;/code&gt; - destination netmask, only needed if network IP specified.&lt;br /&gt;
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dstport=[&amp;lt;port&amp;gt;]&lt;/code&gt; - destination port as integer. 0 for all.&lt;br /&gt;
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;protocol=[ANY|ICMP|TCP|UDP|RAW|&amp;lt;integer&amp;gt;]&lt;/code&gt; - protocol as name or port.  &lt;br /&gt;
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mirrored=[&amp;lt;yes&amp;gt;|&amp;lt;no&amp;gt;]&lt;/code&gt;  - optional and defaults to yes as it enables reverse communication.
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;description=[&amp;lt;string&amp;gt;]&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;For example: Allowing RDP traffic inbound to a machine from any IP  &lt;br /&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static add filter filterlist=&quot;Test Filter List&quot;&lt;/code&gt;&lt;br /&gt;
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;srcaddr=me srcport=3389 dstaddr=any dstport=0 protocol=tcp&lt;/code&gt;  &lt;br /&gt;
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;description=&quot;quick and dirty RDP filter&quot;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Filter Action&lt;/strong&gt; - Occurs when a Filter is satisfied. An IPSec filter can be permit, block, encrypt or sign the data stream. In my use case, I am only interested in permit and block as we are not interested in traffic encryption or validation usecases.&lt;/p&gt;
+
+&lt;p&gt;To create a filter action:&lt;br /&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static add filteraction name=&amp;lt;string&amp;gt; action=&amp;lt;permit&amp;gt;|&amp;lt;block&amp;gt;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Rules&lt;/strong&gt; - An IPSec rule requries a filter list and a filter action and connects them to a policy. An optional component of a rule is authentication.&lt;/p&gt;
+
+&lt;p&gt;To create a rule:&lt;br /&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static add rule name=&amp;lt;string&amp;gt; policy=&amp;lt;string&amp;gt;&lt;/code&gt;&lt;br /&gt;
+    &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;filterlist=&amp;lt;string&amp;gt; filteraction=&amp;lt;string&amp;gt; description=&amp;lt;string&amp;gt;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Authentication&lt;/strong&gt; - An optional component of an IPSec rule and out of scope for my use case. It enables authentication via: Kerberos, shared key or certificate and can be applied to a user or machine.&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;rolling-into-velociraptor&quot;&gt;Rolling into Velociraptor&lt;/h3&gt;
+&lt;p&gt;The above commands are fairly straight forward to implement and transparent to the user in my Velociraptor implementation.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2020-07-23-IPSEC/01parameters.png&quot; /&gt;&lt;br /&gt;Quarantine: Parameter options&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Configurable items are:&lt;br /&gt;
+&lt;strong&gt;PolicyName&lt;/strong&gt; - for auditing purposes&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;RuleLookUpTable&lt;/strong&gt;&lt;br /&gt;
+This enables custom IPSec filters to be added to the permit or block rule configuration easily. Each field corresponds to a Netsh switch discussed above and the only requirements are action, source and destination addresses. All other items will simply add the entry to the relevant switch in netsh and bad commands will be observed in results.&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2020-07-23-IPSEC/02log.png&quot; /&gt;&lt;br /&gt;Artifact log: executed netsh commands.&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;The commands in my screenshots resulted from adding to the artifact defaults:&lt;/p&gt;
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2020-07-23-IPSEC/02error.png&quot; /&gt;&lt;br /&gt;Custom filters: RDP and force error&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;700&quot; src=&quot;/static/img/article_images/2020-07-23-IPSEC/02results.png&quot; /&gt;&lt;br /&gt;Artifact results: see netsh stderr on incorrect entry.&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;MessageBox&lt;/strong&gt; - if configured will show a messagebox to all logged in users. There is a limitation of 256 Characters that will be trucated if exceeded.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/static/img/article_images/2020-07-23-IPSEC/02messagebox.png&quot; /&gt;&lt;br /&gt;Example messagebox&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;RemovePolicy&lt;/strong&gt; - will simply run the remove policy command for configured policy name.&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;caveats&quot;&gt;Caveats&lt;/h3&gt;
+&lt;p&gt;There are a couple of considerations when deploying local IPSec policy.&lt;/p&gt;
+
+&lt;p&gt;First being, it is dangerous to apply local policy and there is a real risk of locking yourself out of access to the machine. DNS resolutions can change, DHCP leases expire or the block all approach may accidentally block an unintended resource. Understanding the network and entering appropriate exclusions to mitigate these issues are important. In addition to exclusions, it is reccomended to test content prior to live fire. To simplify this process, I have implemented a capability to extract the agent config and add the Velociraptor server configuration automatically to whitelist exclusions. The Velociraptor deployment will also attempt communication back to the server and if it fails, roll back the quarantine policy. Similarly, I have made availible customisable configuration with both DNS and DHCP allowed by default in customisable configuration.&lt;/p&gt;
+
+&lt;p&gt;The final caveat is local IPSec policy can not be applied if a domain level IPSec policy is applied. In this case the reccomendation is to add a seperate quarantine rule via Active Directory.&lt;/p&gt;
+
+&lt;h3 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h3&gt;
+&lt;p&gt;In this post I have walked through using local IPSec policy to implement machine quarantine in the Velociraptor platform. Despite limitations, this feature has been useful for me to call on as needed. Testing and the age old “understanding your tools” is a must and I look forward to optimising this capability moving forward.&lt;/p&gt;
+
+&lt;p&gt;Feel free to send through any other thoughts, feedback and optimisations.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;further-resources&quot;&gt;Further resources&lt;/h1&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/windows-server/networking/technologies/netsh/netsh&quot;&gt;Microsoft Docs, Network Shell (Netsh).&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/powershell/module/netsecurity/new-netipsecrule?view=win10-ps&quot;&gt;Microsoft Docs, New-NetIPsecRule.&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc754274(v=ws.11)?redirectedfrom=MSDN&quot;&gt;Microsoft Docs, Windows Firewall with Advanced Security.&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://channel9.msdn.com/Events/Ignite/New-Zealand-2016/M377&quot;&gt;Payne, Jessica. Demystifying the Windows Firewall, Ignite 2016&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://blog.dane.io/2018/04/22/endpoint-isolation-with-the-windows-firewall.html&quot;&gt;Stuckey, Dane. Endpoint Isolation with the Windows Firewall, 2018&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Thu, 23 Jul 2020 00:00:00 +1000</pubDate>
+        <link>https://mgreen27.github.io/posts/2020/07/23/IPSEC.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2020/07/23/IPSEC.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>Velociraptor</category>
+        
+        <category>VQL</category>
+        
+        <category>NetSh</category>
+        
+        <category>IPSec</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
     
       <item>
         <title>Local Live Response with Velociraptor ++</title>

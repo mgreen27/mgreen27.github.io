@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/static/img/favicon.ico" />
+    <title>Live Response Script Builder - Matt's DFIR Blog</title>
+    <meta name="author" content="Matthew Green" />
+    <meta name="description" content="Live Response Script Builder" />
+    <meta name="keywords" content="Live Response Script Builder, Matt's DFIR Blog, posts" />
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+    <meta content="" property="fb:app_id">
+    <meta content="Matt's DFIR Blog" property="og:site_name">
+
+    
+
+    
+      <meta content="Live Response Script Builder" property="og:title">
+      <meta content="article" property="og:type">
+    
+
+    
+      <meta content="A blog for DFIR thoughts, research and for my future reference" property="og:description">
+    
+
+    
+      <meta content="http://localhost:4000/posts/2019/04/07/ILRScriptBuilder.html" property="og:url">
+    
+
+    
+      <meta content="2019-04-07T00:00:00+11:00" property="article:published_time">
+      <meta content="http://localhost:4000/about/" property="article:author">
+    
+
+    
+      <meta content="http://localhost:4000/static/img/posts//static/img/article_images/2019-04-07-ILRScriptBuilder/00title.jpg" property="og:image">
+    
+
+    
+      
+        <meta content="posts" property="article:section">
+      
+    
+
+    
+      
+        <meta content="DFIR" property="article:tag">
+      
+        <meta content="Powershell" property="article:tag">
+      
+        <meta content=""Live" property="article:tag">
+      
+        <meta content="Response"" property="article:tag">
+      
+    
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@mgreen27">
+    <meta name="twitter:creator" content="@mgreen27">
+
+    
+      <meta name="twitter:title" content="Live Response Script Builder">
+    
+
+    
+      <meta name="twitter:url" content="http://localhost:4000/posts/2019/04/07/ILRScriptBuilder.html">
+    
+
+    
+      <meta name="twitter:description" content="A blog for DFIR thoughts, research and for my future reference">
+    
+
+    
+
+    <!-- Font awesome icons -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+    <!-- syntax highlighting CSS -->
+    <link rel="stylesheet" href="/static/css/syntax.css">
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/super-search.css">
+    <link rel="stylesheet" href="/static/css/thickbox.css">
+    <link rel="stylesheet" href="/static/css/projects.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="col-sm-3">
+        <div class="fixed-condition">
+          <a href="/"><img class="profile-avatar" src="/static/img/avatar.jpg" height="75px" width="75px" /></a>
+          <h1 class="author-name">Matthew Green</h1>
+          
+            <div class="profile-about">
+              I am a DFIR and detection guy from Sydney Australia.
+            </div>
+          
+          <div class="social">
+            <ul>
+              
+                <li><a href="https://www.twitter.com/mgreen27" target="_blank"><i class="fa fa-twitter"></i></a></li>
+              
+                <li><a href="https://www.linkedin.com/in/mgreen27/" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+              
+                <li><a href="https://github.com/mgreen27" target="_blank"><i class="fa fa-github"></i></a></li>
+              
+            </ul>
+          </div>
+          <div class="search" id="js-search">
+            <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+            <ul class="search__results" id="js-search__results"></ul>
+          </div>
+          <hr />
+          <ul class="sidebar-nav">
+            <strong>Navigation</strong>
+            <li><a href="/">Home</a></li>
+            
+              <li><a class="about" href="/about/">About Me</a></li>
+            
+              <li><a class="about" href="/projects/">My Projects</a></li>
+            
+              <li><a class="about" href="/feed.xml">XML Feed</a></li>
+            
+          </ul>
+        </div>
+        <!-- end /.fixed-condition -->
+      </div>
+      <div class="col-sm-8 col-offset-1 main-layout">
+        <header class="post-header">
+  <h1 class="post-title">Live Response Script Builder</h1>
+</header>
+
+<span class="time">07 Apr 2019</span>
+
+  <span class="categories">
+    &raquo; <a href="/category/posts">posts</a>
+  </span>
+
+
+<div class="content">
+  <div class="post"><div style="text-align: center;"><img src="/static/img/article_images/2019-04-07-ILRScriptBuilder/00title.jpg" width="500" /><br /></div>
+
+<p>In this post I thought I would share some practical new features implemented in a recent refactor of Invoke-LiveResponse. These features enable fast and modular generation of live response scripts compatible with legacy Powershell. Im going to walk through the background then some of the new features and script creation.</p>
+
+<h1 id="background">Background</h1>
+<p>Invoke-LiveResponse (I-LR) is a Powershell module I put together 18 months ago to enable raw disk collections over WinRM. Leveraging Powerforensics via a custom Powershell function it enabled collections of key forensic artefacts and stdout of script results typical for live response tasks. More information can be found at the wiki, from my previous post or the code.</p>
+
+<p>Unless your running a preinstalled agent based solution, an important component of live response is local execution. As WinRM is not going to be deployed in most environments a common usecase may be via system management tools, scripting or local USB based collection. Secondly, simple expandability and the ability to write new collection capabilities quickly is an important design factor. I-LR’s supportability on Powershell 2.0 and no additional requirements beyond base operating system makes it a good candidate for this task.</p>
+
+<p>With that in mind, im going to explain some of the features below and walk through how custom live response scripts can be generated.
+<br /><br /><br /></p>
+
+<h1 id="modular">Modular</h1>
+<p>Invoke-LiveResponse leverages a new modular component for running collections. We still have the standard preconfigured collection options however a new “-custom” switch allows for dropping a scriptblock or multiple scriptblocks into the custom folder for ForensicCopy mode execution and script generation.</p>
+
+<div style="text-align: center; font-size:70%;"><img src="/static/img/article_images/2019-04-07-ILRScriptBuilder/01CustomFolder.png" />Scripts dropped into custom folder.</div>
+
+<div style="text-align: center; font-size:70%"><img width="400" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/01CustomAll.png" /><br />Invoke-LiveResponse: -all -vss -custom with four custom collections.</div>
+<p><br /></p>
+
+<h4 id="copy-preparation-and-search">Copy Preparation and Search</h4>
+<p>Under the hood, Invoke-LiveResponse now leverages a copy preparation function to simplify creating collection content. A function: Copy-LiveResponse checks for existence of items and builds a hash table of files and folders using Get-ChildItem. This enables generic glob searching on path and filtering using both Get-ChildItem or Powershell’s powerful “Where-Object” syntax. Depending on mode: Windows API via Copy-Item, or a raw copy via Invoke-ForensicCopy, copies files with fallback to the alternate method if failure.</p>
+
+<p>Availible switches are familiar to anyone who uses Powershell Get-ChildItem:</p>
+
+<div style="text-align: center; font-size:70%"><img width="600" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/02copyswitches.png" /><br />Copy-LiveResponse: configuration options.</div>
+
+<div style="text-align: center; font-size:70%"><img width="650" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/02execution.png" /><br />Example collection: Evidence of Execution.</div>
+
+<div style="text-align: center; font-size:70%"><img width="700" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/02forensicmode.png" /><br />Example raw collection: Event Logs.</div>
+
+<p>Its worthy to note: Copy-LiveResponse leverages the Windows API for search. For basic live response of known files this was decided as the best approach as speed is improved greatly. Permissions searching with this technique does not inhibit results as the script runs as SYSTEM and “Get- ChildItem -Force” typically has complete visibility of even protected files. For NTFS special files or raw disk based search, direct use of Invoke- ForensicCopy is required.
+For reference, I have included an example below:</p>
+
+<div style="text-align: center; font-size:70%"><img width="650" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/02rawexample.png" /><br />Example collection: NTFS special files.</div>
+
+<p>WriteScriptBlock and LocalOut
+WriteScriptBlock writes a .ps1 file containing the Invoke-LiveResponse scriptblock to the current working directory. This is useful for creating a script that will be manually run on a host without WinRM configured or troubleshooting development efforts.</p>
+
+<div style="text-align: center; font-size:70%"><img width="500" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/03writescriptblock.png" /><br />Invoke-LiveResponse -writescriptblock switch writes script to working folder.</div>
+
+<p>Writescriptblock also writes a scriptblock to allow for local LiveResponse and Memory collection mode. For LiveResponse mode, additional scripts with desired standard-out can be placed into a Content folder in the same location as the script to run on execution. Simlilarly the “-Mem” switch will look for a WinPMem binary in the same folder path as the generated script.</p>
+
+<div style="text-align: center; font-size:70%"><img width="400" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/03writescriptblock1.png" /><br />Invoke-LiveResponse -writescriptblock folder structure for local execution.</div>
+
+<p>Combined with “-LocalOut:$True” enables building a ps1 file to run from LiveResponse USB or tool with execution. The results and collected artefacts are copied to the path of the script on execution.</p>
+
+<div style="text-align: center; font-size:70%"><img width="500" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/03writescriptblock2.png" /><br />Invoke-LiveResponse -writescriptblock -localout:$true for local out to script location on execution.</div>
+
+<p>Alternatively a localout or UNC path can be defined. Note: UNC path will map a drive to copy, specifying localout will only use preexisting mappings or write to local drives (which is potentially forensically destructive).
+<br /><br /></p>
+
+<h4 id="volume-shadowcopy">Volume ShadowCopy</h4>
+<p>The “-VSS” switch enables collection of Volume ShadowCopy Service artefacts for all selected collections. The feature invokes CreateSymbolicLink via PInvoke to minimise forensic footprint, mounting all available VSC then copying artefacts if available. A dedup feature will take a hash of the VSS item and compare it to hashable collected files, skipping if previously copied.
+<br /><br /></p>
+
+<h4 id="nobase64">NoBase64</h4>
+<p>For raw disk access I-LR will utilise reflection to load an embedded Powerforensics module to memory. In field, some EDR / Powershell prevention tools will block the conversion function from base64. The “-Nobase64” switch leverages a direct byte array and GzipStream to bypass this technique. It is worthy to note, the created script is slightly larger size than its base64 equivalent.
+<br /><br /></p>
+
+<h4 id="psreflect">PSReflect</h4>
+<p>One of the components I have started rolling into Invoke-LiveResponse is reflection via pinvoke and Matt Graeber’s <a href="https://www.powershellmagazine.com/2014/09/25/easily-defining-enums-structs-and-win32-functions-in-memory/">PSreflect template</a>. Initial implementations have been mounting UNC destination, Volume Shadow Copy and SYSTEM elevation via token impersonation. The longer term plan is to eventually run a significant LiveResponse capability via reflection for both forensic collection and live response summary information for use cases Powershell doesn’t provide legacy capability.
+<br /><br /><br /></p>
+
+<h1 id="putting-it-all-together">Putting it all together</h1>
+<p>After walking through the availible features, I thought I would walk through a script generation for a custom collection.</p>
+
+<p>For installation please <a href="https://github.com/mgreen27/Invoke-LiveResponse/archive/master.zip">download Invoke-LiveResponse</a> and add to your Powershell profile. Detailed instructions can be found on the <a href="https://github.com/mgreen27/Invoke-LiveResponse/wiki/Installation">wiki</a>.</p>
+
+<p>To import the module:<br />
+<code class="language-plaintext highlighter-rouge">PS&gt; Import-Module Invoke-LiveResponse</code></p>
+
+<p>To view help:<br />
+<code class="language-plaintext highlighter-rouge">PS&gt; Get-Help Invoke-LiveResponse -detailed</code>
+ <br /><br /></p>
+
+<h4 id="memory-and-custom-disk">Memory and custom disk</h4>
+<p>In this usecase I will be collecting memory artefacts. I am interested in collecting a memory dump in addition to memory artefacts on the file system.</p>
+
+<p>For Memory dump simple use of the inbuilt “-Mem” switch after ensuring WinPMem is available. For the FileSystem memory artefacts, I need to create a custom collection scriptblock.
+Firstly, I am interested in pagefile and swapfile collection targeting the root folder (line 6). I have chosen forensic mode as I know these files are typically locked and require special access to download.</p>
+
+<div style="text-align: center; font-size:70%"><img width="500" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/06scriptblock.png" /><br />Custom Scrtipblock: sbMemoryDisk.ps1</div>
+<p>Secondly, I am interested in any *.dmp files on the filesystem (line 7). For this search I have also targeted the root folder but have also added the “-recurse” switch. This will enable the recursive search to find any dump files on the filesystem by filename. I will also use the “-VSS” switch to mount and search Volume ShadowCopy. It is worthy to note if your looking for a traditional forensic carve / pattern match this is not the method for you - this is a fairly intensive search and typically during a live response we would aim to be more targeted.</p>
+
+<div style="text-align: center; font-size:70%"><img width="750" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/06setup.png" /><br />Custom Scrtipblock: add to custom folder and run Invoke-LiveResponse.</div>
+
+<p>Next, add the custom scriptblock into the Invoke-LiveResponse module folder, load and then execute Invoke-LiveResponse. The Command line is:
+<code class="language-plaintext highlighter-rouge">PS&gt; Invoke-LiveResponse -mem -custom -vss -WriteScriptblock -LocalOut:$True</code><br />
+This command will output the generated live response script, to which we need to add a copy of WinPMem to the root of the target location. In my case, this was a removable SSD drive mounted as E:.</p>
+
+<div style="text-align: center; font-size:70%"><img width="600" src="/static/img/article_images/2019-04-07-ILRScriptBuilder/06execution.png" /><br />Invoke-LiveResponse: Local Execution from USB.</div>
+
+<p>On script execution, memory is collected and several files are found on the filesystem. As seen in the screenshot below, several process dumps were located on my desktop, the VSS and recyclebin.</p>
+
+<div style="text-align: center; font-size:70%"><img src="/static/img/article_images/2019-04-07-ILRScriptBuilder/06results.png" /><br />Memory Artefacts: Results</div>
+<p><br /><br /><br /></p>
+
+<h1 id="final-thoughts">Final Thoughts</h1>
+<p>I have learnt a lot implementing some of these features in a tool that has been fairly handy to have available in the time I have been using it. There are many ways to run live response and collect data, Invoke-LiveResponse provides a solution with minimal requirements beyond what is available by default from Windows 7 and above. I hope others can get some value using it so please feel free to reach out and provide feedback and improvements.
+<br /><br /></p>
+
+</div>
+  <div class="share-page">
+  <span style="float: left;">Share by: &nbsp;&nbsp;</span>
+
+  <!-- Twitter -->
+  <a href="https://twitter.com/share" class="twitter-share-button" data-via="mgreen27">Tweet</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+</div>
+
+
+  
+    
+      
+        
+          
+            
+            <div class="panel-body">
+              <h4>Related Posts</h4>
+              <ul>
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2020/07/23/IPSEC.html">Windows IPSEC for endpoint quarantine</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/12/08/LocalLRwithVRaptor.html">Local Live Response with Velociraptor ++</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html">Live response automation with Velociraptor</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html">O365: Hidden InboxRules</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html">Binary Rename 2</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+  
+  </ul>
+</div>
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/posts/2018/04/02/DownloadCradle.html">&laquo; Powershell Download Cradles</a>
+  
+  
+    <a class="next" href="/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename &raquo;</a>
+  
+</div>
+
+<div class="disqus-comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    /* <![CDATA[ */
+    var disqus_shortname = "";
+    var disqus_identifier = "http://localhost:4000_Live Response Script Builder";
+    var disqus_title = "Live Response Script Builder";
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    /* ]]> */
+  </script>
+</div>
+
+        <footer>
+          &copy; Matthew Green
+          
+            - <a href="https://github.com/mgreen27">https://github.com/mgreen27</a> - Powered by Jekyll.
+          
+        </footer>
+      </div>
+      <!-- end /.col-sm-8 -->
+    </div>
+    <!-- end /.container -->
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/super-search.js"></script>
+    <script src="/static/js/thickbox-compressed.js"></script>
+    <script src="/static/js/projects.js"></script>
+  </body>
+</html>
+
