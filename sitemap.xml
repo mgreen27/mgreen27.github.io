@@ -5,8 +5,8 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 23 Jul 2020 00:50:03 +1000</pubDate>
-    <lastBuildDate>Thu, 23 Jul 2020 00:50:03 +1000</lastBuildDate>
+    <pubDate>Fri, 24 Jul 2020 23:07:17 +1000</pubDate>
+    <lastBuildDate>Fri, 24 Jul 2020 23:07:17 +1000</lastBuildDate>
     <generator>Jekyll v3.8.5</generator>
     
       <item>
@@ -65,17 +65,27 @@ NOTE: when deleting a policy it is disabled and all policy objects are also dele
 &lt;p&gt;To create a filter action:&lt;br /&gt;
 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static add filteraction name=&amp;lt;string&amp;gt; action=&amp;lt;permit&amp;gt;|&amp;lt;block&amp;gt;&lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Rules&lt;/strong&gt; - An IPSec rule requries a filter list and a filter action and connects them to a policy. An optional component of a rule is authentication.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Rules&lt;/strong&gt; - An IPSec rule requries a filter list and a filter action and connects them to a policy. An optional component of a rule is authentication, which is out of scope for my current implementation.&lt;/p&gt;
 
 &lt;p&gt;To create a rule:&lt;br /&gt;
 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static add rule name=&amp;lt;string&amp;gt; policy=&amp;lt;string&amp;gt;&lt;/code&gt;&lt;br /&gt;
     &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;filterlist=&amp;lt;string&amp;gt; filteraction=&amp;lt;string&amp;gt; description=&amp;lt;string&amp;gt;&lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Authentication&lt;/strong&gt; - An optional component of an IPSec rule and out of scope for my use case. It enables authentication via: Kerberos, shared key or certificate and can be applied to a user or machine.&lt;br /&gt;
-&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h3 id=&quot;rolling-into-velociraptor&quot;&gt;Rolling into Velociraptor&lt;/h3&gt;
-&lt;p&gt;The above commands are fairly straight forward to implement and transparent to the user in my Velociraptor implementation.&lt;/p&gt;
+&lt;p&gt;The summary of the above commands translate into a defined process:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Create policy.&lt;/li&gt;
+  &lt;li&gt;Create filter lists.&lt;/li&gt;
+  &lt;li&gt;Add filters to filter lists.&lt;/li&gt;
+  &lt;li&gt;Create filter actions.&lt;/li&gt;
+  &lt;li&gt;Create rules (link all together).&lt;/li&gt;
+  &lt;li&gt;Apply policy.&lt;/li&gt;
+  &lt;li&gt;Test it works.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Velociraptor implementation of this process is transparent apart from a few select components. The goals being a repeatable capability that is reliable.&lt;/p&gt;
 
 &lt;div style=&quot;text-align: center; font-size:70%;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2020-07-23-IPSEC/01parameters.png&quot; /&gt;&lt;br /&gt;Quarantine: Parameter options&lt;/div&gt;
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
@@ -108,14 +118,18 @@ This enables custom IPSec filters to be added to the permit or block rule config
 &lt;h3 id=&quot;caveats&quot;&gt;Caveats&lt;/h3&gt;
 &lt;p&gt;There are a couple of considerations when deploying local IPSec policy.&lt;/p&gt;
 
-&lt;p&gt;First being, it is dangerous to apply local policy and there is a real risk of locking yourself out of access to the machine. DNS resolutions can change, DHCP leases expire or the block all approach may accidentally block an unintended resource. Understanding the network and entering appropriate exclusions to mitigate these issues are important. In addition to exclusions, it is reccomended to test content prior to live fire. To simplify this process, I have implemented a capability to extract the agent config and add the Velociraptor server configuration automatically to whitelist exclusions. The Velociraptor deployment will also attempt communication back to the server and if it fails, roll back the quarantine policy. Similarly, I have made availible customisable configuration with both DNS and DHCP allowed by default in customisable configuration.&lt;/p&gt;
+&lt;p&gt;First being, it is dangerous to apply local policy and there is a real risk of locking yourself out of access to the machine. DNS resolutions can change, DHCP leases expire or the block all approach may accidentally block an unintended resource. Understanding the network and entering appropriate exclusions to mitigate these issues are important. In addition to exclusions, it is reccomended to test content prior to live fire.&lt;/p&gt;
+
+&lt;p&gt;To simplify this process, I have implemented a capability to extract the agent config and add the Velociraptor server configuration automatically to exclusions. After policy deployment, the machine will attempt communication back to the Velociraptor server and if it fails, roll back the quarantine policy. Similarly all DNS and DHCP traffic is allowed by default in user customisable configuration.&lt;/p&gt;
 
 &lt;p&gt;The final caveat is local IPSec policy can not be applied if a domain level IPSec policy is applied. In this case the reccomendation is to add a seperate quarantine rule via Active Directory.&lt;/p&gt;
 
 &lt;h3 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h3&gt;
-&lt;p&gt;In this post I have walked through using local IPSec policy to implement machine quarantine in the Velociraptor platform. Despite limitations, this feature has been useful for me to call on as needed. Testing and the age old “understanding your tools” is a must and I look forward to optimising this capability moving forward.&lt;/p&gt;
+&lt;p&gt;In this post I have walked through local IPSec policy to implement machine quarantine in the Velociraptor platform. Despite limitations, this feature has been useful for me to call on as needed. Testing and the age old “understanding your tools” is very important.&lt;/p&gt;
 
-&lt;p&gt;Feel free to send through any other thoughts, feedback and optimisations.&lt;/p&gt;
+&lt;p&gt;I already have several optimisations planned - feel free to send through any other thoughts, feedback and optimisations.&lt;/p&gt;
+
+&lt;p&gt;Content can be found - &lt;a href=&quot;https://github.com/Velocidex/velociraptor/blob/master/artifacts/definitions/Windows/Remediation/Quarantine.yaml&quot;&gt;Windows.Remediation.Quarantine&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 

@@ -199,17 +199,27 @@ NOTE: when deleting a policy it is disabled and all policy objects are also dele
 <p>To create a filter action:<br />
 <code class="language-plaintext highlighter-rouge">netsh ipsec static add filteraction name=&lt;string&gt; action=&lt;permit&gt;|&lt;block&gt;</code></p>
 
-<p><strong>Rules</strong> - An IPSec rule requries a filter list and a filter action and connects them to a policy. An optional component of a rule is authentication.</p>
+<p><strong>Rules</strong> - An IPSec rule requries a filter list and a filter action and connects them to a policy. An optional component of a rule is authentication, which is out of scope for my current implementation.</p>
 
 <p>To create a rule:<br />
 <code class="language-plaintext highlighter-rouge">netsh ipsec static add rule name=&lt;string&gt; policy=&lt;string&gt;</code><br />
     <code class="language-plaintext highlighter-rouge">filterlist=&lt;string&gt; filteraction=&lt;string&gt; description=&lt;string&gt;</code></p>
 
-<p><strong>Authentication</strong> - An optional component of an IPSec rule and out of scope for my use case. It enables authentication via: Kerberos, shared key or certificate and can be applied to a user or machine.<br />
-<br /></p>
+<p><br /></p>
 
 <h3 id="rolling-into-velociraptor">Rolling into Velociraptor</h3>
-<p>The above commands are fairly straight forward to implement and transparent to the user in my Velociraptor implementation.</p>
+<p>The summary of the above commands translate into a defined process:</p>
+<ol>
+  <li>Create policy.</li>
+  <li>Create filter lists.</li>
+  <li>Add filters to filter lists.</li>
+  <li>Create filter actions.</li>
+  <li>Create rules (link all together).</li>
+  <li>Apply policy.</li>
+  <li>Test it works.</li>
+</ol>
+
+<p>Velociraptor implementation of this process is transparent apart from a few select components. The goals being a repeatable capability that is reliable.</p>
 
 <div style="text-align: center; font-size:70%;"><img src="/static/img/article_images/2020-07-23-IPSEC/01parameters.png" /><br />Quarantine: Parameter options</div>
 <p><br /></p>
@@ -242,14 +252,18 @@ This enables custom IPSec filters to be added to the permit or block rule config
 <h3 id="caveats">Caveats</h3>
 <p>There are a couple of considerations when deploying local IPSec policy.</p>
 
-<p>First being, it is dangerous to apply local policy and there is a real risk of locking yourself out of access to the machine. DNS resolutions can change, DHCP leases expire or the block all approach may accidentally block an unintended resource. Understanding the network and entering appropriate exclusions to mitigate these issues are important. In addition to exclusions, it is reccomended to test content prior to live fire. To simplify this process, I have implemented a capability to extract the agent config and add the Velociraptor server configuration automatically to whitelist exclusions. The Velociraptor deployment will also attempt communication back to the server and if it fails, roll back the quarantine policy. Similarly, I have made availible customisable configuration with both DNS and DHCP allowed by default in customisable configuration.</p>
+<p>First being, it is dangerous to apply local policy and there is a real risk of locking yourself out of access to the machine. DNS resolutions can change, DHCP leases expire or the block all approach may accidentally block an unintended resource. Understanding the network and entering appropriate exclusions to mitigate these issues are important. In addition to exclusions, it is reccomended to test content prior to live fire.</p>
+
+<p>To simplify this process, I have implemented a capability to extract the agent config and add the Velociraptor server configuration automatically to exclusions. After policy deployment, the machine will attempt communication back to the Velociraptor server and if it fails, roll back the quarantine policy. Similarly all DNS and DHCP traffic is allowed by default in user customisable configuration.</p>
 
 <p>The final caveat is local IPSec policy can not be applied if a domain level IPSec policy is applied. In this case the reccomendation is to add a seperate quarantine rule via Active Directory.</p>
 
 <h3 id="final-thoughts">Final Thoughts</h3>
-<p>In this post I have walked through using local IPSec policy to implement machine quarantine in the Velociraptor platform. Despite limitations, this feature has been useful for me to call on as needed. Testing and the age old “understanding your tools” is a must and I look forward to optimising this capability moving forward.</p>
+<p>In this post I have walked through local IPSec policy to implement machine quarantine in the Velociraptor platform. Despite limitations, this feature has been useful for me to call on as needed. Testing and the age old “understanding your tools” is very important.</p>
 
-<p>Feel free to send through any other thoughts, feedback and optimisations.</p>
+<p>I already have several optimisations planned - feel free to send through any other thoughts, feedback and optimisations.</p>
+
+<p>Content can be found - <a href="https://github.com/Velocidex/velociraptor/blob/master/artifacts/definitions/Windows/Remediation/Quarantine.yaml">Windows.Remediation.Quarantine</a></p>
 
 <p><br /></p>
 
