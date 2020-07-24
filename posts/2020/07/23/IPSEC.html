@@ -189,7 +189,8 @@ NOTE: when deleting a policy it is disabled and all policy objects are also dele
     <code class="language-plaintext highlighter-rouge">mirrored=[&lt;yes&gt;|&lt;no&gt;]</code>  - optional and defaults to yes as it enables reverse communication.
     <code class="language-plaintext highlighter-rouge">description=[&lt;string&gt;]</code></p>
 
-<p>For example: Allowing RDP traffic inbound to a machine from any IP  <br />
+<p>For example: Allowing RDP traffic inbound to a machine from any IP<br />
+(Example only - stay away from this rule in an IR)  <br />
 <code class="language-plaintext highlighter-rouge">netsh ipsec static add filter filterlist="Test Filter List"</code><br />
     <code class="language-plaintext highlighter-rouge">srcaddr=me srcport=3389 dstaddr=any dstport=0 protocol=tcp</code>  <br />
     <code class="language-plaintext highlighter-rouge">description="quick and dirty RDP filter"</code></p>
