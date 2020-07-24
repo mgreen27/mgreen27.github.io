@@ -5,8 +5,8 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 24 Jul 2020 23:58:15 +1000</pubDate>
-    <lastBuildDate>Fri, 24 Jul 2020 23:58:15 +1000</lastBuildDate>
+    <pubDate>Sat, 25 Jul 2020 00:20:33 +1000</pubDate>
+    <lastBuildDate>Sat, 25 Jul 2020 00:20:33 +1000</lastBuildDate>
     <generator>Jekyll v3.8.5</generator>
     
       <item>
@@ -56,7 +56,7 @@ NOTE: when deleting a policy it is disabled and all policy objects are also dele
     &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;description=[&amp;lt;string&amp;gt;]&lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;For example: Allowing RDP traffic inbound to a machine from any IP&lt;br /&gt;
-(Example only - stay away from this rule in an IR)  &lt;br /&gt;
+(Example only for testing - stay away from this rule in an IR!)  &lt;br /&gt;
 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static add filter filterlist=&quot;Test Filter List&quot;&lt;/code&gt;&lt;br /&gt;
     &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;srcaddr=me srcport=3389 dstaddr=any dstport=0 protocol=tcp&lt;/code&gt;  &lt;br /&gt;
     &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;description=&quot;quick and dirty RDP filter&quot;&lt;/code&gt;&lt;/p&gt;
