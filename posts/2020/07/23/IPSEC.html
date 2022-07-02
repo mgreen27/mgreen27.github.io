@@ -25,16 +25,16 @@
     
 
     
-      <meta content="http://localhost:4000/posts/2020/07/23/IPSEC.html" property="og:url">
+      <meta content="http://0.0.0.0:4000/posts/2020/07/23/IPSEC.html" property="og:url">
     
 
     
-      <meta content="2020-07-23T00:00:00+10:00" property="article:published_time">
-      <meta content="http://localhost:4000/about/" property="article:author">
+      <meta content="2020-07-23T00:00:00+00:00" property="article:published_time">
+      <meta content="http://0.0.0.0:4000/about/" property="article:author">
     
 
     
-      <meta content="http://localhost:4000/static/img/avatar.jpg" property="og:image">
+      <meta content="http://0.0.0.0:4000/static/img/avatar.jpg" property="og:image">
     
 
     
@@ -66,7 +66,7 @@
     
 
     
-      <meta name="twitter:url" content="http://localhost:4000/posts/2020/07/23/IPSEC.html">
+      <meta name="twitter:url" content="http://0.0.0.0:4000/posts/2020/07/23/IPSEC.html">
     
 
     
@@ -190,7 +190,7 @@ NOTE: when deleting a policy it is disabled and all policy objects are also dele
     <code class="language-plaintext highlighter-rouge">description=[&lt;string&gt;]</code></p>
 
 <p>For example: Allowing RDP traffic inbound to a machine from any IP<br />
-(Example only for testing - stay away from this rule in an IR!)  <br />
+(Example only - stay away from this rule in an IR)  <br />
 <code class="language-plaintext highlighter-rouge">netsh ipsec static add filter filterlist="Test Filter List"</code><br />
     <code class="language-plaintext highlighter-rouge">srcaddr=me srcport=3389 dstaddr=any dstport=0 protocol=tcp</code>  <br />
     <code class="language-plaintext highlighter-rouge">description="quick and dirty RDP filter"</code></p>
@@ -306,6 +306,20 @@ This enables custom IPSec filters to be added to the permit or block rule config
       
         
           
+            
+            <div class="panel-body">
+              <h4>Related Posts</h4>
+              <ul>
+            
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2022/01/12/wmi-eventing.html">WMI Event Consumers: what are you missing?</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
       
     
   
@@ -314,9 +328,29 @@ This enables custom IPSec filters to be added to the permit or block rule config
         
           
             
-            <div class="panel-body">
-              <h4>Related Posts</h4>
-              <ul>
+                <li class="relatedPost">
+                  <a href="https://mgreen27.github.io/posts/2021/11/09/VQL.html">Cobalt Strike Payload Discovery And Data Manipulation In VQL</a>
+                  
+                    (Categories: <a href="/category/posts">posts</a>)
+                  
+                </li>
+          
+          
+        
+      
+    
+  
+    
+      
+        
+          
+      
+    
+  
+    
+      
+        
+          
             
                 <li class="relatedPost">
                   <a href="https://mgreen27.github.io/posts/2019/12/08/LocalLRwithVRaptor.html">Local Live Response with Velociraptor ++</a>
@@ -385,16 +419,6 @@ This enables custom IPSec filters to be added to the permit or block rule config
       
         
           
-            
-                <li class="relatedPost">
-                  <a href="https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename</a>
-                  
-                    (Categories: <a href="/category/posts">posts</a>)
-                  
-                </li>
-          
-          
-        
       
     
   
@@ -402,16 +426,6 @@ This enables custom IPSec filters to be added to the permit or block rule config
       
         
           
-            
-                <li class="relatedPost">
-                  <a href="https://mgreen27.github.io/posts/2019/04/07/ILRScriptBuilder.html">Live Response Script Builder</a>
-                  
-                    (Categories: <a href="/category/posts">posts</a>)
-                  
-                </li>
-          
-          
-        
       
     
   
@@ -460,6 +474,8 @@ This enables custom IPSec filters to be added to the permit or block rule config
     <a class="prev" href="/posts/2019/12/08/LocalLRwithVRaptor.html">&laquo; Local Live Response with Velociraptor ++</a>
   
   
+    <a class="next" href="/posts/2021/11/09/VQL.html">Cobalt Strike Payload Discovery And Data Manipulation In VQL &raquo;</a>
+  
 </div>
 
 <div class="disqus-comments">
@@ -467,7 +483,7 @@ This enables custom IPSec filters to be added to the permit or block rule config
   <script type="text/javascript">
     /* <![CDATA[ */
     var disqus_shortname = "";
-    var disqus_identifier = "http://localhost:4000_Windows IPSEC for endpoint quarantine";
+    var disqus_identifier = "http://0.0.0.0:4000_Windows IPSEC for endpoint quarantine";
     var disqus_title = "Windows IPSEC for endpoint quarantine";
 
     /* * * DON'T EDIT BELOW THIS LINE * * */

