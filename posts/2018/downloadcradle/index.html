@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    Powershell Download Cradles | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2018/downloadcradle/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2018/downloadcradle/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Powershell Download Cradles">
+  <meta property="og:description" content="In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about detection from both network and endpoint views.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2018-04-02T00:00:00+00:00">
+    <meta property="article:modified_time" content="2018-04-02T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="Powershell">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2018/downloadcradle/">Powershell Download Cradles</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">Powershell Download Cradles</h1>
+    
+    <p class="single-summary">In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about detection from both network and endpoint views.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2018-04-02T00:00:00&#43;00:00">April 2, 2018</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      6 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/powershell/">#Powershell</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/downloadcradle/wolfandsheep2.png" width="1218px" height="690px">
+    </div>
+
+    
+</figure>
+</p>
+<p>I have also included a link to a results summary and a noisemaker script I have been using to test. I focused on Powershell download cradles, or more specifically cradles that I could execute a Powershell payload. I have also not included all the .NET methods that seem to be effectively the same as Powershell WebClient.</p>
+<h2 class="heading" id="so-what-is-a-cradle-and-why-do-i-care">
+  So what is a cradle and why do I care?
+  <a href="#so-what-is-a-cradle-and-why-do-i-care">#</a>
+</h2>
+<p>A download cradle is a single line command for download and code execution. Typically seen at the end of a maldoc or exploit, implementing the second stage download of exploit/infection within the attack lifecycle. A download cradle can also be part of a persistence mechanism, tooling or execution at other attack stages when an attacker attempts to download capability or run fileless.</p>
+<p>From an evil standpoint - the best download cradles are proxy, credential and https aware so will slide right by a corporate firewall.
+For defenders, obtaining visibility and focusing detection at a common attack chokepoint, we can minimize impact effectively.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="There is a large menu of evil download cradles - a selection with un-obfuscated CommandLine" src="/posts/2018/downloadcradle/Powershell_CLI_ALL.png" width="1726px" height="1616px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Example of evil download cradles</em></td>
+      </tr>
+  </tbody>
+</table>
+<h2 class="heading" id="network-detection">
+  Network Detection
+  <a href="#network-detection">#</a>
+</h2>
+<p>Network is usually the easiest point of visibility but can be noisy looking at unfiltered events. I have found interesting use cases baselining current activity then spotting deviations from normal filtering on User-Agent, content, http method, destination domain and URL.</p>
+<p>Understanding the traffic behavior for each cradle and whitelisting trusted components is a good start on building out detection.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Download Cradle summary table" src="/posts/2018/downloadcradle/CradleSummary.jpg" width="2206px" height="958px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Download Cradle summary table</em></td>
+      </tr>
+  </tbody>
+</table>
+<h2 class="heading" id="endpoint-detection">
+  Endpoint Detection
+  <a href="#endpoint-detection">#</a>
+</h2>
+<p>Endpoint visibility enables the lions share of quality detection opportunities and bypasses network encryption limitations. I see several main visibility areas that highlight the benefit of modern endpoint capability in addition to network monitoring.</p>
+<h6 class="heading" id="process-image-chains">
+  Process Image Chains
+  <a href="#process-image-chains">#</a>
+</h6>
+<p>One of the most well-known methods for spotting evil is parent / child process relationships. A shell, script interpreter or loader as a child to a commonly exploited program may indicate some type of evil leading to the use of a download cradle.</p>
+<p>Some examples: <br>
+  Parent: <code>(?i).*\\(winword|excel|powerpnt|mspub|visio|outlook)\.exe</code> <br>
+  Child: <code>(?i).*\\(cmd|powershell|cscript|wscript|wmic|regsvr32|schtasks|rundll32|mshta|hh)\.exe</code></p>
+<p>Similarly WmiPrvSE, a shell or script interpreter as parent may indicate a process chain of cradle execution.</p>
+<p>Some examples: <br>
+  Parent: <code>(?i).*\\(mshta|powershell|cmd|rundll32|cscript|wscript|wmiprvse.exe)\.exe</code> <br>
+  Child: <code>(?i).*\\(cmd|powershell|schtasks|reg|nslookup|certutil|bitsadmin)\.exe</code></p>
+<p>Some of these process relationships may be legitimate in a large environment so appropriate baselining is recommended. A mature blue team understands expected process image and chain mappings to spot deviation from normal. A mature team is also able to spot new and unusual process paths across multigenerational chains.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Process chain from a cradle triggered by opening a maldoc" src="/posts/2018/downloadcradle/Powershell_chain.png" width="1516px" height="154px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Process chain triggered by opening a maldoc</em></td>
+      </tr>
+  </tbody>
+</table>
+<h6 class="heading" id="command-line">
+  Command Line
+  <a href="#command-line">#</a>
+</h6>
+<p>Considering process command line makes the blue team’s job much easier by adding another whitelistable data point to the process chain stack.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/downloadcradle/Powershell_CLI.png" width="2524px" height="300px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>DDE attack (top) and WMI based macro (bottom)</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Some of the gaps to this method as a standalone technique is command line obfuscation. Obfuscation is an extreamly large area and to give coverage justice, I have included a link in my references below to some excellent research by Daniel Bohannon (Invoke-CradleCrafter was a huge influence on some of the types of cradles I tested).</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/downloadcradle/Powershell_CLI_03.png" width="1276px" height="152px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>This download cradle was generated by Daniel Bohannon&rsquo;s Invoke-CradleCrafter</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>From a defenders standpoint, obfuscation can defeat specific command line detection, however itself is an indicator. Understanding process chains and their command line enables defenders to whitelist known good and spot abnormalities.</p>
+<p>Its also worthy to note, depending on the obfuscation type - enabling latest Powershell version 5.x script block logging and Windows10 Anti-Malware Scan Interface equipped tools can assist detection of obfuscated Powershell payloads at runtime.</p>
+<h6 class="heading" id="module-loads">
+  Module loads
+  <a href="#module-loads">#</a>
+</h6>
+<p>Module loads provide another unique visibility point vital for modern endpoint based detection. For an attacker living off the land it is impossible for a download cradle to operate without network based modules. Below you can see an example of Powershell loaded network modules during execution.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/downloadcradle/Powershell_module.png" width="1386px" height="570px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Powershell Webclient network module loads</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Some good examples I picked out of my dataset are:</p>
+<ul>
+<li>Powershell.exe loading rasman.dll and rasapi32.dll (Powershell network methods)</li>
+<li>Powershell.exe loading ieproxy.dll (Powershell IE COM methods)</li>
+<li>Powershell.exe loading dnsapi.dll or winhttp.dll or wininet.dll (Common network modules)</li>
+<li>Powershell.exe loading msxml3.dll (Powershell MsXml COM)</li>
+<li>Powershell.exe loading qmgrprxy.dll or Microsoft.BackgroundIntelligentTransfer.Management.Interop.dll (Powershell BITS)</li>
+<li>Certutil.exe loading wininet.dll</li>
+<li>regsvr32.exe loading scrobj.dll and wininet.dll (Squiblydoo)</li>
+</ul>
+<p>Keep in mind, the list above is focused on Powershell cradles. I have seen downloaders implemented for COM objects from vbscript and other languages so it may be worth also considering module loads more heuristically - e.g common script interpreters. Module visibility is key.</p>
+<h6 class="heading" id="network-connections">
+  Network connections
+  <a href="#network-connections">#</a>
+</h6>
+<p>Network connections from the endpoints view provides additional context to detect bad. A mature blue team can collect and baseline network connections by process and user context. In most environments, powershell.exe (and others) would be unexpected connecting to the internet on a standard user endpoint.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/downloadcradle/Powershell_network.png" width="1544px" height="718px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Network activity by process - importance of endpoint context</em></td>
+      </tr>
+  </tbody>
+</table>
+<h6 class="heading" id="file-write-events">
+  File write events
+  <a href="#file-write-events">#</a>
+</h6>
+<p>Despite most Powershell download cradles in my list above being classed as memory resident, there are some that write payloads and artefacts. In the example below of particular interest in the Internet Explorer and Office COM object methods are the cached and *.url link files for downloaded file.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/downloadcradle/Powershell_file.png" width="1516px" height="332px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>A selection of Powershell Office COM object file writes - url files are link files that will provide path and file downloaded</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Monitoring for unusual file writes by Powershell and certutil.exe are other simple techniques enabled by visibility that can be used to detect download cradle activity.</p>
+<h6 class="heading" id="registry">
+  Registry
+  <a href="#registry">#</a>
+</h6>
+<p>Not all download cradles I looked at had specific registry IOCs that were worth monitoring. An exception is the existence of powershell_RASMANCS and powershell_RASAPI32 tracing keys that are evidence of Powershell network communication.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/downloadcradle/Powershell_registry.png" width="1270px" height="448px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Monitor for activity to HKLM\SOFTWARE\Microsoft\Tracing\powershell_RASMANCS and HKLM\SOFTWARE\Microsoft\Tracing\powershell_RASAPI32&quot;</em></td>
+      </tr>
+  </tbody>
+</table>
+<h6 class="heading" id="other-artefacts">
+  Other Artefacts
+  <a href="#other-artefacts">#</a>
+</h6>
+<p>I would expect all modern EDR vendors to provide event visibility of the above artefacts as standard. However, in real world situations, agent coverage may be incomplete or we may be getting into the fight late for event telemetry.</p>
+<p>With that in mind, a component for download cradle detection is traditional forensic capability. Evidence of execution, registry, event logs or volatile data analysis spotting similar artefacts to the event data above is the obvious starting point. In the example below I have highlighted a prefetch entry with reference to the handle to some of the DLLs listed above.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2018/downloadcradle/Powershell_prefetch.png" width="1879px" height="833px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Evidence of Execution - Powershell Webclient method</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Microsoft BITS also has some specific forensic artefacts I have previously covered in another post that I have included in my references below.</p>
+<h2 class="heading" id="final-thoughts">
+  Final Thoughts
+  <a href="#final-thoughts">#</a>
+</h2>
+<p>Network and endpoint visibility should be priority of all blue teams. Although focusing on a small section of the attack lifecycle, this post has been an overview of some of the areas I found interesting when thinking about download cradle detection. Understanding offensive technique and forensic artefacts enables blue teams to write high quality detections near the top the pyramid of pain. Correlating this data towards your own visibility levels, blue teams can work towards improvement and optimising resources for both detection and response.</p>
+<p>Let me know if you have any questions. I have added my <a href="https://github.com/mgreen27/mgreen27.github.io/tree/master/static/other/DownloadCradle">DownloadCradle</a> testing results and script here. I would be interested to hear results testing these out on different vendors.</p>
+<h2 class="heading" id="references">
+  References&lt;
+  <a href="#references">#</a>
+</h2>
+<ol>
+<li>Arno0x0x. <a href="https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/">Windows oneliners to download remote payload and execute arbitrary code</a></li>
+<li>Bohannon, Daniel. <a href="https://www.fireeye.com/content/dam/fireeye-www/blog/pdfs/dosfuscation-report.pdf">DOSfuscation whitepaper</a></li>
+<li>Bohannon, Daniel. <a href="https://github.com/danielbohannon/Invoke-Obfuscation%22%3EInvoke-Obfuscation">Invoke-Obfuscation</a></li>
+<li>Bohannon, Daniel. <a href="http://www.danielbohannon.com/blog-1/2017/12/2/the-invoke-cradlecrafter-overview">The Invoke-CradleCrafter Overview</a></li>
+<li>Bohannon, Daniel. Holmes, Lee. <a href="https://github.com/danielbohannon/Revoke-Obfuscation">Revoke-Obfuscation</a></li>
+<li>HarmJ0y. <a href="https://gist.github.com/HarmJ0y/bb48307ffa663256e239">DownloadCradles.ps1</a></li>
+<li>Have You Secured? [Taking a Closer Look at PowerShell Download Cradles]https://haveyousecured.blogspot.com.au/2017/07/taking-closer-look-at-powershell.html)</li>
+<li>Green, Matthew. <a href="https://mgreen27.github.io/posts/2018/02/18/Sharing_my_BITS.html">Sharing my BITS</a></li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2018/sharing_my_bits/">
+                        Sharing my BITS
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/invoke-liveresponse_builder/">
+                        Live Response Script Builder
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

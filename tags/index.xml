@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on Matt&#39;s DFIR blog</title>
+    <link>https://mgreen27.github.io/tags/</link>
+    <description>Recent content in Tags on Matt&#39;s DFIR blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 20 Nov 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://mgreen27.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Detection</title>
+      <link>https://mgreen27.github.io/tags/detection/</link>
+      <pubDate>Mon, 20 Nov 2023 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/tags/detection/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>DFIR</title>
+      <link>https://mgreen27.github.io/tags/dfir/</link>
+      <pubDate>Mon, 20 Nov 2023 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/tags/dfir/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Velociraptor</title>
+      <link>https://mgreen27.github.io/tags/velociraptor/</link>
+      <pubDate>Mon, 20 Nov 2023 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/tags/velociraptor/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>VQL</title>
+      <link>https://mgreen27.github.io/tags/vql/</link>
+      <pubDate>Mon, 20 Nov 2023 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/tags/vql/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Malware</title>
+      <link>https://mgreen27.github.io/tags/malware/</link>
+      <pubDate>Wed, 05 Apr 2023 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/tags/malware/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>WMI</title>
+      <link>https://mgreen27.github.io/tags/wmi/</link>
+      <pubDate>Wed, 12 Jan 2022 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/tags/wmi/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>EDR</title>
+      <link>https://mgreen27.github.io/tags/edr/</link>
+      <pubDate>Wed, 26 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/tags/edr/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>O365</title>
+      <link>https://mgreen27.github.io/tags/o365/</link>
+      <pubDate>Sun, 09 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/tags/o365/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Powershell</title>
+      <link>https://mgreen27.github.io/tags/powershell/</link>
+      <pubDate>Sun, 09 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/tags/powershell/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Yara</title>
+      <link>https://mgreen27.github.io/tags/yara/</link>
+      <pubDate>Wed, 29 May 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/tags/yara/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>WMI on Matt&#39;s DFIR blog</title>
+    <link>https://mgreen27.github.io/tags/wmi/</link>
+    <description>Recent content in WMI on Matt&#39;s DFIR blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 12 Jan 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://mgreen27.github.io/tags/wmi/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>WMI Event Consumers: what are you missing?</title>
+      <link>https://mgreen27.github.io/posts/2022/wmi-eventing/</link>
+      <pubDate>Wed, 12 Jan 2022 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2022/wmi-eventing/</guid>
+      <description>WMI Eventing is a fairly well known technique in DFIR, however some tools may not provide the coverage you expect. This article covers WMI eventing visibility and detection including custom namespaces.</description>
+    </item>
+    <item>
+      <title>Blue Team Hacks - Binary Rename</title>
+      <link>https://mgreen27.github.io/posts/2019/binaryrename/</link>
+      <pubDate>Sun, 12 May 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/binaryrename/</guid>
+      <description>In this post I thought I would share an interesting proof of concept I developed to detect Binary Rename of commonly abused binaries. Im going to describe the detection, its limitations and share the code.</description>
+    </item>
+    <item>
+      <title>Blue Team Hacks - WMI Eventing</title>
+      <link>https://mgreen27.github.io/posts/2017/wmi_eventing/</link>
+      <pubDate>Mon, 03 Apr 2017 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2017/wmi_eventing/</guid>
+      <description>In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. Thinking about this gap led to me looking at WMI starting as an alternate near real time detection fix, and during feature investigation ended with another technically novel solution I thought was interesting enough to share.</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    Windows IPSEC for endpoint quarantine | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2020/ipsec/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2020/ipsec/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Windows IPSEC for endpoint quarantine">
+  <meta property="og:description" content="This post is going to talk about using Windows IPSec for a quarantine use case. Im going to explain the background, how to configure a policy and some of the design decisions as I was initially looking at building an endpoint based containment capability.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2020-07-23T00:00:00+00:00">
+    <meta property="article:modified_time" content="2020-07-23T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="Velociraptor">
+    <meta property="article:tag" content="VQL">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2020/ipsec/">Windows IPSEC for endpoint quarantine</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">Windows IPSEC for endpoint quarantine</h1>
+    
+    <p class="single-summary">This post is going to talk about using Windows IPSec for a quarantine use case. Im going to explain the background, how to configure a policy and some of the design decisions as I was initially looking at building an endpoint based containment capability.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2020-07-23T00:00:00&#43;00:00">July 23, 2020</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      6 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/velociraptor/">#Velociraptor</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/vql/">#VQL</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2020/ipsec/00quarantine.png" width="269px" height="187px">
+    </div>
+
+    
+</figure>
+</p>
+<h3 class="heading" id="background">
+  Background
+  <a href="#background">#</a>
+</h3>
+<p>As a consultant part of our workflow may be to contain a machine whilst we carry out an investigation. There are often complexities when carrying out cross team tasks so any capability that enables remote management typically saves time and resources. Most modern EDR has some kind of quarantine capability built in, however my current goto endpoint IR tool does not. Im looking for a scriptable, native tool based containment capability that can be deployed via Velociraptor.</p>
+<p>IPSec has been included in every Microsoft Windows operating system since Windows 2000. Most practitioners believe IPSec as a purely VPN based technology, however the Windows implementation enables additional endpoint focused IP Security. In addition to encryption and authentication, IPSec uses the same engine as Windows Firewall so can be used for packet filtering. With these capabilities in mind, IPSec adds some nice options for teams looking to implement best practices in host based segmentation.</p>
+<p>IPSec can be configured via Group Policy Object, Local Security Policy, Powershell, or Netsh in modern windows versions. This post will only focus on my use case of IPSec as a local policy deployment. Although Powershell is the goto tool for administration of Windows systems, its support is lacking for IPSec configuration prior to Windows 2012R2. For this reason, I decided to use the built in Netsh tool which has support for IPsec from Windows 7 through to the current iterations of Windows 10 / Server.</p>
+<p>Even though this post is not covering all the IPSec use cases. I have included some links in my resources section for anyone interested in more information and best practice around centralised group policy based configuration.</p>
+<h3 class="heading" id="ipsec-policy-definitions">
+  IPSec policy definitions
+  <a href="#ipsec-policy-definitions">#</a>
+</h3>
+<p>First of all, we need to understand what makes up an IPSec policy.</p>
+<p>Netsh IPSec can be deployed in 2 different modes - Dynamic and Static: <br>
+<strong>Dynamic</strong> - Is applied to current state and is not a persistent configuration.<br>
+<strong>Static</strong> - Is applied as a policy and is simply a container for one or more rules. When enabled the policy populates the dynamic configuration and persists across reboot. When deleted, all objects attached to the policy are removed.</p>
+<p>One of my requirements was to enable policy removal with minimal changes to current configuration. Using netsh static IPSec policies, we have a simplified process that can be built, applied and removed cleanly.</p>
+<p>To create a policy:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cmd" data-lang="cmd"><span style="display:flex;"><span>netsh ipsec static add policy name=&lt;string&gt; description=&lt;string&gt;
+</span></span></code></pre></div><p>To enable a policy:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cmd" data-lang="cmd"><span style="display:flex;"><span>netsh ipsec static set policy name=&lt;string&gt; assign=[y|n]
+</span></span></code></pre></div><p>To delete a policy:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cmd" data-lang="cmd"><span style="display:flex;"><span>netsh ipsec static delete policy name=&lt;string&gt;
+</span></span></code></pre></div><p>NOTE: when deleting a policy it is disabled and all policy objects are also deleted.</p>
+<p><strong>Filter List</strong> - Is simply a named container for one or more filters.</p>
+<p><strong>Filter</strong> - Filters determine when to activate IPSec Rules.</p>
+<p>To create a filter:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cmd" data-lang="cmd"><span style="display:flex;"><span>netsh ipsec static add filter filterlist=&lt;string&gt;  
+</span></span><span style="display:flex;"><span>	srcaddr=[me|any|&lt;dns&gt;|&lt;server&gt;|&lt;ipv4&gt;|&lt;ipv6&gt;|&lt;ipv4-ipv4&gt;|&lt;ipv6-ipv6&gt;] # source address.  
+</span></span><span style="display:flex;"><span>	srcmask=[&lt;mask&gt;|&lt;prefix&gt;] # source netmask, only needed if network IP specified.    
+</span></span><span style="display:flex;"><span>	srcport=[&lt;port&gt;] # source port as integer. 0 for all.  
+</span></span><span style="display:flex;"><span>	dstaddr=[me|any|&lt;dns&gt;|&lt;server&gt;|&lt;ipv4&gt;|&lt;ipv6&gt;|&lt;ipv4-ipv4&gt;|&lt;ipv6-ipv6&gt;] # destination. 
+</span></span><span style="display:flex;"><span>	dstmask=[&lt;mask&gt;|&lt;prefix&gt;] # destination netmask, only needed if network IP specified.  
+</span></span><span style="display:flex;"><span>	dstport=[&lt;port&gt;] # destination port as integer. 0 for all.  
+</span></span><span style="display:flex;"><span>	protocol=[ANY|ICMP|TCP|UDP|RAW|&lt;integer&gt;] # protocol as name or port.    
+</span></span><span style="display:flex;"><span>	mirrored=[&lt;yes&gt;|&lt;no&gt;] # optional and defaults to yes as it enables reverse communication.
+</span></span><span style="display:flex;"><span>	description=[&lt;string&gt;]  
+</span></span></code></pre></div><p>For example: Allowing RDP traffic inbound to a machine from any IP<br>
+(Example only - stay away from this rule in an IR)</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cmd" data-lang="cmd"><span style="display:flex;"><span>netsh ipsec static add filter filterlist=<span style="color:#666;font-style:italic">&#34;Test Filter List&#34;</span>
+</span></span><span style="display:flex;"><span>	srcaddr=me srcport=3389 dstaddr=any dstport=0 protocol=tcp`   
+</span></span><span style="display:flex;"><span>	description=<span style="color:#666;font-style:italic">&#34;quick and dirty RDP filter&#34;</span>
+</span></span></code></pre></div><p><strong>Filter Action</strong> - Occurs when a Filter is satisfied. An IPSec filter can be permit, block, encrypt or sign the data stream. In my use case, I am only interested in permit and block as we are not interested in traffic encryption or validation usecases.</p>
+<p>To create a filter action:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cmd" data-lang="cmd"><span style="display:flex;"><span>netsh ipsec static add filteraction name=&lt;string&gt; action=&lt;permit&gt;|&lt;block&gt;
+</span></span></code></pre></div><p><strong>Rules</strong> - An IPSec rule requries a filter list and a filter action and connects them to a policy. An optional component of a rule is authentication, which is out of scope for my current implementation.</p>
+<p>To create a rule:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cmd" data-lang="cmd"><span style="display:flex;"><span>netsh ipsec static add rule name=&lt;string&gt; policy=&lt;string&gt;
+</span></span><span style="display:flex;"><span>	filterlist=&lt;string&gt; filteraction=&lt;string&gt; description=&lt;string&gt;
+</span></span></code></pre></div><h3 class="heading" id="rolling-into-velociraptor">
+  Rolling into Velociraptor
+  <a href="#rolling-into-velociraptor">#</a>
+</h3>
+<p>The summary of the above commands translate into a defined process:</p>
+<ol>
+<li>Create policy.</li>
+<li>Create filter lists.</li>
+<li>Add filters to filter lists.</li>
+<li>Create filter actions.</li>
+<li>Create rules (link all together).</li>
+<li>Apply policy.</li>
+<li>Test it works.</li>
+</ol>
+<p>Velociraptor implementation of this process is transparent apart from a few select components. The goals being a repeatable capability that is reliable.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2020/ipsec/01parameters.png" width="1379px" height="372px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Quarantine: Parameter options</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Configurable items are:<br>
+<strong>PolicyName</strong> - for auditing purposes</p>
+<p><strong>RuleLookUpTable</strong><br>
+This enables custom IPSec filters to be added to the permit or block rule configuration easily. Each field corresponds to a Netsh switch discussed above and the only requirements are action, source and destination addresses. All other items will simply add the entry to the relevant switch in netsh and bad commands will be observed in results.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2020/ipsec/02log.png" width="1154px" height="228px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Artifact log: executed netsh commands.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>The commands in my screenshots resulted from adding to the artifact defaults:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2020/ipsec/02error.png" width="1144px" height="293px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Custom filters: RDP and force error</em></td>
+      </tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2020/ipsec/02results.png" width="1085px" height="223px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Artifact results: see netsh stderr on incorrect entry.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>MessageBox</strong> - if configured will show a messagebox to all logged in users. There is a limitation of 256 Characters that will be trucated if exceeded.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2020/ipsec/02messagebox.png" width="409px" height="155px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Example messagebox</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>RemovePolicy</strong> - will simply run the remove policy command for configured policy name.</p>
+<h3 class="heading" id="caveats">
+  Caveats
+  <a href="#caveats">#</a>
+</h3>
+<p>There are a couple of considerations when deploying local IPSec policy.</p>
+<p>First being, it is dangerous to apply local policy and there is a real risk of locking yourself out of access to the machine. DNS resolutions can change, DHCP leases expire or the block all approach may accidentally block an unintended resource. Understanding the network and entering appropriate exclusions to mitigate these issues are important. In addition to exclusions, it is reccomended to test content prior to live fire.</p>
+<p>To simplify this process, I have implemented a capability to extract the agent config and add the Velociraptor server configuration automatically to exclusions. After policy deployment, the machine will attempt communication back to the Velociraptor server and if it fails, roll back the quarantine policy. Similarly all DNS and DHCP traffic is allowed by default in user customisable configuration.</p>
+<p>The final caveat is local IPSec policy can not be applied if a domain level IPSec policy is applied. In this case the reccomendation is to add a seperate quarantine rule via Active Directory.</p>
+<h3 class="heading" id="final-thoughts">
+  Final Thoughts
+  <a href="#final-thoughts">#</a>
+</h3>
+<p>In this post I have walked through local IPSec policy to implement machine quarantine in the Velociraptor platform. Despite limitations, this feature has been useful for me to call on as needed. Testing and the age old &ldquo;understanding your tools&rdquo; is very important.</p>
+<p>I already have several optimisations planned - feel free to send through any other thoughts, feedback and optimisations.</p>
+<p>Content can be found - <a href="https://github.com/Velocidex/velociraptor/blob/master/artifacts/definitions/Windows/Remediation/Quarantine.yaml">Windows.Remediation.Quarantine</a></p>
+<h1 class="heading" id="further-resources">
+  Further resources
+  <a href="#further-resources">#</a>
+</h1>
+<ol>
+<li><a href="https://docs.microsoft.com/en-us/windows-server/networking/technologies/netsh/netsh">Microsoft Docs, Network Shell (Netsh).</a></li>
+<li><a href="https://docs.microsoft.com/en-us/powershell/module/netsecurity/new-netipsecrule?view=win10-ps">Microsoft Docs, New-NetIPsecRule.</a></li>
+<li><a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc754274(v=ws.11)?redirectedfrom=MSDN">Microsoft Docs, Windows Firewall with Advanced Security.</a></li>
+<li><a href="https://channel9.msdn.com/Events/Ignite/New-Zealand-2016/M377">Payne, Jessica. Demystifying the Windows Firewall, Ignite 2016</a></li>
+<li><a href="https://blog.dane.io/2018/04/22/endpoint-isolation-with-the-windows-firewall.html">Stuckey, Dane. Endpoint Isolation with the Windows Firewall, 2018</a></li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/local_liveresponse_with_vr/">
+                        Local Live Response with Velociraptor &#43;&#43;
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2021/cobaltstrike_vql/">
+                        Cobalt Strike Payload Discovery And Data Manipulation In VQL
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

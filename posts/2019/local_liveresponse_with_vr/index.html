@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    Local Live Response with Velociraptor &#43;&#43; | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2019/local_liveresponse_with_vr/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2019/local_liveresponse_with_vr/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Local Live Response with Velociraptor &#43;&#43;">
+  <meta property="og:description" content="In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2019-12-08T00:00:00+00:00">
+    <meta property="article:modified_time" content="2019-12-08T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="Velociraptor">
+    <meta property="article:tag" content="VQL">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2019/local_liveresponse_with_vr/">Local Live Response with Velociraptor &#43;&#43;</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">Local Live Response with Velociraptor &#43;&#43;</h1>
+    
+    <p class="single-summary">In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2019-12-08T00:00:00&#43;00:00">December 8, 2019</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      5 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/velociraptor/">#Velociraptor</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/vql/">#VQL</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/00title.png" width="321px" height="443px">
+    </div>
+
+    
+</figure>
+</p>
+<p>EDIT: Please use this post for education only. Although the content and themes of this post are valid, the examples included have been superseeded by a GUI based local collector builder from the Velociraptor server.</p>
+<h4 class="heading" id="background">
+  Background
+  <a href="#background">#</a>
+</h4>
+<p>Live response collection is one of the most critical stages of modern incident response. A quick targeted collection of important artefacts means timely answers and more efficient results. Although I prefer a remote agent keeping the human element out of collection as much as possible, a common use case I encounter is needing to run a local collection from a USB or network share. Typically this means providing a script of some sort with a binaries folder and collection protocol, sometimes to less technical users with a margin for error.</p>
+<p>Mike at Velocidex has posted recently about triage collection (local live response) with Velociraptor:</p>
+<ul>
+<li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-1-253f57ce96c0">Triage with Velociraptor — Pt 1</a></li>
+<li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-2-d0f79066ca0e">Triage with Velociraptor — Pt 2</a></li>
+<li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-3-d6f63215f579">Triage with Velociraptor — Pt 3</a></li>
+</ul>
+<p>One undocumented feature is Velociraptor&rsquo;s ability to append additional tools to the end of the binary and enable execution. This capability opens up some really nice use cases for ancillary data collection during a local Velociraptor triage. Im going to cover creating a Velicraptor local live binary with WinPMem for memory and Autoruns for autostart extensibility point (ASEP) collection.</p>
+<h4 class="heading" id="what-do-i-need">
+  What do I need?
+  <a href="#what-do-i-need">#</a>
+</h4>
+<p>I will be using the current Velociraptor release and building on a linux platform. Im looking at building both a x64 and x86 Windows version, so I want to download the relevant Velociraptor binaries to my staging folder.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/01Latest.png" width="1304px" height="280px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Download Velociraptor binaries</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>We will also download both x86 and x64 third party binaries supporting my use cases. In this instance Autoruns and WinPMem, which I then add to the relevant &ldquo;bitness&rdquo; payload zip files.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/01Other.png" width="713px" height="175px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>payload.zip: x64 binaries, payload_x86.zip: x86 binaries</em></td>
+      </tr>
+  </tbody>
+</table>
+<h4 class="heading" id="velociraptor-configuration">
+  Velociraptor configuration
+  <a href="#velociraptor-configuration">#</a>
+</h4>
+<p>Setting up for local live response requires setting up an autoexecution object and output configuration. In my case, I setup artifact called &ldquo;MultiCollection&rdquo; with a zipfile output &ldquo;collection_HOSTNAME.zip&rdquo;. As there is no folder path specified, the zip will end up in the &ldquo;start in folder&rdquo;.</p>
+<p>Once the structure of VQL is understood it is trivial to add in additional use cases. Under the parameters section, I also have included an &ldquo;uploadTable&rdquo; parameter to add additional direct file downloads not covered by other components. In this case, im adding pagefile, swapfile and hybernation files if they exist as default. This table is helpful for quick collection and can also be represented in a glob style search.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/02Config.png" width="812px" height="205px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Autoexecution VQL object</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Next component is the &ldquo;sources&rdquo; section which outlines the VQL queries to run. In my screenshot below, supporting order of volatility, I am running memory collection first then supporting file uploads. Worthy to note: my VQL does not &ldquo;upload&rdquo; to the output zip file, instead I have decided to output to &ldquo;HOSTNAME.aff4&rdquo; to the same folder as the binary to optimise resouce use and remove the need to push the aff4 to a temporary location prior to adding to the zip.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/02Config2.png" width="826px" height="430px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Memory acquisition</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Velociraptor allows modular use of the collection profiles from Eric Zimmerman’s KapeFiles project. I have chosen KapeFiles.Targets _BasicCollection and some supporting items is my next VQL sources. I have also included a version of <a href="https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local_all-yaml">all currently available switches</a> (at time of writing), to use as a template and remove unwanted items prior to build.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/02Config3.png" width="837px" height="175px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>KapeFiles acquisition</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Finally, I am collecting an Autoruns output for autostart extensibility point (ASEP) collection. In my VQL I have specifically used wildcards to cover both x86 and x64 binaries and enable use of the same configuration across bitness. I am also using the same trick as my WinPMem execution and output to the binary root folder as &ldquo;HOSTNAME_autoruns.csv&rdquo;</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/02Config4.png" width="703px" height="359px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Autoruns aquisition</em></td>
+      </tr>
+  </tbody>
+</table>
+<h4 class="heading" id="how-do-i-build-it">
+  How do I build it?
+  <a href="#how-do-i-build-it">#</a>
+</h4>
+<p>To build we run velociraptor in &ldquo;repack&rdquo; mode. That is specifying: the input binary, relevant payload zip, configuration file and output binary.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/03Build.png" width="1018px" height="130px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Velociraptor repack</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>One thing to note, is that using this technique the created binary will not contain a valid certificate as the binary is modified with the &ldquo;repack&rdquo; command. This condition occurs through any of the Velociraptor customisations and typically is not a problem during live response.</p>
+<h4 class="heading" id="how-do-i-run-it">
+  How do I run it?
+  <a href="#how-do-i-run-it">#</a>
+</h4>
+<p>Copy the relevant binaries to your collection USB, folder or share and execute with administrator privilege.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/04Run.png" width="1235px" height="227px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/04Run2.png" width="1444px" height="149px">
+    </div>
+
+    
+</figure>
+</td>
+      </tr>
+      <tr>
+          <td style="text-align: center"><em>Local live response execution</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Output will be to the binary folder.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/04Run3.png" width="576px" height="123px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Live response output</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Opening collection_HOSTNAME.zip we can see all files that were configured for collection / upload.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/local_liveresponse_with_vr/04Run4.png" width="776px" height="201px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>collection zip contents</em></td>
+      </tr>
+  </tbody>
+</table>
+<h4 class="heading" id="final-thoughts">
+  Final Thoughts
+  <a href="#final-thoughts">#</a>
+</h4>
+<p>In this post I have walked through using Velociraptor to wrap third party binaries into an easy to use local live response tool. Velociraptor&rsquo;s modular architecture enables rolling in and out capabilities fast for a simple end user experience.</p>
+<p>For those that are interested I have included below:</p>
+<ol>
+<li><a href="https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-buildlocallr-sh">A build script for building x86 and x64 versions of my local live response tool</a></li>
+<li><a href="https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local_all-yaml">A configuration file with ALL KapeFiles switches</a></li>
+<li><a href="https://gist.github.com/mgreen27/22cd70739e733647e1e23338ca35c9a9#file-local-yaml">The reduced configuration from my example</a></li>
+</ol>
+<p>I hope you have gained some knowledge on Velociraptor for local live response. Please feel free to reach out and provide feedback or improvements.</p>
+<h4 class="heading" id="further-resources">
+  Further resources
+  <a href="#further-resources">#</a>
+</h4>
+<ol>
+<li><a href="https://www.velocidex.com/about/">Velociraptor Documentation</a></li>
+<li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-1-253f57ce96c0">Triage with Velociraptor — Pt 1</a></li>
+<li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-2-d0f79066ca0e">Triage with Velociraptor — Pt 2</a></li>
+<li><a href="https://medium.com/velociraptor-ir/triage-with-velociraptor-pt-3-d6f63215f579">Triage with Velociraptor — Pt 3</a></li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/liveresponse_with_vr/">
+                        Live response automation with Velociraptor
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2020/ipsec/">
+                        Windows IPSEC for endpoint quarantine
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

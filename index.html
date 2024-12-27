@@ -1,178 +1,550 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us"
+  dir="ltr">
+
   <head>
+	<meta name="generator" content="Hugo 0.140.0">
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="/static/img/favicon.ico" />
-    <title>Matthew Green</title>
-    <meta name="author" content="Matthew Green" />
-    <meta name="description" content="A blog for DFIR thoughts, research and for my future reference" />
-    <meta name="keywords" content="Matt's DFIR Blog, posts" />
-    <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
-    <meta content="" property="fb:app_id">
-    <meta content="Matt's DFIR Blog" property="og:site_name">
+<meta name="viewport" content="width=device-width">
 
-    
 
-    
-      <meta content="Matt's DFIR Blog" property="og:title">
-      <meta content="website" property="og:type">
-    
 
-    
-      <meta content="A blog for DFIR thoughts, research and for my future reference" property="og:description">
-    
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
 
-    
-      <meta content="http://0.0.0.0:4000/" property="og:url">
-    
+<link rel="alternate" type="application/rss+xml" href="https://mgreen27.github.io/index.xml" title="Matt's DFIR blog">
+<meta name="description" content="Matt&#39;s DFIR blog: Incident Response, DFIR, CTI, Detection, Threat Hunting, Velociraptor, RE, Malware, Programming."/>
 
+<title>
     
+    Matt&#39;s DFIR blog
+    
+</title>
 
-    
-      <meta content="http://0.0.0.0:4000/static/img/avatar.jpg" property="og:image">
-    
+<link rel="canonical" href="https://mgreen27.github.io/"/>
 
-    
+<meta property="og:url" content="https://mgreen27.github.io/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Home">
+  <meta property="og:description" content="Matt&#39;s DFIR blog: Incident Response, DFIR, CTI, Detection, Threat Hunting, Velociraptor, RE, Malware, Programming.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="website">
 
-    
 
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:site" content="@mgreen27">
-    <meta name="twitter:creator" content="@mgreen27">
 
-    
-      <meta name="twitter:title" content="Matt's DFIR Blog">
-    
 
-    
-      <meta name="twitter:url" content="http://0.0.0.0:4000/">
-    
 
-    
-      <meta name="twitter:description" content="A blog for DFIR thoughts, research and for my future reference">
-    
 
-    
 
-    <!-- Font awesome icons -->
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
-    <!-- syntax highlighting CSS -->
-    <link rel="stylesheet" href="/static/css/syntax.css">
-    <!-- Bootstrap core CSS -->
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/super-search.css">
-    <link rel="stylesheet" href="/static/css/thickbox.css">
-    <link rel="stylesheet" href="/static/css/projects.css">
-    <link rel="stylesheet" href="/static/css/main.css">
 
-    
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
   </head>
-  <body>
-    <div class="container">
-      <div class="col-sm-3">
-        <div class="fixed-condition">
-          <a href="/"><img class="profile-avatar" src="/static/img/avatar.jpg" height="75px" width="75px" /></a>
-          <h1 class="author-name">Matthew Green</h1>
-          
-            <div class="profile-about">
-              I am a DFIR and detection guy from Sydney Australia.
-            </div>
-          
-          <div class="social">
-            <ul>
-              
-                <li><a href="https://www.twitter.com/mgreen27" target="_blank"><i class="fa fa-twitter"></i></a></li>
-              
-                <li><a href="https://www.linkedin.com/in/mgreen27/" target="_blank"><i class="fa fa-linkedin"></i></a></li>
-              
-                <li><a href="https://github.com/mgreen27" target="_blank"><i class="fa fa-github"></i></a></li>
-              
-            </ul>
-          </div>
-          <div class="search" id="js-search">
-            <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
-            <ul class="search__results" id="js-search__results"></ul>
-          </div>
-          <hr />
-          <ul class="sidebar-nav">
-            <strong>Navigation</strong>
-            <li><a href="/">Home</a></li>
-            
-              <li><a class="about" href="/about/">About Me</a></li>
-            
-              <li><a class="about" href="/projects/">Talks / Projects</a></li>
-            
-              <li><a class="about" href="/feed.xml">XML Feed</a></li>
-            
-          </ul>
-        </div>
-        <!-- end /.fixed-condition -->
-      </div>
-      <div class="col-sm-8 col-offset-1 main-layout">
-        <div id="home">
-  <h1>Matt's DFIR Blog</h1>
-  <hr />
 
-  <ol class="posts">
-    
-      <li><a href="/posts/2022/01/12/wmi-eventing.html">WMI Event Consumers: what are you missing?</a> &raquo; <i><span>12 Jan 2022</span></i></li>
-    
-      <li><a href="/posts/2021/11/09/VQL.html">Cobalt Strike Payload Discovery And Data Manipulation In VQL</a> &raquo; <i><span>09 Nov 2021</span></i></li>
-    
-      <li><a href="/posts/2020/07/23/IPSEC.html">Windows IPSEC for endpoint quarantine</a> &raquo; <i><span>23 Jul 2020</span></i></li>
-    
-      <li><a href="/posts/2019/12/08/LocalLRwithVRaptor.html">Local Live Response with Velociraptor ++</a> &raquo; <i><span>08 Dec 2019</span></i></li>
-    
-      <li><a href="/posts/2019/11/10/LRwithVRaptor.html">Live response automation with Velociraptor</a> &raquo; <i><span>10 Nov 2019</span></i></li>
-    
-      <li><a href="/posts/2019/06/09/O365HiddenRules.html">O365: Hidden InboxRules</a> &raquo; <i><span>09 Jun 2019</span></i></li>
-    
-      <li><a href="/posts/2019/05/29/BinaryRename2.html">Binary Rename 2</a> &raquo; <i><span>29 May 2019</span></i></li>
-    
-      <li><a href="/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename</a> &raquo; <i><span>12 May 2019</span></i></li>
-    
-      <li><a href="/posts/2019/04/07/ILRScriptBuilder.html">Live Response Script Builder</a> &raquo; <i><span>07 Apr 2019</span></i></li>
-    
-      <li><a href="/posts/2018/04/02/DownloadCradle.html">Powershell Download Cradles</a> &raquo; <i><span>02 Apr 2018</span></i></li>
-    
-      <li><a href="/posts/2018/02/18/Sharing_my_BITS.html">Sharing my BITS</a> &raquo; <i><span>18 Feb 2018</span></i></li>
-    
-      <li><a href="/posts/2018/01/14/Invoke-LiveResponse.html">Invoke-LiveResponse</a> &raquo; <i><span>14 Jan 2018</span></i></li>
-    
-      <li><a href="/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html">Blue Team Hacks - WMI Eventing</a> &raquo; <i><span>03 Apr 2017</span></i></li>
-    
-      <li><a href="/posts/2017/01/12/PowerShell_Remoting_IR.html">PowerShell Remoting and Incident Response</a> &raquo; <i><span>12 Jan 2017</span></i></li>
-    
-  </ol>
-
-  <!-- Pagination links -->
   
-</div><!-- end #home -->
 
-        <footer>
-          &copy; Matthew Green
-          
-            - <a href="https://github.com/mgreen27">https://github.com/mgreen27</a> - Powered by Jekyll.
-          
-        </footer>
-      </div>
-      <!-- end /.col-sm-8 -->
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small  bold ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
     </div>
-    <!-- end /.container -->
 
-    <!-- Bootstrap core JavaScript -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-    <script src="/static/js/bootstrap.min.js"></script>
-    <script src="/static/js/super-search.js"></script>
-    <script src="/static/js/thickbox-compressed.js"></script>
-    <script src="/static/js/projects.js"></script>
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+
+<div class="intro">
+    
+
+    
+    <p>Im a seasoned cybersecurity professional with a passion for incident response and threat research.<br>
+Currently working in Rapid7 labs tracking adversaries, and working with Velociraptor.<br>
+This is a personal DFIR and technology blog to document some of my projects.</p>
+    
+</div>
+
+
+
+
+
+<div class="social-icons">
+    <a href="https://github.com/mgreen27" target="_blank"
+        rel="noopener noreferrer me"
+        title="Github">
+        <svg role="img" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+    </a>
+    <a href="https://www.linkedin.com/in/mgreen27/" target="_blank"
+        rel="noopener noreferrer me"
+        title="Linkedin">
+        <svg role="img" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+    </a>
+    <a href="https://x.com/mgreen27" target="_blank"
+        rel="noopener noreferrer me"
+        title="X">
+        <svg role="img" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>X</title><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+    </a>
+    <a href="https://bsky.app/profile/mgreen27.bsky.social" target="_blank"
+        rel="noopener noreferrer me"
+        title="Bluesky">
+        <svg role="img" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Bluesky</title><path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z"/></svg>
+    </a>
+</div>
+
+
+
+
+
+
+<div class="list-container">
+    
+    <h1> Posts </h1>
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">5 Apr 2023 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2023/qakbot/">
+                Automating Qakbot decode at scale
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> This is a technical post covering practical methodology to extract configuration data from recent Qakbot samples. In this blog, I will provide some background on Qakbot, then walk through decode themes in an easy to visualize manner. I will then share a Velociraptor artifact to detect and automate the decode process at scale. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">12 Jan 2022 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2022/wmi-eventing/">
+                WMI Event Consumers: what are you missing?
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> WMI Eventing is a fairly well known technique in DFIR, however some tools may not provide the coverage you expect. This article covers WMI eventing visibility and detection including custom namespaces. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">9 Nov 2021 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2021/cobaltstrike_vql/">
+                Cobalt Strike Payload Discovery And Data Manipulation In VQL
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> Velociraptor’s ability for data manipulation is a core platform capability that drives a lot of the great content we have available in terms of data parsing for artifacts and live analysis. After a recent engagement with less common encoded Cobalt Strike beacons, and finding sharable files on VirusTotal,  I thought it would be a good opportunity to walk through some workflow around data manipulation with VQL for analysis. In this post I will walk though some background, collection at scale, and finally talk about processing target files to extract key indicators. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">23 Jul 2020 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2020/ipsec/">
+                Windows IPSEC for endpoint quarantine
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> This post is going to talk about using Windows IPSec for a quarantine use case. Im going to explain the background, how to configure a policy and some of the design decisions as I was initially looking at building an endpoint based containment capability. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">8 Dec 2019 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2019/local_liveresponse_with_vr/">
+                Local Live Response with Velociraptor &#43;&#43;
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">10 Nov 2019 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2019/liveresponse_with_vr/">
+                Live response automation with Velociraptor
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> This post is going to talk about the Velociraptor project. Specifically, live response and automation I have built for my own engagements. Im going to provide some background and walk through a proof of concept, then share the code. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">9 Jun 2019 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2019/o365_hiddenrules/">
+                O365: Hidden InboxRules
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> In this post Im going to talk about Office365 hidden inbox rules. Im going to give some background, show rule modification, and talk about detection methodology. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">29 May 2019 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2019/binaryrename2/">
+                Binary Rename 2
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> This is my second Binary Rename post, in this post I am focusing on static detection, that is assessing files on disk. I am going to describe differences between both Yara and Powershell based detections, then share the code. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">12 May 2019 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2019/binaryrename/">
+                Blue Team Hacks - Binary Rename
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> In this post I thought I would share an interesting proof of concept I developed to detect Binary Rename of commonly abused binaries. Im going to describe the detection, its limitations and share the code. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">7 Apr 2019 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2019/invoke-liveresponse_builder/">
+                Live Response Script Builder
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> In this post I thought I would share some practical new features implemented in a recent refactor of Invoke-LiveResponse. These features enable fast and modular generation of live response scripts compatible with legacy Powershell. Im going to walk through the background then some of the new features and script creation. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">2 Apr 2018 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2018/downloadcradle/">
+                Powershell Download Cradles
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about detection from both network and endpoint views. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">18 Feb 2018 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2018/sharing_my_bits/">
+                Sharing my BITS
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on download cradles and an interest in the client side forensics. I’m going to give a brief background, talk about some nuances in collection types and provide some background information when I was thinking about detection. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">14 Jan 2018 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2018/invoke-liveresponse/">
+                Invoke-LiveResponse
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> In this post, I am going to talk about a Powershell module I have authored as a simple implementation for live response and file collections over Powershell remoting. The initial use case was considered after an endpoint vendor appliance failed and capability for raw collections was limited. The module uses Powerforensics over WinRM, and after some interest, I think is worth sharing. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">3 Apr 2017 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2017/wmi_eventing/">
+                Blue Team Hacks - WMI Eventing
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. Thinking about this gap led to me looking at WMI starting as an alternate near real time detection fix, and during feature investigation ended with another technically novel solution I thought was interesting enough to share. </p>
+        
+    </div>
+</div>
+    
+    <div class="post-line">
+
+    
+    
+
+    <p class="line-date">12 Jan 2017 </p>
+
+    <div>
+        <p class="line-title">
+            <a href="/posts/2017/powershell_remoting_ir/">
+                PowerShell Remoting and Incident Response
+            </a>
+        </p>
+
+        
+        <p class="line-summary"> PowerShell is quickly becoming a tool of choice for many IT Operations staff and Security Practitioners alike. This post is a quick overview of using Windows Remote Management and PowerShell for Incident Response. I will also provide some proof of concept setup instructions and general themes for those interested in further research on this topic. </p>
+        
+    </div>
+</div>
+    
+
+    
+
+    
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
   </body>
-</html>
 
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

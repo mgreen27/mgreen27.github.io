@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    O365: Hidden InboxRules | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2019/o365_hiddenrules/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2019/o365_hiddenrules/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="O365: Hidden InboxRules">
+  <meta property="og:description" content="In this post Im going to talk about Office365 hidden inbox rules. Im going to give some background, show rule modification, and talk about detection methodology.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2019-06-09T00:00:00+00:00">
+    <meta property="article:modified_time" content="2019-06-09T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="O365">
+    <meta property="article:tag" content="Powershell">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2019/o365_hiddenrules/">O365: Hidden InboxRules</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">O365: Hidden InboxRules</h1>
+    
+    <p class="single-summary">In this post Im going to talk about Office365 hidden inbox rules. Im going to give some background, show rule modification, and talk about detection methodology.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2019-06-09T00:00:00&#43;00:00">June 9, 2019</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      5 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/o365/">#O365</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/powershell/">#Powershell</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/00title.png" width="620px" height="349px">
+    </div>
+
+    
+</figure>
+</p>
+<h1 class="heading" id="background">
+  Background
+  <a href="#background">#</a>
+</h1>
+<p>Attacks against Office 365 have generated a fair amount of industry acknowledgement in recent times as more and more organisations have moved towards cloud based services. Misconfiguration combined with less than optimal threat awareness means even the most simple attacks can provide access to this crucial service.</p>
+<p>Inbox rules are typically part of evil methodology and can be abused across the attack lifecycle:</p>
+<ul>
+<li>Defence Evasion</li>
+<li>Reconnaissance</li>
+<li>Persistence</li>
+<li>Data collection / Exfiltration</li>
+</ul>
+<p>Typically inbox rules are simple to detect statically via GUI access or in bulk from the Exchange Management Shell (EMS).</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/01rule.png" width="744px" height="250px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>O365 OWA: Inbox rule <a href="https://outlook.office.com/mail/options/mail/rules">https://outlook.office.com/mail/options/mail/rules</a></em></td>
+      </tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/01rule2.png" width="1092px" height="790px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>O365 EMS: Typical Powershell detection.</em></td>
+      </tr>
+  </tbody>
+</table>
+<h1 class="heading" id="hidden-rules">
+  Hidden Rules
+  <a href="#hidden-rules">#</a>
+</h1>
+<p>Minimally documented, Damian Pfammatter at Compass Security explained the methodology in his September 2018 <a href="https://blog.compass-security.com/2018/09/hidden-inbox-rules-in-microsoft-exchange/">blog post</a>. In summary, inbox rules can be hidden by leveraging an API called Messaging Application Programming Interface (MAPI), which provides low level access to exchange data stores.</p>
+<p>Below I am accessing the inbox rule manually via the <a href="https://github.com/stephenegriffin/mfcmapi">MFCMAPI tool</a> from a machine with an Outlook profile configured to our in scope mailbox. IPM.Rule.Version2.Message objects indicate an inbox rule.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/02mapi.png" width="981px" height="547px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>EvilMove inbox rule: prior to change</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Modification is simply adding an unsupported value to the PR_RULE_MSG_PROVIDER field (or blanking out).</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/02mapi2.png" width="962px" height="131px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>EvilMove inbox rule hidden: fake provider details.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Once modified, the inbox rule is hidden and completely operational:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/02mapi4.png" width="923px" height="327px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>InboxRule hidden: no view in WebUI, InboxRule works as expected.</em></td>
+      </tr>
+      <tr>
+          <td style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/02mapi5.png" width="549px" height="267px">
+    </div>
+
+    
+</figure>
+</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">:&ndash;:</td>
+      </tr>
+      <tr>
+          <td style="text-align: center"><em>InboxRule hidden: EMS results.</em></td>
+      </tr>
+  </tbody>
+</table>
+<h1 class="heading" id="detection">
+  Detection
+  <a href="#detection">#</a>
+</h1>
+<p>At scale detection of hidden inbox rules comes down to two main areas.</p>
+<h4 class="heading" id="1-mapi-based---point-in-time">
+  1. MAPI based - point in time.
+  <a href="#1-mapi-based---point-in-time">#</a>
+</h4>
+<p>Microsoft have released a script for use over Exchange Web Services (EWS) - Get-AllTenantRulesAndForms that enables tenant wide collection of Exchange Rules and Forms querying the low level data stores. This script enables visibility of Hidden Rules but leaves out an essential PR_RULE_MSG_PROVIDER field for detection. A modified version from Glen Scales collecting the PR_RULE_MSG_PROVIDER field is available <a href="https://github.com/gscales/O365-InvestigationTooling/blob/master/Get-AllTenantRulesAndForms.ps1">here - Get-AllTenantRulesAndForms</a> (screenshot below).</p>
+<ul>
+<li>Frequency analysis on RuleMsgProvider field is recommended as a starting point for detection.</li>
+<li>Alert and investigate any inbox rules with blank or unusual RuleMsgProvider fields.</li>
+<li>Alert and investigate IsPotentiallyMalicious = True - i.e rule action is an executable object.</li>
+<li>Limitations are high privilege requirements - Global Admin role AND EWS ApplicationImpersonation.</li>
+</ul>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/03Detection.png" width="2096px" height="390px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Exchange Web Services (EWS): Empty RuleName and RuleMsgProvider fields.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>The action, condition and command fields (if populated) are base64 encoded raw byte arrays. I have yet to find documentation on the format for decoding or reverse engineer the data but there are some identifiable strings that can provide insights into the rule.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/03Detection1a.png" width="1528px" height="249px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Decoded Action: Rule to forward email to external SMTP account.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>For investigations, it is also possible to attempt to reanimate the strings and unhide the rules using MFCMAPI. In my testing I have been able to have the rule reappear adding in a known PR_RULE_MSG_PROVIDER field value.</p>
+<ul>
+<li>A fake, mistyped or blank PR_RULE_MSG_PROVIDER the rule would remain hidden.</li>
+<li>Protocol documentation can be found <a href="https://docs.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxorule/70ac9436-501e-43e2-9163-20d2b546b886">here</a>.</li>
+<li>Remediation instructions can be found in the Further Reading section below.</li>
+</ul>
+<h4 class="heading" id="2-unified-audit-log---telemetry">
+  2. Unified Audit Log - telemetry.
+  <a href="#2-unified-audit-log---telemetry">#</a>
+</h4>
+<p>The Unified Audit Log (UAL) is a centralised log storing audit events for all Azure services. It can be accessed via O365 WebUI: Security &amp; Compliance &gt; Search &gt; AuditLog Search or EMS Administration: Search-UnifiedAuditLog commandlet.</p>
+<ul>
+<li>This method is best suited to active monitoring via a SIEM or monitoring solution.</li>
+<li>Alert and investigate any unusual New-InboxRule (creation) or Set-InboxRule (modification) events.</li>
+<li>Benefits include reduced privilege requirements - e.g a user with View-Only Audit Logs or Audit Logs roles enabled.</li>
+<li>Logging must be enabled and retention is a consideration for historical searches.</li>
+</ul>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/03Detection2.png" width="1612px" height="856px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Telemetry based detection - Search-UnifiedAuditLog: New-InboxRule event</em></td>
+      </tr>
+  </tbody>
+</table>
+<h4 class="heading" id="other-forwarding-specific">
+  Other Forwarding specific
+  <a href="#other-forwarding-specific">#</a>
+</h4>
+<p>O365 has other indirect detection capabilities that assist spotting hidden rules. One of those is built in alerting on forwarding of mail to external addresses. This alert is also generated as a SecurityComplianceAlert in the UAL. Keep in mind on compromise of a privileged account an attacker could simply suppress these alerts to stay under the radar.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/03Detection3a.png" width="514px" height="433px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Redirect Threat Management alert - Email also sent.</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>It is also possible to monitor traffic patterns of forwarded or redirected traffic. Below I have shown a summary inside the Security and Compliance Mailflow Dashboard.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/o365_hiddenrules/03Detection4.png" width="507px" height="498px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Mailflow Dashboard: <a href="https://protection.office.com/mailflow/dashboard">https://protection.office.com/mailflow/dashboard</a></em></td>
+      </tr>
+  </tbody>
+</table>
+<h1 class="heading" id="final-thoughts">
+  Final Thoughts
+  <a href="#final-thoughts">#</a>
+</h1>
+<p>In this post I have covered detection points for hidden inbox rules:</p>
+<ul>
+<li>Point in time query via Exchange Web Services (EWS).</li>
+<li>Rule creation and modification inside the Unified Audit Log.</li>
+<li>Other alerts in O365 ecosystem</li>
+</ul>
+<p>Although this post has an example of an inbox rule with external forwarding, hidden rules can be leveraged for other evil use cases including: persistence, reconnaissance and data collection. Best practice would include creation of a low privilege account for active monitoring of telemetry and periodic assessments leveraging a higher privilege account via Exchange Web Services.</p>
+<p>I hope others found this post useful, feel free to reach out if you have any feedback, questions, or improvements.</p>
+<h1 class="heading" id="further-reading">
+  Further reading
+  <a href="#further-reading">#</a>
+</h1>
+<ol>
+<li>Griffin, Stephen. <a href="https://github.com/stephenegriffin/mfcmapi">MFCMAPI github</a></li>
+<li>Hartley, Dave. <a href="https://labs.mwrinfosecurity.com/blog/malicous-outlook-rules">Malicious Outlook Rules</a>, 2016</li>
+<li>Lambert, John. <a href="https://onedrive.live.com/view.aspx?resid=F32A9F4F1477E49!122&amp;ithint=file,pptx&amp;authkey=!ACC5Ztb5uVED22k">Office 365 Attacks</a>, May 2019</li>
+<li>MSDN. <a href="https://blogs.msdn.microsoft.com/hkong/2015/02/27/how-to-delete-corrupted-hidden-inbox-rules-from-a-mailbox-using-mfcmapi/">How to delete corrupted, hidden inbox rules from a mailbox using MFCMAPI</a>, February 2015</li>
+<li>Pfammatter, Damian. <a href="https://blog.compass-security.com/2018/09/hidden-inbox-rules-in-microsoft-exchange/">Hidden Inbox Rules in Microsoft Exchange</a>, September 2018</li>
+<li>Scales, Glen. <a href="https://gsexdev.blogspot.com/2019/05/audting-inbox-rules-with-ews-and-graph.html">Auditing Inbox rules with EWS and the Graph API in Powershell</a>, May 2019</li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/binaryrename2/">
+                        Binary Rename 2
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/liveresponse_with_vr/">
+                        Live response automation with Velociraptor
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

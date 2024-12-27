@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>VQL on Matt&#39;s DFIR blog</title>
+    <link>https://mgreen27.github.io/tags/vql/</link>
+    <description>Recent content in VQL on Matt&#39;s DFIR blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 20 Nov 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://mgreen27.github.io/tags/vql/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>DEATHcon2023: Practical DEATH by Velociraptor</title>
+      <link>https://mgreen27.github.io/projects/deathcon2023-practical-death-by-velociraptor/</link>
+      <pubDate>Mon, 20 Nov 2023 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/projects/deathcon2023-practical-death-by-velociraptor/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://www.notion.so/mgreen27Velociraptor-DEATHcon-2023-25d9760af2ac4b419ff39c2a48f7bb2c&#34;&gt;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&lt;figure class=&#34;&#34;&gt;&#xA;&#xA;    &lt;div&gt;&#xA;        &lt;img loading=&#34;lazy&#34; alt=&#34;&#34; src=&#34;https://mgreen27.github.io/projects/deathcon2023-practical-death-by-velociraptor/skulls.png&#34; width=&#34;728px&#34; height=&#34;410px&#34;&gt;&#xA;    &lt;/div&gt;&#xA;&#xA;    &#xA;    &lt;div class=&#34;caption-container&#34;&gt;&#xA;        &lt;figcaption&gt; Workshop link &lt;/figcaption&gt;&#xA;    &lt;/div&gt;&#xA;    &#xA;&lt;/figure&gt;&#xA;&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;DEATHcon Velociraptor workshop was held November 2023. I covered practical break down of Velociraptor and VQL, incorporated into real world scenarios.&lt;/p&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;Brief introduction to Velociraptor and lab setup&lt;/li&gt;&#xA;&lt;li&gt;Available data / VQL accessors&lt;/li&gt;&#xA;&lt;li&gt;VQL Performance and Yara.&lt;/li&gt;&#xA;&lt;li&gt;ATT&amp;amp;CK Detection use case: RDP patching&lt;/li&gt;&#xA;&lt;li&gt;UEFI BlackLotus&lt;/li&gt;&#xA;&lt;li&gt;LNK Analysis&lt;/li&gt;&#xA;&lt;/ol&gt;</description>
+    </item>
+    <item>
+      <title>Content Management Like a Boss!</title>
+      <link>https://mgreen27.github.io/projects/content-management-like-a-boss/</link>
+      <pubDate>Wed, 13 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/projects/content-management-like-a-boss/</guid>
+      <description>&lt;p&gt;Content management is one of the most under rated Velociraptor capabilities used by mature users. This talk will walk through some basics of content management, introduce automation and hopefully leave you with actionable ideas on how to do Velociraptor Content like a boss.&lt;/p&gt;&#xA;&lt;p&gt;&#xA;    &lt;div style=&#34;position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;&#34;&gt;&#xA;      &lt;iframe allow=&#34;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share&#34; allowfullscreen=&#34;allowfullscreen&#34; loading=&#34;eager&#34; referrerpolicy=&#34;strict-origin-when-cross-origin&#34; src=&#34;https://www.youtube.com/embed/DjMAri17-MI?autoplay=0&amp;amp;controls=1&amp;amp;end=0&amp;amp;loop=0&amp;amp;mute=0&amp;amp;start=0&#34; style=&#34;position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;&#34; title=&#34;YouTube video&#34;&gt;&lt;/iframe&gt;&#xA;    &lt;/div&gt;&#xA;&#xA;&lt;em&gt;Presentation&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>DEATHcon 2022 Velociraptor workshop</title>
+      <link>https://mgreen27.github.io/projects/deathcon-2022-velociraptor-workshop/</link>
+      <pubDate>Sat, 05 Nov 2022 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/projects/deathcon-2022-velociraptor-workshop/</guid>
+      <description>&lt;p&gt;DEATHcon Velociraptor workshop was held November 2022. We cover some basic VQL use cases including NTFS, Event Logs, Yara and memory artifacts.&lt;/p&gt;&#xA;&lt;p&gt;The workshop was implemented with Velociraptor 0.6.6 although the data generation can be applied to any version.&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://gist.github.com/mgreen27/05f95f27f70234ea7242190c5c62a62a&#34;&gt;Data generation scripts &lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;div id=&#34;Container&#34;&#xA; style=&#34;padding-bottom:56.25%; position:relative; display:block; width: 100%&#34;&gt;&#xA; &lt;iframe id=&#34;googleSlideIframe&#34;&#xA;  width=&#34;100%&#34; height=&#34;100%&#34;&#xA;  src=&#34;https://docs.google.com/presentation/d/1HRIjfPXxSu95tfkyCs7PNqQon1HTeHTz-sQ4-wdWlNA/embed&#34;&#xA;  frameborder=&#34;0&#34; allowfullscreen=&#34;&#34;&#xA;  style=&#34;position:absolute; top:0; left: 0&#34;&gt;&lt;/iframe&gt;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;em&gt;Workshop slides&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;&#xA;    &lt;div style=&#34;position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;&#34;&gt;&#xA;      &lt;iframe allow=&#34;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share&#34; allowfullscreen=&#34;allowfullscreen&#34; loading=&#34;eager&#34; referrerpolicy=&#34;strict-origin-when-cross-origin&#34; src=&#34;https://www.youtube.com/embed/LZYeL3AKXvs?autoplay=0&amp;amp;controls=1&amp;amp;end=0&amp;amp;loop=0&amp;amp;mute=0&amp;amp;start=0&#34; style=&#34;position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;&#34; title=&#34;YouTube video&#34;&gt;&lt;/iframe&gt;&#xA;    &lt;/div&gt;&#xA;&#xA;&lt;em&gt;Workshop introduction&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Notebook and VQL - data munging your way to victory!</title>
+      <link>https://mgreen27.github.io/projects/notebook-and-vql-data-munging-your-way-to-victory/</link>
+      <pubDate>Sat, 17 Sep 2022 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/projects/notebook-and-vql-data-munging-your-way-to-victory/</guid>
+      <description>&lt;p&gt;Velociraptor notebook is a feature that supercharges analysis and speeds up many components of incident response. New users are often intimidated by advanced VQL and don’t know where to start. This talk aims to shed some light on data manipulation in VQL and provide some practical examples that can be taken away for better artifacts and analysis.&lt;/p&gt;&#xA;&lt;p&gt;&lt;div id=&#34;Container&#34;&#xA; style=&#34;padding-bottom:56.25%; position:relative; display:block; width: 100%&#34;&gt;&#xA; &lt;iframe id=&#34;googleSlideIframe&#34;&#xA;  width=&#34;100%&#34; height=&#34;100%&#34;&#xA;  src=&#34;https://docs.google.com/presentation/d/1Ev1o3nDmTyejOj2RDjiscRvV_SeS0E90ygrlZU0wsig/embed&#34;&#xA;  frameborder=&#34;0&#34; allowfullscreen=&#34;&#34;&#xA;  style=&#34;position:absolute; top:0; left: 0&#34;&gt;&lt;/iframe&gt;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;em&gt;Presentation slides&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;&#xA;    &lt;div style=&#34;position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;&#34;&gt;&#xA;      &lt;iframe allow=&#34;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share&#34; allowfullscreen=&#34;allowfullscreen&#34; loading=&#34;eager&#34; referrerpolicy=&#34;strict-origin-when-cross-origin&#34; src=&#34;https://www.youtube.com/embed/VoO7y65TOsE?autoplay=0&amp;amp;controls=1&amp;amp;end=0&amp;amp;loop=0&amp;amp;mute=0&amp;amp;start=0&#34; style=&#34;position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;&#34; title=&#34;YouTube video&#34;&gt;&lt;/iframe&gt;&#xA;    &lt;/div&gt;&#xA;&#xA;&lt;em&gt;Presentation&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Cobalt Strike Payload Discovery And Data Manipulation In VQL</title>
+      <link>https://mgreen27.github.io/posts/2021/cobaltstrike_vql/</link>
+      <pubDate>Tue, 09 Nov 2021 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2021/cobaltstrike_vql/</guid>
+      <description>Velociraptor’s ability for data manipulation is a core platform capability that drives a lot of the great content we have available in terms of data parsing for artifacts and live analysis. After a recent engagement with less common encoded Cobalt Strike beacons, and finding sharable files on VirusTotal,  I thought it would be a good opportunity to walk through some workflow around data manipulation with VQL for analysis. In this post I will walk though some background, collection at scale, and finally talk about processing target files to extract key indicators.</description>
+    </item>
+    <item>
+      <title>Windows IPSEC for endpoint quarantine</title>
+      <link>https://mgreen27.github.io/posts/2020/ipsec/</link>
+      <pubDate>Thu, 23 Jul 2020 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2020/ipsec/</guid>
+      <description>This post is going to talk about using Windows IPSec for a quarantine use case. Im going to explain the background, how to configure a policy and some of the design decisions as I was initially looking at building an endpoint based containment capability.</description>
+    </item>
+    <item>
+      <title>Local Live Response with Velociraptor &#43;&#43;</title>
+      <link>https://mgreen27.github.io/posts/2019/local_liveresponse_with_vr/</link>
+      <pubDate>Sun, 08 Dec 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/local_liveresponse_with_vr/</guid>
+      <description>In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.</description>
+    </item>
+    <item>
+      <title>Live response automation with Velociraptor</title>
+      <link>https://mgreen27.github.io/posts/2019/liveresponse_with_vr/</link>
+      <pubDate>Sun, 10 Nov 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/liveresponse_with_vr/</guid>
+      <description>This post is going to talk about the Velociraptor project. Specifically, live response and automation I have built for my own engagements. Im going to provide some background and walk through a proof of concept, then share the code.</description>
+    </item>
+  </channel>
+</rss>

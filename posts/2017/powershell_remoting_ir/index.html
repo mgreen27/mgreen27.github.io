@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    PowerShell Remoting and Incident Response | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2017/powershell_remoting_ir/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2017/powershell_remoting_ir/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="PowerShell Remoting and Incident Response">
+  <meta property="og:description" content="PowerShell is quickly becoming a tool of choice for many IT Operations staff and Security Practitioners alike. This post is a quick overview of using Windows Remote Management and PowerShell for Incident Response. I will also provide some proof of concept setup instructions and general themes for those interested in further research on this topic.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2017-01-12T12:00:00+10:00">
+    <meta property="article:modified_time" content="2017-01-12T12:00:00+10:00">
+    <meta property="article:tag" content="Powershell">
+    <meta property="article:tag" content="DFIR">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2017/powershell_remoting_ir/">PowerShell Remoting and Incident Response</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">PowerShell Remoting and Incident Response</h1>
+    
+    <p class="single-summary">PowerShell is quickly becoming a tool of choice for many IT Operations staff and Security Practitioners alike. This post is a quick overview of using Windows Remote Management and PowerShell for Incident Response. I will also provide some proof of concept setup instructions and general themes for those interested in further research on this topic.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2017-01-12T12:00:00&#43;10:00">January 12, 2017</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      9 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/powershell/">#Powershell</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt=" " src="/posts/2017/powershell_remoting_ir/00PowerShellthumb.png" width="687px" height="474px">
+    </div>
+
+    
+</figure>
+</p>
+<h3 class="heading" id="so-what-is-windows-remote-management">
+  So what is Windows Remote Management?
+  <a href="#so-what-is-windows-remote-management">#</a>
+</h3>
+<p>PowerShell is a powerful scripting language for systems management due to its ability to run on remote systems, automation capability and ability to scale. The component enabling this capability is called the Windows Remote Management service (WinRM), which works over a standardised Simple Object Access Protocol (SOAP) based, firewall friendly protocol – WS Management. PowerShell is just one consumer of this service/protocol combo and with all Windows management communications heading down this path, this capability is only going to be further entrenched moving forward.</p>
+<p>Windows Remote Management has been available since PowerShell 2.0 and Windows 7 through to the most recent incarnation in Windows Management Framework (WMF) 5.1. WinRM is enabled by default in Windows Server 2012 and 2016 but, as you’ll see below, simple to enable back to Windows 7 running PowerShell 2.0.</p>
+<h3 class="heading" id="why-do-i-care">
+  Why do I care?
+  <a href="#why-do-i-care">#</a>
+</h3>
+<p>There are six primary reasons why you should care about PowerShell Remoting for Incident Response:</p>
+<p><strong>Data available for Collection</strong> - PowerShell has access to WMI, COM, .NET as well as to the Windows API. When combined with the capability to run some smart 3rd party or open source tools there really isn’t much you can’t do with PowerShell. Data collection is possible from: static disk, registry, log and configuration data; or any volatile process, network connection, or other in memory artefact. Historical data can be collected with timeline collection tools or pre-deployment of a process monitoring tool or Event Tracing for Windows.</p>
+<p><strong>Analysis</strong> - PowerShell is an object based language making analysis fairly simple once the dataset and methods of sorting / searching are understood. There is much integration readily available for common use cases like: live response, outlier analysis, baseline comparisons or building a timeline</p>
+<p><strong>Performance</strong> - PowerShell Remoting can significantly improve performance when scripting collections at scale. Execution of the command occurs in parallel on each target machine reporting the results, opposed to the source machine running through commands in an iterative scripted loop.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt=" " src="/posts/2017/powershell_remoting_ir/01performance.png" width="2226px" height="734px">
+    </div>
+
+    
+</figure>
+</p>
+<p><strong>Strategic</strong> - Windows Remote Management is Microsoft’s strategic direction for all Windows management communications moving forward. Many operations teams are already considering or currently using WinRM so it is worthwhile to understand points of leverage and weaknesses. Interestingly, PowerShell is also now open source with both OSX and Linux versions available.</p>
+<p><strong>Agentless</strong> - PowerShell remoting provides capability without needing to install “yet another agent”.</p>
+<p><strong>Cost</strong> – It is hard to argue with free, especially if there are skillsets in house already taking advantage of WinRM / PowerShell remoting.</p>
+<h3 class="heading" id="what-is-the-catch">
+  What is the catch?
+  <a href="#what-is-the-catch">#</a>
+</h3>
+<p>The benefits of PowerShell remoting seem quite compelling but there are two main catches:</p>
+<p><strong>Operational overhead</strong> - Traditional open source issues of cost to build and maintain capability rather than going down a COTS path. Most organisations are not really mature enough to fully embrace building a complete solution in this space beyond simple collections (not everyone is a well resourced Fortune 500).</p>
+<p>A great example here is process monitoring solutions - i.e. collection and analysis of historical data. While open source collection via Sysmon or other tools is available and better than the status quo in most organisations (i.e. nothing), a paid solution may provide much more capability at lower overall cost. When deciding to build, buy or outsource it is important not only understanding requirements, but also workflow underpinning those requirements, as well as technology and architecture.</p>
+<p><strong>Security perceptions</strong> - There are concerns around PowerShell security. Increased in-wild threats and popularity of offensive research in the past few years have driven this concern. Although most definitely not infallible, a properly configured PowerShell network will arguably lead to a much more secure environment than default - &ldquo;properly configured&rdquo; being the key word. With that in mind, similar to operational overhead, maturity may be the major driver for concerns about turning on WinRM.</p>
+<p>It’s also worthy to note Microsoft has come a long way in recent editions of Windows and PowerShell from the original WinRM version included in Windows 7. Modern Windows 10 / PowerShell 5.0 versions feature comprehensive auditing capabilities for PowerShell and additional OS level security features. Features like Credential Guard, Device Guard, Applocker and AntiMalware ScanInterface (when used mainstream); combined with the Microsoft concept of &ldquo;constrained endpoints&rdquo; will really help reduce options for attackers.</p>
+<h1 class="heading" id="so-how-do-i-start">
+  So how do I start?
+  <a href="#so-how-do-i-start">#</a>
+</h1>
+<p>There are a few ways to setup WinRM. Group Policy, you can use a command line tool (Winrm), or PowerShell cmdlets. I have pointed at some good resources including ideas to lock down Windows Remote Management and how to configure WinRM over HTTPS in the reference section below.</p>
+<p>A useful method for Lab / Proof of Concept testing is via group policy; also consider turning on PowerShell script block logging and process monitoring to list a couple of other generic recommendations. In a nutshell for a basic WinRM configuration you are required to:</p>
+<h4 class="heading" id="1-configure-a-winrm-listener">
+  1. Configure a WinRM listener
+  <a href="#1-configure-a-winrm-listener">#</a>
+</h4>
+<p>Note: Examples are referencing Windows 2012R2 Domain with client machines running PowerShell 2.0 (WinRM minimum requirement) through 5.0. Recommendations are to upgrade to WMF5.0 to take advantage of capabilities like PowerShell Script Block logging and additional built-in PowerShell cmdlets.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt=" " src="/posts/2017/powershell_remoting_ir/02config1.png" width="1356px" height="656px">
+    </div>
+
+    
+</figure>
+</p>
+<p>Group Policy &gt; Computer Configuration &gt; Policies &gt; Administrative Templates &gt; Windows Components &gt; Windows Remote Management &gt; WinRM Service &gt; Allow Remote server management through WinRM &gt; Here you are required to Enable WinRM and set service listening IP to * or IP of listening interface.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt=" " src="/posts/2017/powershell_remoting_ir/03config2.png" width="1490px" height="792px">
+    </div>
+
+    
+</figure>
+</p>
+<h4 class="heading" id="2-configure-the-winrm-service-to-start-automatically">
+  2. Configure the WinRM service to start automatically
+  <a href="#2-configure-the-winrm-service-to-start-automatically">#</a>
+</h4>
+<p>Group Policy &gt; Computer Configuration &gt; Policies &gt; Windows Settings &gt; Security Settings &gt; System Services &gt; Windows Remote Management (WS-Management) &gt; set to automatic</p>
+<p>Note: a client reboot is required to start Windows Remote Management Service automatically from Group Policy.</p>
+<h4 class="heading" id="3-allow-winrm-traffic-through-the-firewall">
+  3. Allow WinRM traffic through the firewall
+  <a href="#3-allow-winrm-traffic-through-the-firewall">#</a>
+</h4>
+<p>Group Policy &gt; Computer Configuration &gt; Policies &gt; Windows Settings &gt; Security Settings &gt; Windows Firewall&hellip; &gt; Windows Firewall… &gt; Inbound Rule &gt; Create rule using predefined Windows Remote Management (HTTP-In)</p>
+<h4 class="heading" id="4-ensure-local-admin-privileges-on-the-target-machine">
+  4. Ensure local admin privileges on the target machine.
+  <a href="#4-ensure-local-admin-privileges-on-the-target-machine">#</a>
+</h4>
+<p>Note: WinRM can be configured to NOT require local admin however some of the collections your going to want to run will likely require administrator privilege. Credential risk is minimised using the default WinRM Kerberos authentication.</p>
+<p>Group Policy &gt; Computer Configuration &gt; Policies &gt; Preferences &gt; Control Panel Settings &gt; Local Users and Groups &gt; right click &gt; All Tasks &gt; Add &gt; add User or Group to local administrators group.</p>
+<p>Alternatively, for those looking for a PowerShell command line version: Running the command below to setup WinRM locally on your test hosts is fairly painless. Options like Enterprise Deployment Tool, Logon Script, PSEXEC or WMIC can be used for deployment as required. It is also worth noting that to configure a custom listener port you are required to use a CLI based configuration.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#888;font-style:italic"># Setup: </span>
+</span></span><span style="display:flex;"><span>PS&gt; <span style="font-weight:bold;font-style:italic">Enable-PSRemoting</span> -Force
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"># Confirm WinRM is setup and responsive:</span>
+</span></span><span style="display:flex;"><span>PS&gt; <span style="font-weight:bold;font-style:italic">Test-WSMan</span> &lt;ComputerName&gt; [<span style="color:#666;font-weight:bold;font-style:italic">Options</span>]
+</span></span><span style="display:flex;"><span>PS&gt; <span style="font-weight:bold;font-style:italic">Test-WSMan</span> &lt;ComputerName&gt; -Credential &lt;Domain\User&gt; -Authentication Kerberos 
+</span></span></code></pre></div><p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt=" " src="/posts/2017/powershell_remoting_ir/04testnoauth.png" width="1492px" height="296px">
+    </div>
+
+    
+</figure>
+</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt=" " src="/posts/2017/powershell_remoting_ir/05testwithauth.png" width="1484px" height="296px">
+    </div>
+
+    
+</figure>
+</p>
+<h1 class="heading" id="authentication">
+  Authentication
+  <a href="#authentication">#</a>
+</h1>
+<p>When using PowerShell Remoting you have the capability to configure authentication methods. The default and recommended when joined to a domain is PowerShell’s non-delegated Kerberos network logons. These authentication attempts result in network type 3 logons and no credential exposure. Other available options are Basic, CredSSP, Default, Digest, Kerberos, and Negotiate; Negotiate being recommended for non domain machines.</p>
+<p>Note: make a point not to use CredSSP as there are credential risks associated with delegating credentials.</p>
+<p>When testing in a domain to use default Kerberos authentication you do not need to specify the authentication method. There are a couple of ways to initiate a session, the simplest being a singular: “Invoke-Command” with parameters included.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt=" " src="/posts/2017/powershell_remoting_ir/06simpleexampleNEW.png" width="2218px" height="710px">
+    </div>
+
+    
+</figure>
+</p>
+<p>Reusable sessions can also be configured using the “New-PSSession” cmdlet then calling the open session. As seen in my animation below I can invoke a session then run several commands through the open session.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="PS-Session" src="/posts/2017/powershell_remoting_ir/gif01.gif" width="1374px" height="587px">
+    </div>
+
+    
+</figure>
+</p>
+<p>Finally the “Enter-PSSession” cmdlet can be used for SSH like connectivity on the remote machine. In the animated example below I show some basic queries and filtering then query Sysmon logs.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="PS-Session Sysmon" src="/posts/2017/powershell_remoting_ir/gif02.gif" width="1374px" height="580px">
+    </div>
+
+    
+</figure>
+</p>
+<p>In my test environment I used a specifically allocated Active Directory service account for my PowerShell Remoting use, which I then allocated into a local administrator role via group policy. Similar actions could be taken with an appropriate group with local admin rights across all machines. This is much easier to control as well as audit in Security and Windows Remote Management Event logs.</p>
+<h1 class="heading" id="whats-next">
+  What’s next?
+  <a href="#whats-next">#</a>
+</h1>
+<p>Some good areas to start to understand capabilities or implementation code reference are the following interesting frameworks and capabilities able to leverage WinRM:</p>
+<p><strong>1) Kansa</strong> - Written by Dave Hull, Kansa is a modular incident response framework that takes advantage of PowerShell remoting to enable surprisingly simple and scalable, current state data collections from Windows machines. Kansa can facilitate incident response, an environment baseline, intrusion hunting analysis, or even remediation across thousands of machines with ease. Kansa enables fairly easy way to write additional modules and a prebuilt framework to run 3rd party binaries inside its workflow.</p>
+<p>Get-Kansa: <a href="https://github.com/davehull/Kansa" title="Get Kansa">https://github.com/davehull/Kansa</a></p>
+<p><strong>2) PowerForensics</strong> - Written by Jared Atkinson, PowerForensics is a comprehensive disk forensic framework proving raw access to disk from PowerShell. Working with PowerForensics a typical analysis would occur locally, for a local or mounted drive.</p>
+<p>Jared has recently been working on a remoting solution that leverages the Assembly class&rsquo; Load method to load the PowerForensics DLL in memory. The general idea is when running a command over WinRM the local machine checks if PowerForensics is loaded, if not, the appropriate PowerForensics assembly dll is loaded in memory for the duration of the WinRM session. This capability enables remote raw drive analysis and would significantly speed up analysis times removing the need for imaging or pushing an agent.</p>
+<p>Get-PowerForensics: <a href="https://github.com/Invoke-IR/PowerForensics" title="Get Powerforensics">https://github.com/Invoke-IR/PowerForensics</a></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt=" " src="/posts/2017/powershell_remoting_ir/07Powerforensics.png" width="2146px" height="434px">
+    </div>
+
+    
+</figure>
+</p>
+<p>The Remoting capability via &ldquo;Invoke-Command&rdquo; is very new and still in development. Current requirement is to run &ldquo;Add-PowerForensicsType&rdquo; in your PS-Session although the goal is to eventually make this transparent to the user. In my testing limitations around versioning of PowerForensics appear to require ironing out so testing and tool validation are essential.</p>
+<h1 class="heading" id="conclusion">
+  Conclusion
+  <a href="#conclusion">#</a>
+</h1>
+<p>With PowerShell Remoting over WinRM we have a flexible, yet powerful scripting language that can be used to query endpoints to collect relevant data points that an Incident Responder or Security team may require. Capable at scale, and over a communications framework included free in all modern Windows Operating systems. Although actually turning on WinRM may be difficult, it is worth some research to understand PowerShell remoting capabilities when considering future needs. A great strategy, but one used too infrequently is justifying a paid solution through showing benefits of open source capability, and comparing to relevant capability provided from a vendor.</p>
+<p>The above should provide a some food for thought and point you in the right direction for further research. Feel free to reach out if you have any questions.</p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<h3 class="heading" id="references--further-reading">
+  References / Further reading
+  <a href="#references--further-reading">#</a>
+</h3>
+<ol>
+<li>
+<p>Atkinson, <a href="http://www.invoke-ir.com">Jared. Invoke-IR</a></p>
+</li>
+<li>
+<p>Australian Signals Directorate. <a href="http://www.asd.gov.au/publications/protect/Securing_PowerShell.pdf">Securing PowerShell in the Enterprise</a>, 2016</p>
+</li>
+<li>
+<p>Hofferle, Jason. <a href="https://blogs.technet.microsoft.com/heyscriptingguy/2012/07/23/an-introduction-to-powershell-remoting-part-one/">Hey Scripting Guy! An Introduction to PowerShell Remoting: Part One</a>, 2012</p>
+</li>
+<li>
+<p>Hull, Dave. <a href="http://www.powershellmagazine.com/2014/07/18/kansa-a-powershell-based-incident-response-framework/">PowerShell Magazine. Kansa overview </a>, 2014</p>
+</li>
+<li>
+<p>Kazanciyan, Ryan. Hastings, Matt. <a href="https://www.blackhat.com/docs/us-14/materials/us-14-Kazanciyan-Investigating-Powershell-Attacks-WP.pdf">Investigating Powershell Attacks</a>, 2014</p>
+</li>
+<li>
+<p>Metcalf, Sean. <a href="https://adsecurity.org/wp-content/uploads/2015/01/">PowerShell Security: Defending the Enterprise from the Latest Attack Platform</a>, 2016.</p>
+</li>
+<li>
+<p>MSDN. <a href="https://blogs.msdn.microsoft.com/powershell/2015/06/09/powershell-the-blue-team/">PowerShell for the Blue Team</a>, 2015</p>
+</li>
+<li>
+<p>MSDN. <a href="https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx">Windows Remote Management</a></p>
+</li>
+<li>
+<p>Upguard. <a href="https://support.upguard.com/upguard/winrm-configuration.html#enabling-https-winrm">WinRM Configuration: Enabling HTTPS WinRM</a></p>
+</li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2017/wmi_eventing/">
+                        Blue Team Hacks - WMI Eventing
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

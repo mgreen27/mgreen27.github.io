@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    Blue Team Hacks - Binary Rename | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2019/binaryrename/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2019/binaryrename/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Blue Team Hacks - Binary Rename">
+  <meta property="og:description" content="In this post I thought I would share an interesting proof of concept I developed to detect Binary Rename of commonly abused binaries. Im going to describe the detection, its limitations and share the code.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2019-05-12T00:00:00+00:00">
+    <meta property="article:modified_time" content="2019-05-12T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="WMI">
+    <meta property="article:tag" content="Detection">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2019/binaryrename/">Blue Team Hacks - Binary Rename</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">Blue Team Hacks - Binary Rename</h1>
+    
+    <p class="single-summary">In this post I thought I would share an interesting proof of concept I developed to detect Binary Rename of commonly abused binaries. Im going to describe the detection, its limitations and share the code.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2019-05-12T00:00:00&#43;00:00">May 12, 2019</time>
+      
+
+      
+    </p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename/00title.jpg" width="474px" height="320px">
+    </div>
+
+    
+</figure>
+</p>
+<h1 class="heading" id="background">
+  Background
+  <a href="#background">#</a>
+</h1>
+<p>Binary rename is a defence evasion technique used to bypass brittle process name and path based detections. Following the mantra of misdirection and hiding in plain sight, binary rename is a sub technique of <a href="https://attack.mitre.org/techniques/T1036/">T1036</a> - Masquerading in the Mitre ATT&amp;CK framework.  Binary rename can be observed in use across all stages of the attack lifecycle and is a technique used by a large selection of actors from commodity malware crews through to Nation States. One of the most well recognised use of the binary rename technique was NotPetya, a renamed psexec binary enabling the automated and devastating lateral infection.</p>
+<p>In my current $dayjob I developed a query to hunt for this activity by reviewing an executed process&rsquo; binary attributes and comparing with unexpected process names and paths. These have been some of my goto hunt queries pulling in hits for javascript based junkware, through to lateral movement, exfiltration tools and nation state level defence evasion.</p>
+<p>For attacks sitting earlier in the attack lifecycle, often this involves an extension to the living off the land techniques copying a monitored binary to a less conspicuous path. For interactive attacks or attacks later in lifecycle, often an attacker will leverage a hack tool or administration binary not native to the environment but similarly &ldquo;legitimate&rdquo; looking to an unfamiliar eye. Understanding the types of binaries used, the PE attributes enables some interesting detection anchors and subsequent hunts.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename/01vba.png" width="2048px" height="386px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>VBA Macro example: <a href="https://twitter.com/ItsReallyNick/status/945682763486777345">https://twitter.com/ItsReallyNick/status/945682763486777345</a></em></td>
+      </tr>
+  </tbody>
+</table>
+<p>With that in mind, not all security teams have a capable EDR solution (End Point Detection and Response) that enables binary attribute visibility at scale. Thinking about this problem led me to thinking about an open source solution available on a wide selection of machines.</p>
+<h1 class="heading" id="solution">
+  Solution
+  <a href="#solution">#</a>
+</h1>
+<p>In absence of a mature logging or EDR, an interesting visability tool is WMI Eventing. A WMI event subscription is a method of subscribing to certain system events with a trigger (filter) and action (event consumer). WMI eventing can be used to action on almost any operating system event. For example - logon, process, registry or file activity.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename/01WMIOverview.png" width="1268px" height="614px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>WMI Eventing</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>WMI is the Blue Team&rsquo;s equivalent to &ldquo;living off the land&rdquo; providing telemetry. This telemetry is similar to a limited version of modern EDR userland event tracing without the need to install a service or execute a binary directly. WMI Eventing is not new, Fireeye discussed the use of WMI as an endpoint intrusion detection system back in 2016. I have previously built WMI Eventing based solutions for a variety of niche IR use cases and visibility gaps. Although a complete description of WMI and WMI Event Consumers is outside the scope of this post, please see the further reading section for some detailed links and background in this space.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename/02filter.png" width="688px" height="114px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>WMI Filter Query</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>An ActiveScript Event Consumers allows the Blue Team to add logic and enrichment to WMI event triggers through the powerful Windows Scripting Host. In this POC I leverage a real time &ldquo;extrinsic&rdquo; wmi trigger for process execution monitoring, collecting ProcessID from all executed processes. A query of Win32_Process enables further process metadata to enable lookup of PE Attributes for detection. The PE Attribute in this use case is Original Name, with the Detection to lookup and alert against a list of high priority Original Names</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename/03binaries.png" width="506px" height="426px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Binaries targetted: Original Name</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>On condition match the POC has the capability to write to the Application event log. Event ID 4, with relevant alert details. The decision to leave out a hash calculation was decided for performance reasons, process path and Original Name providing a lead for live response.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename/04evtx.png" width="990px" height="620px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Generated EventLog</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Similarly, output to a logfile for data ingestion. It is worthy to note: the POC can easily be modifed to suit requirements, removing the write to file or event log functions and function calls.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename/04log.png" width="1720px" height="769px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Generated Log File</em></td>
+      </tr>
+  </tbody>
+</table>
+<h1 class="heading" id="limitations">
+  Limitations
+  <a href="#limitations">#</a>
+</h1>
+<p>One of the limitations of leveraging WMI Eventing as an event source is events typically do not hold all the appropriate data for a mature detection use case. To enrich the detection, we require to query the Win32_Process class. There is a slight delay in obtaining process metadata so very short-lived processes (fraction of a second) may cause missed results. In my testing, these very short-lived commands like renamed cmd: <code>cdm /c echo &lt;string&gt;</code> failed to generate wmi data however a slight pause during a local ping recorded the event. For the use case of a download cradle, access shell or other interactive commands typically of interest I do not foresee an issue but please keep this limitation in mind.</p>
+<p>A second limitation is performance. Although not particularly resource intensive in my testing (no visible resource utilisation), in production there may be unexpected constraints. I have filtered my Process Events with this in mind but testing is recommended. I have also specifically kept the binary attribute matching use case very simple with a eye on performance. This may mean less fidelity in alerting, however the POC is fairly simple to modify and add capabilities.</p>
+<p>It is also worthy to note: in some environments there may be legitimate binary rename activity for some of the targeted Original Names. Some of the binaries listed may require some tweaking of the matching logic to match host environment detection tolerance.</p>
+<p>Finally management, WMI Event consumers are notoriously hard to manage. I have included a Powershell installation script with uninstall instructions to support Powershell 2.0 and above.</p>
+<h1 class="heading" id="final-thoughts">
+  Final Thoughts
+  <a href="#final-thoughts">#</a>
+</h1>
+<p>This has been a fun short project working on an open source detection capability. I was pleasantly surprised when I discovered vbscript has the ability query PE attributes. I hope others may find it useful, feel free to reach out if you have any feedback, questions, or improvements.</p>
+<p>The POC template can be found here - <a href="https://gist.github.com/mgreen27/80d2709c01ef795206670605c1073370">WMIEvent-BinaryRename.ps1</a></p>
+<h1 class="heading" id="further-reading">
+  Further reading
+  <a href="#further-reading">#</a>
+</h1>
+<ol>
+<li>Ballenthin,William. Graeber, Matt. Teodorescu Claudiu. <a href="https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html">Windows Management Instrumentation (WMI) Offense, Defense, and Forensics</a>, 2015</li>
+<li>Green, Matthew. <a href="https://mgreen27.github.io/posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html">Blue Team Hacks - WMI Eventing</a>, 2017</li>
+<li>The MITRE Corporation. <a href="https://attack.mitre.org/techniques/T1036/">Technique: Masquerading - MITRE ATT&amp;CK™</a></li>
+<li>MSDN. <a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/krnlprov/win32-processstarttrace">Win32_ProcessStartTrace class</a></li>
+<li>MSDN. <a href="https://docs.microsoft.com/en-us/windows/desktop/properties/props-system-originalfilename">System.OriginalFileName</a></li>
+<li>Parisi, Timothy. Pena, Evan. <a href="https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html">WMI vs. WMI: Monitoring for Malicious Activity</a>, 2016</li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/invoke-liveresponse_builder/">
+                        Live Response Script Builder
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/binaryrename2/">
+                        Binary Rename 2
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

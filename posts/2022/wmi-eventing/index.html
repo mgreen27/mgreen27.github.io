@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    WMI Event Consumers: what are you missing? | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2022/wmi-eventing/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2022/wmi-eventing/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="WMI Event Consumers: what are you missing?">
+  <meta property="og:description" content="WMI Eventing is a fairly well known technique in DFIR, however some tools may not provide the coverage you expect. This article covers WMI eventing visibility and detection including custom namespaces.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2022-01-12T00:00:00+00:00">
+    <meta property="article:modified_time" content="2022-01-12T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="WMI">
+    <meta property="article:tag" content="Detection">
+    <meta property="article:tag" content="Velociraptor">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2022/wmi-eventing/">WMI Event Consumers: what are you missing?</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">WMI Event Consumers: what are you missing?</h1>
+    
+    <p class="single-summary">WMI Eventing is a fairly well known technique in DFIR, however some tools may not provide the coverage you expect. This article covers WMI eventing visibility and detection including custom namespaces.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2022-01-12T00:00:00&#43;00:00">January 12, 2022</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      4 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/wmi/">#WMI</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/detection/">#Detection</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/velociraptor/">#Velociraptor</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Selection bias in WWII: missing what is not collected." src="/posts/2022/wmi-eventing/00SelectionBias.png" width="1000px" height="681px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Selection bias in WWII: missing what is not collected.</em></td>
+      </tr>
+  </tbody>
+</table>
+<h2 class="heading" id="background">
+  Background
+  <a href="#background">#</a>
+</h2>
+<p>There has been a fair bit of research and observations of WMI eventing
+in field over the last years. In short, a WMI event consumer is a
+method of subscribing to certain system events, then enabling an action
+of some sort. Common adversary use cases may include persistence, privilege
+escalation, or as a collection trigger. Represented as ATT&amp;CK T1546.003
+this technique has been observed in use from APT, through to trash-tic
+worm and coin miner threats.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="WMI Eventing: 3 system classes" src="/posts/2022/wmi-eventing/01WMIOverview.png" width="1268px" height="614px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>WMI Eventing: 3 system classes</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>There are three system classes in every active event consumer:</p>
+<ol>
+<li>__EventFilter is a WQL query that outlines the trigger event of
+interest.</li>
+<li>__EventConsumer is an action to perform upon triggering an event.</li>
+<li>__FilterToConsumerBinding is the registration mechanism that binds
+a filter to a consumer.</li>
+</ol>
+<p>Most detection will focus on collecting the WMI classes in root/subscription
+and, in some tools root/default WMI namespaces.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Autoruns 14.07: detects root/default and root/subscription namespace WMI event consumers" src="/posts/2022/wmi-eventing/02Autoruns.png" width="1056px" height="362px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Autoruns 14.07: detects root/default and root/subscription namespace WMI event consumers</em></td>
+      </tr>
+  </tbody>
+</table>
+<h4 class="heading" id="custom-namespaces">
+  Custom Namespaces
+  <a href="#custom-namespaces">#</a>
+</h4>
+<p>At Blackhat 2018 Lee Christensen and Matt Graeber presented &ldquo;Subverting
+Sysmon: Application of a Formalized Security Product Evasion Methodology&rdquo;.
+This excellent talk focused on defense evasion methodology and highlighted
+potential collection gaps in telemetry tools around WMI eventing. In this
+case, the focus was on Sysmon behaviour of collection only in
+root/subscription, interestingly, it also highlighted the possibility to
+implement __EventConsumer classes in arbitrary namespaces.</p>
+<p>It is detection of WMI Event Consumers in arbitrary namespaces that I&rsquo;m going
+to focus. For anyone interested in testing I have written
+<a href="https://github.com/mgreen27/mgreen27.github.io/blob/master/static/other/WMIEventingNoisemaker/WmiEventingNoisemaker.ps1">a script to generate WMI event consumers</a>.
+This script wraps several powershell functions released during the Black
+Hat talk to test creating working event consumers.</p>
+<p>First step was to create a custom namespace event consumer. In this
+instance I selected the namespace name <code>totallylegit</code> and attached an
+ActiveScript event consumer.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="WMIEventingNoismaker.ps1:Generate active script EventConsumer" src="/posts/2022/wmi-eventing/04WMIEventGeneration.png" width="1048px" height="250px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>WMIEventingNoismaker.ps1:Generate active script EventConsumer</em></td>
+      </tr>
+  </tbody>
+</table>
+<h2 class="heading" id="collection">
+  Collection
+  <a href="#collection">#</a>
+</h2>
+<p>Velociraptor has several valuable artifacts for hunting WMI Event
+Consumers:</p>
+<ul>
+<li><code>Windows.Sysinternals.Autoruns</code> - leverages a thirdparty deployment of
+Sysinternals Autoruns and typically my go to ASEP collection artifact but
+limited by visibility in root/default and root/subscription only.</li>
+<li><code>Windows.Persistence.PermanentWMIEvents</code> - recently upgraded to query all ROOT namespaces.
+<ul>
+<li>This artifact reports currently deployed permanent WMI Event Consumers.</li>
+<li>The artifact collects Binding information, then presents associated Filters and Consumers.</li>
+<li>Target a specific namespace, or tick <code>AllRootNamespaces</code> to collect all root namespace event consumers.</li>
+</ul>
+</li>
+</ul>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Windows.Persistence.PermanentWMIEvents: configuration options" src="/posts/2022/wmi-eventing/05collection.png" width="1642px" height="330px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Windows.Persistence.PermanentWMIEvents: configuration options</em></td>
+      </tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Windows.Persistence.PermanentWMIEvents: results" src="/posts/2022/wmi-eventing/05collection_results.png" width="1320px" height="492px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Windows.Persistence.PermanentWMIEvents: results</em></td>
+      </tr>
+  </tbody>
+</table>
+<h4 class="heading" id="telemetry">
+  Telemetry
+  <a href="#telemetry">#</a>
+</h4>
+<p>Unfortunately prior to Windows 10 WMI logging was fairly limited. Sysmon and
+other telemetry sources often rely on WMI eventing itself to collect WMI
+eventing telemetry events. That means custom classes require namespace and
+class existence prior to telemetry subscription. Sysmon as seen below also
+does not have coverage for root/default namespace.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Sysmon collection: Event ID 20 mapping (__EventConsumer" src="/posts/2022/wmi-eventing/03SysmonEid20.png" width="1584px" height="722px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Sysmon collection: Event ID 20 mapping (<code>__EventConsumer</code></em></td>
+      </tr>
+  </tbody>
+</table>
+<p>The good news is since Windows 10, WMI logging has improved significantly
+and we can now query the event log: Microsoft-Windows-WMI-Activity or
+subscribe the underlying ETW provider of the same name. In the VQL below
+I filter the ETW event on event consumer creation or delete operations.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="font-weight:bold;text-decoration:underline">SELECT</span>
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">System</span>.<span style="font-weight:bold;text-decoration:underline">TimeStamp</span> <span style="font-weight:bold;text-decoration:underline">AS</span> EventTime,
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">System</span>.ID <span style="font-weight:bold;text-decoration:underline">as</span> EventId,
+</span></span><span style="display:flex;"><span>    strip(<span style="font-weight:bold;text-decoration:underline">prefix</span>=<span style="color:#666;font-style:italic">&#39;\\\\\.\\&#39;</span>,string=EventData.NamespaceName) <span style="font-weight:bold;text-decoration:underline">as</span> NamespaceName,
+</span></span><span style="display:flex;"><span>    EventData.<span style="font-weight:bold;text-decoration:underline">Operation</span> <span style="font-weight:bold;text-decoration:underline">as</span> <span style="font-weight:bold;text-decoration:underline">Operation</span>,
+</span></span><span style="display:flex;"><span>    GetProcessInfo(TargetPid=<span style="font-weight:bold;font-style:italic">int</span>(<span style="font-weight:bold;font-style:italic">int</span>=EventData.ClientProcessId))[0] <span style="font-weight:bold;text-decoration:underline">as</span> Process
+</span></span><span style="display:flex;"><span><span style="font-weight:bold;text-decoration:underline">FROM</span> watch_etw(guid=<span style="color:#666;font-style:italic">&#34;{1418ef04-b0b4-4623-bf7e-d74ab47bbdaa}&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="font-weight:bold;text-decoration:underline">WHERE</span> EventId = 11
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">AND</span> <span style="font-weight:bold;text-decoration:underline">Operation</span> =~ <span style="color:#666;font-style:italic">&#39;WbemServices::(PutInstance|DeleteInstance|PutClass|DeleteClass)&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">AND</span> <span style="font-weight:bold;text-decoration:underline">Operation</span> =~ <span style="color:#666;font-style:italic">&#39;EventConsumer|EventFilter|FilterToConsumerBinding&#39;</span>
+</span></span></code></pre></div><p>I have included a completed artifact in the artifact exchange:
+<a href="https://docs.velociraptor.app/exchange/artifacts/pages/wmieventing/">Windows.ETW.WMIEventing</a>.
+That artifact includes process enrichment, targeting both creation and deletion of EventConsumers.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Custom namespace provider registration and process enrichment" src="/posts/2022/wmi-eventing/06ETW.png" width="1129px" height="480px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Custom namespace provider registration and process enrichment</em></td>
+      </tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Windows.ETW.WMIEventing: all operations event consumer creation and removal" src="/posts/2022/wmi-eventing/06ETWb.png" width="863px" height="301px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Windows.ETW.WMIEventing: all operations event consumer creation and removal</em></td>
+      </tr>
+  </tbody>
+</table>
+<h4 class="heading" id="event-log">
+  Event Log
+  <a href="#event-log">#</a>
+</h4>
+<p>Similar filters can be used with <code>Windows.EventLogs.EvtxHunter</code> for
+detection. Its worthy to note, event logs hold less verbose logging for
+the registration than ETW but this use case is helpful when coming late
+to the party during an investigation.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Windows.EventLogs.EvtxHunter: hunt for event consumer string" src="/posts/2022/wmi-eventing/07EvtxHunter.png" width="472px" height="363px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Windows.EventLogs.EvtxHunter: hunt for event consumer string</em></td>
+      </tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Windows.EventLogs.EvtxHunter: detect event consumer class creation" src="/posts/2022/wmi-eventing/07EvtxHunterb.png" width="667px" height="673px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Windows.EventLogs.EvtxHunter: detect event consumer class creation</em></td>
+      </tr>
+  </tbody>
+</table>
+<h1 class="heading" id="conclusions">
+  Conclusions
+  <a href="#conclusions">#</a>
+</h1>
+<p>During this post, we have shown three techniques for detecting WMI event consumers
+that are worth considering. We can collect these data-points over an entire
+network in minutes using Velociraptor&rsquo;s &ldquo;hunt&rdquo; capability. Similarly
+Velociraptor notebook workflow assists excluding known good entries quickly as part of analysis.</p>
+<p>The Velociraptor platform aims to provide visibility and access
+to endpoint data. If you would like to try Velociraptor it is available on Github under an open source license.
+As always, please file issues on the bug tracker or ask questions on our
+mailing list <a href="mailto:velociraptor-discuss@googlegroups.com">velociraptor-discuss@googlegroups.com</a>. You can also chat with
+us directly on discord at <a href="https://www.velocidex.com/discord">https://www.velocidex.com/discord</a></p>
+<h2 class="heading" id="references">
+  References
+  <a href="#references">#</a>
+</h2>
+<ol>
+<li><a href="https://docs.microsoft.com/en-us/windows/win32/wmisdk/about-wmi">Microsoft documentation, About WMI</a></li>
+<li><a href="https://attack.mitre.org/techniques/T1546/003/">MITRE ATT&amp;CK T1546.003, Event Triggered Execution: Windows Management Instrumentation Event Subscription</a></li>
+<li><a href="https://www.youtube.com/watch?v=R5IEyoFpZq0">Christensen.L and Graeber.M, Blackhat 2018 - Subverting Sysmon: Application of a Formalized Security Product Evasion Methodology</a></li>
+<li><a href="https://github.com/jsecurity101/Windows-API-To-Sysmon-Events/">JSecurity101, Windows APIs To Sysmon-Events</a></li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2021/cobaltstrike_vql/">
+                        Cobalt Strike Payload Discovery And Data Manipulation In VQL
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2023/qakbot/">
+                        Automating Qakbot decode at scale
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    Cobalt Strike Payload Discovery And Data Manipulation In VQL | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2021/cobaltstrike_vql/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2021/cobaltstrike_vql/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Cobalt Strike Payload Discovery And Data Manipulation In VQL">
+  <meta property="og:description" content="Velociraptor’s ability for data manipulation is a core platform capability that drives a lot of the great content we have available in terms of data parsing for artifacts and live analysis. After a recent engagement with less common encoded Cobalt Strike beacons, and finding sharable files on VirusTotal,  I thought it would be a good opportunity to walk through some workflow around data manipulation with VQL for analysis. In this post I will walk though some background, collection at scale, and finally talk about processing target files to extract key indicators.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2021-11-09T00:00:00+00:00">
+    <meta property="article:modified_time" content="2021-11-09T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="Detection">
+    <meta property="article:tag" content="Velociraptor">
+    <meta property="article:tag" content="VQL">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2021/cobaltstrike_vql/">Cobalt Strike Payload Discovery And Data Manipulation In VQL</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">Cobalt Strike Payload Discovery And Data Manipulation In VQL</h1>
+    
+    <p class="single-summary">Velociraptor’s ability for data manipulation is a core platform capability that drives a lot of the great content we have available in terms of data parsing for artifacts and live analysis. After a recent engagement with less common encoded Cobalt Strike beacons, and finding sharable files on VirusTotal,  I thought it would be a good opportunity to walk through some workflow around data manipulation with VQL for analysis. In this post I will walk though some background, collection at scale, and finally talk about processing target files to extract key indicators.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2021-11-09T00:00:00&#43;00:00">November 9, 2021</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      8 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/detection/">#Detection</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/velociraptor/">#Velociraptor</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/vql/">#VQL</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <h2 class="heading" id="background">
+  Background
+  <a href="#background">#</a>
+</h2>
+<p>The Microsoft Build Engine (MSBuild.exe) is a signed Windows binary that
+can  be used to load C# or Visual Basic code via an inline task project
+file. Legitimately used in Windows software development, it can handle XML
+formatted task files that define requirements for loading and building
+Visual Studio configurations. Adversaries can abuse this mechanism for
+execution as defence evasion and to bypass application whitelisting -
+<a href="https://attack.mitre.org/techniques/T1127/001/">ATT&amp;CK T1127</a>.</p>
+<p>In this particular engagement, the Rapid7 MDR/IR team responded to an
+intrusion in which during lateral movement, the adversary dropped many
+variants of an MSBuild inline task file to several machines and then
+executed MSBuild via wmi to load an embedded Cobalt Strike beacon.
+Detecting an in memory Cobalt Strike beacon is trivial for active threats
+with our process based yara and carving content.</p>
+<p>The problem in this case was: how do you discover, then decode these encoded
+files on disk quickly to find any additional scope using Velociraptor?</p>
+<h2 class="heading" id="collection">
+  Collection
+  <a href="#collection">#</a>
+</h2>
+<p>First task is discovery and collecting our files in scope from the network.
+Typically this task may be slow to deploy or rely on cobbled together
+capabilities from other teams. The Velociraptor hunt is an easy button for
+this use case.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Velociraptor GUI : hunt : add hunt" src="/posts/2021/cobaltstrike_vql/01_new_hunt.png" width="680px" height="305px">
+    </div>
+
+    
+</figure>
+</p>
+<p>Velociraptor has several valuable artifacts for hunting over Windows file
+systems with yara: <code>Windows.Detection.Yara.NTFS</code> and <code>Generic.Detection.Yara.Glob</code>
+spring to mind readily.  In this instance I am selecting Yara.NTFS. I have
+leveraged this artifact in the field for hunting malware, searching logs or
+any other capability where both metadata and content based discovery is desired.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Select artifact : Windows.Detection.Yara.NTFS" src="/posts/2021/cobaltstrike_vql/02_find_artifact.png" width="1193px" height="765px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Select artifact : Windows.Detection.Yara.NTFS</em></td>
+      </tr>
+  </tbody>
+</table>
+<ul>
+<li>This artifact searches the MFT, returns a list of target files then runs Yara over the target list.</li>
+<li>The artifact leverages <code>Windows.NTFS.MFT</code> so similar regex filters can be applied including Path, Size and date.</li>
+<li>The artifact also has an option to search across all attached drives and upload any files with Yara hits.</li>
+</ul>
+<p>The file filter: <code>Windows/Temp/[^/]*\.TMP$</code> will suffice in this case to target
+our adversaries path for payloads before applying our yara rule. Typically when
+running discovery like this, an analyst can also apply additional options like
+file size or time stamp bounds for use at scale and optimal performance.
+The yara rule deployed in this case was simply quick and dirty hex conversion of
+text directly from the project file referencing the unique variable setup that
+was common across acquired samples.</p>
+<pre tabindex="0"><code class="language-yara" data-lang="yara">rule MSBuild_buff {
+   meta:
+      description = &#34;Detect unique variable setup MSBuild inline task project file&#34;
+      author = &#34;Matt Green - @mgreen27&#34;
+      date = &#34;2021-10-22&#34;
+   strings:
+    // byte[] buff = new byte[]
+    $buff = { 62 79 74 65 5b 5d 20 62 75 66 66 20 3d 20 6e 65 77 20 62 79 74 65 5b 5d }
+
+    // byte[] key_code = new byte[]
+    $key_code = { 62 79 74 65 5b 5d 20 6b 65 79 5f 63 6f 64 65 20 3d 20 6e 65 77 20 62 79 74 65 5b 5d }
+
+condition:
+      any of them
+}
+</code></pre><table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Windows.Detection.Yara.NTFS hunt configuration" src="/posts/2021/cobaltstrike_vql/03_configure_artifact.png" width="843px" height="827px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Windows.Detection.Yara.NTFS hunt configuration</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>After launching the hunt, results become available inside the hunt entry on the
+Velociraptor server for download or additional analysis.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Hunt results" src="/posts/2021/cobaltstrike_vql/04_hunt_results.png" width="1364px" height="612px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Hunt results</em></td>
+      </tr>
+  </tbody>
+</table>
+<h2 class="heading" id="payload-decode">
+  Payload decode
+  <a href="#payload-decode">#</a>
+</h2>
+<p>The Cobalt Strike payload is a string with represented characters xor encoded
+as a hex formatted buffer and key in embedded C Sharp code as seen below.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2021/cobaltstrike_vql/05_payload_b.png" width="833px" height="409px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>MSBuild inline task project file with CobaltStrike payload</em></td>
+      </tr>
+  </tbody>
+</table>
+<h3 class="heading" id="enumerate-collected-files-and-find-location-on-server">
+  Enumerate collected files and find location on server
+  <a href="#enumerate-collected-files-and-find-location-on-server">#</a>
+</h3>
+<p>So far we have only collected files that have suspicious content. Now we want
+to post process the result and try to extract more information from the payload.</p>
+<blockquote>
+<p><strong><em>INFO:</em></strong><br>
+The Velociraptor notebook is a gui component that lets the user run VQL directly on the server. In this case we are leveraging the notebook attached to our hunt to post process results opposed to downloading the files and processing offline.</p>
+</blockquote>
+<p>Our first step of decode is to examine all the files we collected in the hunt.
+The first query enumerates all the individual collections in the hunt, while the
+second query retrieves the files collected for each job.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#888;font-style:italic">-- find flow ids for each client
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span>LET hunt_flows = <span style="font-weight:bold;text-decoration:underline">SELECT</span> *, Flow.client_id <span style="font-weight:bold;text-decoration:underline">as</span> ClientId, Flow.session_id <span style="font-weight:bold;text-decoration:underline">as</span> FlowId
+</span></span><span style="display:flex;"><span><span style="font-weight:bold;text-decoration:underline">FROM</span> hunt_flows(hunt_id=<span style="color:#666;font-style:italic">&#39;H.C6508PLOOPD2U&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic">-- extract uploaded files and path on server
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span>Let targets = <span style="font-weight:bold;text-decoration:underline">SELECT</span>  * <span style="font-weight:bold;text-decoration:underline">FROM</span> foreach(<span style="font-weight:bold;text-decoration:underline">row</span>=hunt_flows,
+</span></span><span style="display:flex;"><span>    query=<span style="">{</span>
+</span></span><span style="display:flex;"><span>        <span style="font-weight:bold;text-decoration:underline">SELECT</span>
+</span></span><span style="display:flex;"><span>            file_store(path=vfs_path) <span style="font-weight:bold;text-decoration:underline">as</span> SamplePath,
+</span></span><span style="display:flex;"><span>            file_size <span style="font-weight:bold;text-decoration:underline">as</span> SampleSize
+</span></span><span style="display:flex;"><span>        <span style="font-weight:bold;text-decoration:underline">FROM</span> uploads(client_id=ClientId,flow_id=FlowId)
+</span></span><span style="display:flex;"><span>    <span style="">}</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="font-weight:bold;text-decoration:underline">SELECT</span> * <span style="font-weight:bold;text-decoration:underline">FROM</span> targets
+</span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Find the location of all files collected" src="/posts/2021/cobaltstrike_vql/06_notebook_files.png" width="895px" height="660px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Find the location of all files collected</em></td>
+      </tr>
+  </tbody>
+</table>
+<h3 class="heading" id="extract-encoded-payload-and-xor-key">
+  Extract encoded payload and xor key
+  <a href="#extract-encoded-payload-and-xor-key">#</a>
+</h3>
+<p>For the second step, to extract target bytes we leverage the <code>parse_records_with_regex()</code>
+plugin to extract the strings of interest (Data and Key) in our target files.
+Note: the buffer_size argument allows VQL to examine a larger buffer than the
+default size in order to capture the typically very large payloads in these build
+files. We have also included a 200 character limitation on the data field initially
+as this will improve performance when working on VQL. We have also specified buffer
+size to be larger than default and just larger than the biggest payload in scope.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#888;font-style:italic">-- regex to extract Data and Key fields
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span>LET target_regex = <span style="color:#666;font-style:italic">&#39;buff = new byte\\[\\]\\s*{(?P&lt;Data&gt;[^\\n]*)};\\s+byte\\[\\]\\s+key_code = new byte\\[\\]\\s*{(?P&lt;Key&gt;[^\\n]*)};\\n&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="font-weight:bold;text-decoration:underline">SELECT</span> * <span style="font-weight:bold;text-decoration:underline">FROM</span> foreach(<span style="font-weight:bold;text-decoration:underline">row</span>=targets,
+</span></span><span style="display:flex;"><span>    query=<span style="">{</span>
+</span></span><span style="display:flex;"><span>        <span style="font-weight:bold;text-decoration:underline">SELECT</span>
+</span></span><span style="display:flex;"><span>            basename(path=SamplePath) <span style="font-weight:bold;text-decoration:underline">as</span> Sample,
+</span></span><span style="display:flex;"><span>            SampleSize,
+</span></span><span style="display:flex;"><span>            <span style="font-weight:bold;text-decoration:underline">Key</span>, <span style="color:#888;font-style:italic">--obtained from regex
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span>            read_file(filename=<span style="font-weight:bold;text-decoration:underline">Data</span>,accessor=<span style="color:#666;font-style:italic">&#39;data&#39;</span>,<span style="font-weight:bold;text-decoration:underline">length</span>=200) <span style="font-weight:bold;text-decoration:underline">as</span> DataExtract <span style="color:#888;font-style:italic">-- obtained by regex, only output 200 characters
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span>        <span style="font-weight:bold;text-decoration:underline">FROM</span> parse_records_with_regex(
+</span></span><span style="display:flex;"><span>            file=SamplePath,buffer_size=15000000,
+</span></span><span style="display:flex;"><span>            regex=target_regex)
+</span></span><span style="display:flex;"><span>    <span style="">}</span>)
+</span></span></code></pre></div><blockquote>
+<p><strong><em>Parse records with regex:</em></strong><br>
+<code>parse_records_with_regex()</code> is a VQL plugin that parses a file with a set of regexp and yields matches as records. The file is read into a large buffer. Then each regular expression is applied to the buffer, and all matches are emitted as rows.
+The regular expressions are specified in the Go syntax. They are expected to contain capture variables to name the matches extracted.</p>
+<p>The aim of this plugin is to split the file into records which can be further parsed. For example, if the file consists of multiple records, this plugin can be used to extract each record, while <code>parse_string_with_regex()</code> can be used to further split each record into elements. This works better than trying to write a more complex regex which tries to capture a lot of details in one pass.</p>
+</blockquote>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="VQL: extract data and keys" src="/posts/2021/cobaltstrike_vql/07_notebook_regex.png" width="3070px" height="709px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>VQL: extract data and keys</em></td>
+      </tr>
+  </tbody>
+</table>
+<h3 class="heading" id="extract-normalisation">
+  Extract normalisation
+  <a href="#extract-normalisation">#</a>
+</h3>
+<p>The third step adds a custom function for hex normalisation and converts the inline
+C Sharp style encoding to a standard hex encoded string which VQL can easily parse.
+In this case, the local normalise function will ensure we have  valid 2 character hex.
+The <code>regex_replace()</code> will strip the leading &lsquo;0x&rsquo; from the hex strings and prepare for
+xor processing.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#888;font-style:italic">-- regex to extract Data and Key fields
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span>LET target_regex = <span style="color:#666;font-style:italic">&#39;buff = new byte\\[\\]\\s*{(?P&lt;Data&gt;[^\\n]*)};\\s+byte\\[\\]\\s+key_code = new byte\\[\\]\\s*{(?P&lt;Key&gt;[^\\n]*)};\\n&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic">-- normalise function to fix bad hex strings
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span>LET normalise_hex(value) = regex_replace(<span style="font-weight:bold;text-decoration:underline">source</span>=value,re=<span style="color:#666;font-style:italic">&#39;0x(.)[,}]&#39;</span>,<span style="font-weight:bold;text-decoration:underline">replace</span>=<span style="color:#666;font-style:italic">&#39;0x0\$1,&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="font-weight:bold;text-decoration:underline">SELECT</span> * <span style="font-weight:bold;text-decoration:underline">FROM</span> foreach(<span style="font-weight:bold;text-decoration:underline">row</span>=targets,
+</span></span><span style="display:flex;"><span>    query=<span style="">{</span>
+</span></span><span style="display:flex;"><span>        <span style="font-weight:bold;text-decoration:underline">SELECT</span>
+</span></span><span style="display:flex;"><span>            basename(path=SamplePath) <span style="font-weight:bold;text-decoration:underline">as</span> Sample,
+</span></span><span style="display:flex;"><span>            SampleSize,
+</span></span><span style="display:flex;"><span>            regex_replace(re=<span style="color:#666;font-style:italic">&#34;0x|,&#34;</span>, <span style="font-weight:bold;text-decoration:underline">replace</span>=<span style="color:#666;font-style:italic">&#34;&#34;</span>, <span style="font-weight:bold;text-decoration:underline">source</span>=normalise_hex(value=<span style="font-weight:bold;text-decoration:underline">Key</span>)) <span style="font-weight:bold;text-decoration:underline">as</span> KeyNormalised,
+</span></span><span style="display:flex;"><span>            regex_replace(re=<span style="color:#666;font-style:italic">&#34;0x|,&#34;</span>, <span style="font-weight:bold;text-decoration:underline">replace</span>=<span style="color:#666;font-style:italic">&#34;&#34;</span>, <span style="font-weight:bold;text-decoration:underline">source</span>=normalise_hex(value=<span style="font-weight:bold;text-decoration:underline">Data</span>)) <span style="font-weight:bold;text-decoration:underline">as</span> DataNormalised
+</span></span><span style="display:flex;"><span>        <span style="font-weight:bold;text-decoration:underline">FROM</span> parse_records_with_regex(
+</span></span><span style="display:flex;"><span>            file=SamplePath,buffer_size=15000000,
+</span></span><span style="display:flex;"><span>            regex=target_regex)
+</span></span><span style="display:flex;"><span>    <span style="">}</span>)
+</span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="VQL: hex normalisation" src="/posts/2021/cobaltstrike_vql/08_notebook_normalise.png" width="2262px" height="709px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>VQL: hex normalisation</em></td>
+      </tr>
+  </tbody>
+</table>
+<h3 class="heading" id="extract-to-bytes">
+  Extract to bytes
+  <a href="#extract-to-bytes">#</a>
+</h3>
+<p>The fourth step converts hex to bytes and validates that the next stage is working. In the example VQL below
+we pass the hex text to the <code>unhex()</code> function to produce raw bytes for our variables.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="font-weight:bold;text-decoration:underline">SELECT</span> * <span style="font-weight:bold;text-decoration:underline">FROM</span> foreach(<span style="font-weight:bold;text-decoration:underline">row</span>=targets,
+</span></span><span style="display:flex;"><span>    query=<span style="">{</span>
+</span></span><span style="display:flex;"><span>        <span style="font-weight:bold;text-decoration:underline">SELECT</span>
+</span></span><span style="display:flex;"><span>            basename(path=SamplePath) <span style="font-weight:bold;text-decoration:underline">as</span> Sample,
+</span></span><span style="display:flex;"><span>            SampleSize,
+</span></span><span style="display:flex;"><span>            unhex(string=regex_replace(re=<span style="color:#666;font-style:italic">&#34;0x|,&#34;</span>, <span style="font-weight:bold;text-decoration:underline">replace</span>=<span style="color:#666;font-style:italic">&#34;&#34;</span>, <span style="font-weight:bold;text-decoration:underline">source</span>=normalise_hex(value=<span style="font-weight:bold;text-decoration:underline">Key</span>))) <span style="font-weight:bold;text-decoration:underline">as</span> KeyBytes,
+</span></span><span style="display:flex;"><span>            read_file(filename=
+</span></span><span style="display:flex;"><span>                unhex(string=regex_replace(re=<span style="color:#666;font-style:italic">&#34;0x|,&#34;</span>, <span style="font-weight:bold;text-decoration:underline">replace</span>=<span style="color:#666;font-style:italic">&#34;&#34;</span>, <span style="font-weight:bold;text-decoration:underline">source</span>=normalise_hex(value=<span style="font-weight:bold;text-decoration:underline">Data</span>))),
+</span></span><span style="display:flex;"><span>                    accessor=<span style="color:#666;font-style:italic">&#39;data&#39;</span>,<span style="font-weight:bold;text-decoration:underline">length</span>=200) <span style="font-weight:bold;text-decoration:underline">as</span> DataBytesExtracted
+</span></span><span style="display:flex;"><span>        <span style="font-weight:bold;text-decoration:underline">FROM</span> parse_records_with_regex(
+</span></span><span style="display:flex;"><span>            file=SamplePath,buffer_size=15000000,
+</span></span><span style="display:flex;"><span>            regex=target_regex)
+</span></span><span style="display:flex;"><span>    <span style="">}</span>)
+</span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="VQL: extract bytes" src="/posts/2021/cobaltstrike_vql/09_notebook_bytes.png" width="1912px" height="850px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>VQL: extract bytes</em></td>
+      </tr>
+  </tbody>
+</table>
+<h3 class="heading" id="xor-decode">
+  Xor decode
+  <a href="#xor-decode">#</a>
+</h3>
+<p>VQL&rsquo;s flexibility comes with its ability to reuse existing artifacts in different ways.
+The fifth step is running Velociraptor’s <code>xor()</code> function and piping the output into our
+the existing <code>Windows.Carving.CobaltStrike()</code> configuration decoder.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#888;font-style:italic">-- extract bytes
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span>LET bytes &lt;= <span style="font-weight:bold;text-decoration:underline">SELECT</span> * <span style="font-weight:bold;text-decoration:underline">FROM</span> foreach(<span style="font-weight:bold;text-decoration:underline">row</span>=targets,
+</span></span><span style="display:flex;"><span>    query=<span style="">{</span>
+</span></span><span style="display:flex;"><span>        <span style="font-weight:bold;text-decoration:underline">SELECT</span>
+</span></span><span style="display:flex;"><span>            SamplePath, basename(path=SamplePath) <span style="font-weight:bold;text-decoration:underline">as</span> Sample, SampleSize,
+</span></span><span style="display:flex;"><span>            unhex(string=regex_replace(re=<span style="color:#666;font-style:italic">&#34;0x|,&#34;</span>, <span style="font-weight:bold;text-decoration:underline">replace</span>=<span style="color:#666;font-style:italic">&#34;&#34;</span>, <span style="font-weight:bold;text-decoration:underline">source</span>=normalise_hex(value=<span style="font-weight:bold;text-decoration:underline">Key</span>))) <span style="font-weight:bold;text-decoration:underline">as</span> KeyBytes,
+</span></span><span style="display:flex;"><span>            read_file(filename=
+</span></span><span style="display:flex;"><span>                unhex(string=regex_replace(re=<span style="color:#666;font-style:italic">&#34;0x|,&#34;</span>, <span style="font-weight:bold;text-decoration:underline">replace</span>=<span style="color:#666;font-style:italic">&#34;&#34;</span>, <span style="font-weight:bold;text-decoration:underline">source</span>=normalise_hex(value=<span style="font-weight:bold;text-decoration:underline">Data</span>))),
+</span></span><span style="display:flex;"><span>                    accessor=<span style="color:#666;font-style:italic">&#39;data&#39;</span>) <span style="font-weight:bold;text-decoration:underline">as</span> DataBytes
+</span></span><span style="display:flex;"><span>        <span style="font-weight:bold;text-decoration:underline">FROM</span> parse_records_with_regex(
+</span></span><span style="display:flex;"><span>            file=SamplePath,buffer_size=15000000,
+</span></span><span style="display:flex;"><span>            regex=target_regex)
+</span></span><span style="display:flex;"><span>    <span style="">}</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic">-- pass bytes to cobalt strike parser and format key indicators im interested in
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span><span style="font-weight:bold;text-decoration:underline">SELECT</span> *, <span style="font-weight:bold;text-decoration:underline">FROM</span> foreach(<span style="font-weight:bold;text-decoration:underline">row</span>=bytes,query=<span style="">{</span>
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">SELECT</span> *,
+</span></span><span style="display:flex;"><span>        basename(path=SamplePath) <span style="font-weight:bold;text-decoration:underline">as</span> Sample,SampleSize
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">FROM</span> Artifact.Windows.Carving.CobaltStrike(TargetBytes=xor(<span style="font-weight:bold;text-decoration:underline">key</span>=KeyBytes,string=DataBytes))
+</span></span><span style="display:flex;"><span><span style="">}</span>)
+</span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="VQL: parse config" src="/posts/2021/cobaltstrike_vql/10_notebook_parse.png" width="2443px" height="709px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>VQL: parse config</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Decoded Cobalt Strike configuration is clearly observed.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Cobalt strike configuration example" src="/posts/2021/cobaltstrike_vql/11_notebook_config_example.png" width="2501px" height="992px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Cobalt strike configuration example</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>The smallest file also includes a Cobalt Strike shellcode stager, which I have recently
+added to the Velociraptor Cobalt Strike parser.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="Cobalt strike shellcode example" src="/posts/2021/cobaltstrike_vql/12_notebook_shellcode_example.png" width="1179px" height="850px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Cobalt strike shellcode example</em></td>
+      </tr>
+  </tbody>
+</table>
+<h3 class="heading" id="additional-analysis">
+  Additional analysis
+  <a href="#additional-analysis">#</a>
+</h3>
+<p>Finally, we may have a desire to extract specific key indicators and compare across
+samples. A simple data stack on key indicators of interest.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#888;font-style:italic">-- pass bytes to cobalt strike parser and format key indicators im interested in
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span>LET cobalt = <span style="font-weight:bold;text-decoration:underline">SELECT</span> *, <span style="font-weight:bold;text-decoration:underline">FROM</span> foreach(<span style="font-weight:bold;text-decoration:underline">row</span>=bytes,query=<span style="">{</span>
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">SELECT</span>
+</span></span><span style="display:flex;"><span>        basename(path=SamplePath) <span style="font-weight:bold;text-decoration:underline">as</span> Sample,SampleSize,
+</span></span><span style="display:flex;"><span>        Hash <span style="font-weight:bold;text-decoration:underline">as</span> DecodeHash,
+</span></span><span style="display:flex;"><span>        <span style="font-weight:bold;text-decoration:underline">Rule</span>,<span style="font-weight:bold;text-decoration:underline">Offset</span>,Xor,DecodedConfig
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">FROM</span> Artifact.Custom.Windows.Carving.CobaltStrike(TargetBytes=xor(<span style="font-weight:bold;text-decoration:underline">key</span>=KeyBytes,string=DataBytes))
+</span></span><span style="display:flex;"><span><span style="">}</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic">-- quick data stack on a few things to show sample analysis
+</span></span></span><span style="display:flex;"><span><span style="color:#888;font-style:italic"></span><span style="font-weight:bold;text-decoration:underline">SELECT</span> <span style="font-weight:bold;text-decoration:underline">count</span>() <span style="font-weight:bold;text-decoration:underline">as</span> Total,
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">if</span>(condition= Xor=~<span style="color:#666;font-style:italic">&#39;^0x(2e|69)$&#39;</span>, <span style="font-weight:bold;text-decoration:underline">then</span>=DecodedConfig.BeaconType, <span style="font-weight:bold;text-decoration:underline">else</span>= <span style="color:#666;font-style:italic">&#39;Shellcode stager&#39;</span>) <span style="font-weight:bold;text-decoration:underline">as</span> <span style="font-weight:bold;text-decoration:underline">Type</span>,
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">if</span>(condition= Xor=~<span style="color:#666;font-style:italic">&#39;^0x(2e|69)$&#39;</span>, <span style="font-weight:bold;text-decoration:underline">then</span>=DecodedConfig.LicenseId, <span style="font-weight:bold;text-decoration:underline">else</span>= DecodedConfig.Licence) <span style="font-weight:bold;text-decoration:underline">as</span> License,
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">if</span>(condition= Xor=~<span style="color:#666;font-style:italic">&#39;^0x(2e|69)$&#39;</span>, <span style="font-weight:bold;text-decoration:underline">then</span>=dict(SpawnTox86=DecodedConfig.SpawnTox86,SpawnTox64=DecodedConfig.SpawnTox64), <span style="font-weight:bold;text-decoration:underline">else</span>= <span style="color:#666;font-style:italic">&#39;N/A&#39;</span>) <span style="font-weight:bold;text-decoration:underline">as</span> SpawnTo,
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">if</span>(condition= Xor=~<span style="color:#666;font-style:italic">&#39;^0x(2e|69)$&#39;</span>, <span style="font-weight:bold;text-decoration:underline">then</span>=DecodedConfig.Port, <span style="font-weight:bold;text-decoration:underline">else</span>= <span style="color:#666;font-style:italic">&#39;N/A&#39;</span>) <span style="font-weight:bold;text-decoration:underline">as</span> Port,
+</span></span><span style="display:flex;"><span>    <span style="font-weight:bold;text-decoration:underline">if</span>(condition= Xor=~<span style="color:#666;font-style:italic">&#39;^0x(2e|69)$&#39;</span>, <span style="font-weight:bold;text-decoration:underline">then</span>=DecodedConfig.C2Server, <span style="font-weight:bold;text-decoration:underline">else</span>= DecodedConfig.Server) <span style="font-weight:bold;text-decoration:underline">as</span> Server
+</span></span><span style="display:flex;"><span><span style="font-weight:bold;text-decoration:underline">FROM</span> cobalt
+</span></span><span style="display:flex;"><span><span style="font-weight:bold;text-decoration:underline">GROUP</span> <span style="font-weight:bold;text-decoration:underline">BY</span> <span style="font-weight:bold;text-decoration:underline">Type</span>, Licence,SpawnTo,Port,Server
+</span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="VQL results: key indicators of interest" src="/posts/2021/cobaltstrike_vql/13_notebook_example.png" width="2461px" height="850px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>VQL results: key indicators of interest</em></td>
+      </tr>
+  </tbody>
+</table>
+<h2 class="heading" id="conclusions">
+  Conclusions
+  <a href="#conclusions">#</a>
+</h2>
+<p>In this post we showed discovery, then decode of encoded Cobalt Strike beacons on disk.
+Velociraptor can read, manipulate and enrich data efficiently across a large network
+without the overhead of needing to extract and process manually.</p>
+<p>Whilst most traditional workflows concentrate on collection and offline analysis,
+Velociraptor notebook also enables data manipulation and flexibility in analysis.
+If you would like to try out these features in Velociraptor, It is available on
+<a href="https://github.com/Velocidex/velociraptor">GitHub</a> under an open source license.
+Please follow the project or ask questions on our mailing list
+<a href="mailto:velociraptor-discuss@googlegroups.com">velociraptor-discuss@googlegroups.com</a>. You can also chat with us directly on
+<a href="https://www.velocidex.com/discord">discord</a>.</p>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2020/ipsec/">
+                        Windows IPSEC for endpoint quarantine
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2022/wmi-eventing/">
+                        WMI Event Consumers: what are you missing?
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

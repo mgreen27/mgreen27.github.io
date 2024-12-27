@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    Live response automation with Velociraptor | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2019/liveresponse_with_vr/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2019/liveresponse_with_vr/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Live response automation with Velociraptor">
+  <meta property="og:description" content="This post is going to talk about the Velociraptor project. Specifically, live response and automation I have built for my own engagements. Im going to provide some background and walk through a proof of concept, then share the code.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2019-11-10T00:00:00+00:00">
+    <meta property="article:modified_time" content="2019-11-10T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="Velociraptor">
+    <meta property="article:tag" content="VQL">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2019/liveresponse_with_vr/">Live response automation with Velociraptor</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">Live response automation with Velociraptor</h1>
+    
+    <p class="single-summary">This post is going to talk about the Velociraptor project. Specifically, live response and automation I have built for my own engagements. Im going to provide some background and walk through a proof of concept, then share the code.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2019-11-10T00:00:00&#43;00:00">November 10, 2019</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      6 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/velociraptor/">#Velociraptor</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/vql/">#VQL</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/00title.png" width="555px" height="514px">
+    </div>
+
+    
+</figure>
+</p>
+<p>EDIT: Please use this post for historical education only. Although the content and themes of this post are valid, the examples included are no longer valid for the current Velociraptor version. For current API configuration, please refer to the following links or feel free to contact me directly.</p>
+<ul>
+<li><a href="https://www.velocidex.com/discord">Chat with us on Discord</a></li>
+<li><a href="https://www.velocidex.com/docs/user-interface/api/">Documentation</a></li>
+<li><a href="https://www.velocidex.com/blog/medium/2020-03-06-velociraptor-post-processing-with-jupyter-notebook-and-pandas-8a344d05ee8c/">Blog Post</a></li>
+</ul>
+<h3 class="heading" id="background">
+  Background
+  <a href="#background">#</a>
+</h3>
+<p>Velociraptor is an endpoint collection tool developed by Michel Cohen at Velocidex. Mike was the lead developer on many open source tools we know pretty well in our industry: for example Rekall/WinPMem, AFF4 and GRR. Velociraptor was created to simplify the GRR architecture and some of the complexity poblems of clunky back end and bloated data models. The result is a robust query language (VQL) and open source collection framework that is the building blocks of greatness.</p>
+<p>The ability to collect and process data efficiently as part of live response workflow is critial for timely incident response. This is all made possible by Velociraptor, and its open ended API enables interoperability with other tools, speeding up this process.</p>
+<p>Basic setup of Velociraptor is out of scope for this post. I am running Velociraptor on hardened linux platform and plan to walk through setting up a live response processing service. For setup background, I have added a lot of great resources in the references section below.  Although not required, this post assumes some familiarity with Velociraptor and it is reccomended to review some of the references if not familiar with the platform.</p>
+<h3 class="heading" id="api-basics">
+  API Basics
+  <a href="#api-basics">#</a>
+</h3>
+<p>The Velociraptor API is fairly simple architecture and enables VQL queries with an output of familiar VQL result rows. The power to this approach is those rows can then be enriched and processed to enable completx workflows.  It can be invoked both locally or over the network, providing the building blocks we desire in mature incident response.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/01APIServices.png" width="771px" height="370px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Velociraptor Services Architecture</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>The modularity means post processing work is not part of the Velociraptor front end. We are able to essentially watch an event queue, then execute our API based use cases as desired. Performance can be optimised as with an accessable file system, intensive tasks like Live Response processing can be run on dedicated servers.</p>
+<h3 class="heading" id="api-setup">
+  API Setup
+  <a href="#api-setup">#</a>
+</h3>
+<p><a href="https://github.com/Velocidex/velociraptor/tree/master/bindings/python">Python bindings</a> are included in the project a long with a <a href="https://github.com/Velocidex/velociraptor/blob/master/bindings/python/client_example.py">working client example</a>. The velocidex team also have a great amount of API connection information on the documentation page. This ensures connection and content development are simple and we can focus on the content.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/02APIinstall.png" width="962px" height="175px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Velociraptor Python bindings install commands</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>An API configuration file is also required for authentication and key materials are generated similar to other Velociraptor configuration items.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>velociraptor --config server.config.yaml config api_client --name [APIName] &gt; api_client.yaml
+</span></span></code></pre></div><p>api_client.yaml:<br>
+        <em>&lt;SNIP Certificate information&gt;</em><br>
+        <em>api_connection_string: 127.0.0.1:8001</em><br>
+        <em>name: [APIName]</em></p>
+<p>Note: default server.config.yaml configures the API service to bind to all interfaces and listen on port 8001. Please ensure relevant bindings and ports availible.</p>
+<p>The example client script contains a great example of setting up API connection and a query stub. I have chosen to modify the script and add some global variables to simplify execution.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/03APIQuery.png" width="559px" height="353px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Example API python global variables</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>CONFIG is my generated client API configuration path. I have chosen the default velociraptor config path but this can be any location.</p>
+<p>CASES is my output folder path. This can be an ingestion path or distributed storage to plug processed data into additional workflow.</p>
+<p>QUERY is my VQL I plan to query through the API. The query monitors the Velociraptor server for completed flow events; i.e <em>watch_monitoring(artifact=’System.Flow.Completion’)</em>. A WHERE clause extracts Flows containing artefacts with results and names containing  “KapeFiles” or “LiveResponse”.</p>
+<p>What makes VQL so powerful is we can enrich with additional VQL or formatting. In my example, the SELECT statement extracts relevant fields pertaining to a completed flow for my processing use cases. This includes a list of uploaded files, their path and other flow metadata.</p>
+<h3 class="heading" id="api-processing">
+  API Processing
+  <a href="#api-processing">#</a>
+</h3>
+<p>Now we have collected data points requried for processing, its as simple as running our normal processing logic applied to each row of results.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/04Process.png" width="514px" height="478px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Extraction and printing of Flow results</em></td>
+      </tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/04ProcessStdOut.png" width="356px" height="128px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>StdOut: Flow results</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>After setting up relevant variables for processing, we can then shuttle off to tasks. Below is my plaso based timeliner function for a quick and dirty timeline.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/05TimelinerFlow.png" width="430px" height="50px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Calling timeliner</em></td>
+      </tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/05Timeliner.png" width="623px" height="303px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Timeliner: plaso based timeline function</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>The function sets up relevant paths for the command, creates target folder and shells out to the relevant plaso script. Modification is simple and the results can be collected manually or by data platform agent of choice.</p>
+<p>Similarly, file specific processing based on upload_paths enables traversing the flow upload paths once for optimal performance. I have also included a test and will only process some paths if the artifact of interest was collected.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/05ProcessingPathBased.png" width="537px" height="304px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Example path specific processing flow</em></td>
+      </tr>
+  </tbody>
+</table>
+<h3 class="heading" id="so-what-do-we-collect">
+  So what do we collect?
+  <a href="#so-what-do-we-collect">#</a>
+</h3>
+<p>The Velociraptor project has built in artefacts that are able to be customised easily. In the early days of Velociraptor I had written custom ntfs collection artifacts to accommodate my collection use cases. The velocidex team have recently developed an artefact that makes this process much easier. The artefact is called Windows.KapeFiles.Targets and extracts the collection profiles from Eric Zimmerman’s KapeFiles project.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/06KapeTargets.png" width="1123px" height="624px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Artifact: KapeTargets</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>From a user perspective this is very easy with preset levels of live response enabled or individual targetted artefact collection. Of course I still have my own live response preferences based on use case, but Kape files is a fairly mature and modular collection capability.</p>
+<h3 class="heading" id="how-do-i-run-it">
+  How do I run it?
+  <a href="#how-do-i-run-it">#</a>
+</h3>
+<p>To run simply call the client script inside the same folder as the bindings.<br>
+For example</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>/usr/bin/python3 <span style="color:#666;font-weight:bold;font-style:italic">$VRAPTOR</span>/api/processing.py
+</span></span></code></pre></div><p>In my usecase I prefer an on demand Velociraptor processing service with the following attributes:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/liveresponse_with_vr/07Service.png" width="472px" height="248px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Velociraptor Processing Service</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Set to on demand, I simply execute service startup with:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo systemctl start vraptor-processing
+</span></span></code></pre></div><p>Stop with:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo systemctl stop vraptor-processing
+</span></span></code></pre></div><p>And view status with:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo systemctl status vraptor-processing -l
+</span></span></code></pre></div><p>Once running, the service will wait for relevant rows to be returned and process as configured.</p>
+<h3 class="heading" id="final-thoughts">
+  Final Thoughts
+  <a href="#final-thoughts">#</a>
+</h3>
+<p>In this post I have walked through using the Velociraptor API for live response processing. Velociraptor is modular providing access to underlying services and enabling blue teams to build the workflow that they need, on the infastructure that works for them. In my instance the example covers a small subset of what I plan to deply but is already saving on some really time consuming tasks.</p>
+<p>For those that are interested I have included below:</p>
+<ol>
+<li><a href="other/Velociraptor/VRaptorAPISetup.sh">An install script for the API bindings and service install</a></li>
+<li><a href="other/Velociraptor/processing.py">A POC processsing script</a></li>
+</ol>
+<p>I hope you have gained some knowledge on Velociraptor API setup and one of the most important use cases for incident response. Please feel free to reach out and provide feedback or improvements.</p>
+<h1 class="heading" id="further-resources">
+  Further resources
+  <a href="#further-resources">#</a>
+</h1>
+<ol>
+<li><a href="https://www.velocidex.com/about/">Velociraptor Documentation</a></li>
+<li><a href="https://www.velocidex.com/docs/presentations/sans_dfir_summit2019/">Velociraptor Overview at 2019 SANs DFIR Summit</a></li>
+<li><a href="https://www.velocidex.com/docs/getting-started/">Velociraptor Getting started</a></li>
+<li><a href="https://www.velocidex.com/docs/user-interface/api/">Velociraptor API documentation</a></li>
+<li><a href="https://github.com/Velocidex/velociraptor/tree/master/bindings/python">Velociraptor Python Bindings</a></li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/o365_hiddenrules/">
+                        O365: Hidden InboxRules
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/local_liveresponse_with_vr/">
+                        Local Live Response with Velociraptor &#43;&#43;
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

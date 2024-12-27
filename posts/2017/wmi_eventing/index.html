@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    Blue Team Hacks - WMI Eventing | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2017/wmi_eventing/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2017/wmi_eventing/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Blue Team Hacks - WMI Eventing">
+  <meta property="og:description" content="In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. Thinking about this gap led to me looking at WMI starting as an alternate near real time detection fix, and during feature investigation ended with another technically novel solution I thought was interesting enough to share.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2017-04-03T00:00:00+00:00">
+    <meta property="article:modified_time" content="2017-04-03T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="Powershell">
+    <meta property="article:tag" content="WMI">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2017/wmi_eventing/">Blue Team Hacks - WMI Eventing</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">Blue Team Hacks - WMI Eventing</h1>
+    
+    <p class="single-summary">In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. Thinking about this gap led to me looking at WMI starting as an alternate near real time detection fix, and during feature investigation ended with another technically novel solution I thought was interesting enough to share.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2017-04-03T00:00:00&#43;00:00">April 3, 2017</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      6 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/powershell/">#Powershell</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/wmi/">#WMI</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt=" " src="/posts/2017/wmi_eventing/00Title.jpg" width="456px" height="245px">
+    </div>
+
+    
+</figure>
+</p>
+<h1 class="heading" id="the-problem">
+  The problem
+  <a href="#the-problem">#</a>
+</h1>
+<p>I recently worked an engagement where our Process Monitoring tool of choice utilised Microsoft Sysmon. Unfortunately Sysmon only supports Windows 2008R2 and above, presenting with an interesting visibility gap for older machines. The first question was, how can I provide some advanced capability without needing to install another agent?</p>
+<p>Another interesting question is what if as a defender I would like to run an automated action directly on the endpoint if certain conditions exist? A use case of file recovery to mitigate a potential threat actor over a short timeframe dropping a few files, running the tools and collecting output, then removing artefacts from disk with little chance of deleted file recovery. In this instance developing a solution that could also enable an alert, then copy, of files soon after they hit a staging folder could increase recoverability.</p>
+<h1 class="heading" id="so-what-is-wmi">
+  So what is WMI?
+  <a href="#so-what-is-wmi">#</a>
+</h1>
+<p>Windows Management Instrumentation is a framework used to manage Windows Systems and has been an important part of all Windows operating systems since Windows Millennium Edition. The WMI schema is Microsoft’s implementation of the Common Information Model (CIM) and Web-Based Enterprise Management (WBEM) standards by the Distributed Management Taskforce. The purpose of WMI is to enable a standardisation in the way environment classes are modelled, representing the environment data that can be accessed in a common way.</p>
+<p>In layman terms, WMI both describes and is part of the “guts” of Windows internals. WMI can collect informative things like current state, or performance statistics but also capability to query, configure and take actions. WMI is often invoked through various scripting languages like PowerShell or VBScript, with both IT Operations and Offensive types using various WMI capabilities for many years. Some of the more interesting offensive use cases are persistence, reconnoissance, lateral movement, hidden storage and even command &amp; control.</p>
+<p>Unfortunately WMI is minimally documented beyond MSDN and technical code references, all of which will not be covered in this post. For those interested I have included some relevant links in my references section below for further research.</p>
+<h1 class="heading" id="wmi-eventing">
+  WMI Eventing
+  <a href="#wmi-eventing">#</a>
+</h1>
+<p>A WMI event subscription is a method of subscribing to certain system events. WMI eventing can be used to action on almost any operating system event. For example - logon, process, registry or file activity. In my use case I am particularly interested in files being created in known staging locations on the endpoint or a particular method of lateral movement that leveraged WMI process creation. I would also require a relevant action of alert, event log generation and for the staging locations, file copy to a different folder.</p>
+<p>WMI Eventing comes in two flavours, a local single process context or permanent WMI Event Subscriptions which are our focus today. These permanent subscriptions are stored in the WMI repository and persist across system shutdown / reboots. It is also worthy to note permanent WMI events run as SYSTEM level privileges.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt=" " src="/posts/2017/wmi_eventing/01WMIOverview.png" width="1268px" height="614px">
+    </div>
+
+    
+</figure>
+</p>
+<p>There are 3 components in WMI Eventing:</p>
+<h4 class="heading" id="1-an-event-filter">
+  <strong>1. An Event Filter</strong>
+  <a href="#1-an-event-filter">#</a>
+</h4>
+<p>An Event Filter is a WQL query that outlines the event of interest. Think of this as the &ldquo;signature” component of which are two types covering almost all conceivable operating system events.</p>
+<ul>
+<li><strong>Intrinsic events</strong> are polled events that fire upon a polling interval. In research there was some concern around best practice for performance of polling intervals, in my testing I found no large performance hits however would recommend at least 30 seconds as standard, especially when deploying many Intrinsic event filters.
+In my use case I used a a WQL query that polls every 30 seconds to report on all file creations in relevant staging location. For example: C:\Windows\VSS.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>	<span style="font-weight:bold;text-decoration:underline">SELECT</span> * <span style="font-weight:bold;text-decoration:underline">FROM</span> __InstanceCreationEvent WITHIN 30
+</span></span><span style="display:flex;"><span>	<span style="font-weight:bold;text-decoration:underline">WHERE</span> TargetInstance ISA <span style="color:#666;font-style:italic">&#34;CIM_DataFile&#34;</span> 
+</span></span><span style="display:flex;"><span>	<span style="font-weight:bold;text-decoration:underline">AND</span> TargetInstance.Drive = <span style="color:#666;font-style:italic">&#34;C:&#34;</span> 
+</span></span><span style="display:flex;"><span>	<span style="font-weight:bold;text-decoration:underline">AND</span> TargetInstance.Path = <span style="color:#666;font-style:italic">&#34;\\Windows\\VSS\\” 
+</span></span></span></code></pre></div><ul>
+<li>Alternatively, <strong>Extrinsic events</strong> are real time filters. The downside is there are not a lot of Extrinsic events available, but they should take preference over Intrinsic.</li>
+</ul>
+<p>Below will alert on WMI Process Create event and trigger on some WMI based lateral movement.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>	<span style="font-weight:bold;text-decoration:underline">SELECT</span> * <span style="font-weight:bold;text-decoration:underline">FROM</span> MSFT_WmiProvider_ExecMethodAsyncEvent_Pre 
+</span></span><span style="display:flex;"><span>	<span style="font-weight:bold;text-decoration:underline">WHERE</span> ObjectPath=<span style="color:#666;font-style:italic">&#34;Win32_Process&#34;</span> <span style="font-weight:bold;text-decoration:underline">AND</span> MethodName=<span style="color:#666;font-style:italic">&#34;Create&#34;</span>
+</span></span></code></pre></div><h4 class="heading" id="2-event-consumer">
+  <strong>2. Event Consumer</strong>
+  <a href="#2-event-consumer">#</a>
+</h4>
+<p>An Event Consumer is an action to perform upon triggering an event. There are 5 possible classes.</p>
+<ul>
+<li><strong>ActiveScriptEventConsumer</strong> - Executes a script by reference or embedded in the consumer itself, support for VBScript via WSH.</li>
+<li><strong>CommandLineEventConsumer</strong>  - Executes a specified binary or command line, preferred for PowerShell execution, potential for use with an encoded command for embedded PowerShell.</li>
+<li><strong>LogFileEventConsumer</strong> - Write to a specified log file.</li>
+<li><strong>NTEventLogEventConsumer</strong> - Logs a Message to the Application EventLog</li>
+<li><strong>SMTPEventConsumer</strong> - Sends an email message using SMTP every time that an event is delivered to it.</li>
+</ul>
+<p>I initially was looking at NTEventLogEventConsumer which could be the preferred option for most organisations looking for a monitoring capability. For my use case above, I ended up implementing an ActiveScriptEventConsumer that wrote to a particular log file and completed the file copy in a single Event Consumer to a friendly folder. The alerts and file copy status for each machine is managed and retrieved by a centralised dashboard, however the solution could alert, post, or write to any scriptable resource.</p>
+<h4 class="heading" id="3-filter-to-consumer-binding">
+  <strong>3. Filter to Consumer Binding</strong>
+  <a href="#3-filter-to-consumer-binding">#</a>
+</h4>
+<p>Filter to consumer Binding is the registration mechanism that binds a filter to a consumer.</p>
+<h1 class="heading" id="final-thoughts">
+  Final Thoughts
+  <a href="#final-thoughts">#</a>
+</h1>
+<p>With WMI we have a powerful but difficult to manage capability that can be used in some interesting technical use cases. The scope of capabilities being limited to understanding WMI classes and taking the time to build filters and event consumers.</p>
+<p>Its worthy to note there is a proof of concept capability currently available from the research community. FLARE WMI-IDS and Invoke-IR Uproot-IDS (see references) provides a good starting point for those looking to build their own solution.</p>
+<p>One of the major difficulties with WMI Eventing is troubleshooting problems with event consumers. With this in mind I found best workflow came with using some reference code to develop a simple template to assist understanding and troubleshooting efforts then expand into using the above frameworks as new functionality not incorporated is validated and understood.</p>
+<p>For those interested, I have also included a reference PowerShell script on GitHub - <a href="https://gist.github.com/mgreen27/ef726db0baac5623dc7f76bfa0fc494c?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">HERE</a> -  to help anyone looking to create a similar ActiveScriptEventConsumer described above.</p>
+<p>Hopefully this post has provided some good food for thought and pointed interested parties in the direction for further research and reference material. Feel free to reach out if you have any questions.</p>
+<h3 class="heading" id="references">
+  References:
+  <a href="#references">#</a>
+</h3>
+<ol>
+<li>
+<p>Ballenthin,William. Graeber, Matt. Teodorescu Claudiu. <a href="https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/wp-windows-management-instrumentation.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">Windows Management Instrumentation (WMI) Offense, Defense, and Forensics</a>, 2015</p>
+</li>
+<li>
+<p>Distributed Management Task Force, <a href="http://www.dmtf.org/standards/cim?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">Common Information Model</a></p>
+</li>
+<li>
+<p>Distributed Management Task Force, <a href="http://www.dmtf.org/standards/wbem?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">Web-Based Enterprise Management</a></p>
+</li>
+<li>
+<p>Fireeye FLARE. <a href="https://github.com/fireeye/flare-wmi/tree/master/WMI-IDS?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">WMI-IDS</a>, 2015</p>
+</li>
+<li>
+<p>Invoke IR. <a href="https://github.com/Invoke-IR/Uproot?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">Uproot</a></p>
+</li>
+<li>
+<p>Kerr, <a href="https://www.fireeye.com/content/dam/fireeye-www/services/pdfs/sans-dfir-2015.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">Devon.There&rsquo;s Something About WMI</a>, 2015</p>
+</li>
+<li>
+<p>MSDN. <a href="https://msdn.microsoft.com/en-us/library/aa394582(v=vs.85).aspx?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">Windows Management Instrumentation</a></p>
+</li>
+<li>
+<p>Parisi, Timothy. Pena, Evan. <a href="https://www.fireeye.com/blog/threat-research/2016/08/wmi_vs_wmi_monitor.html?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">WMI vs. WMI: Monitoring for Malicious Activity</a>, 2016</p>
+</li>
+<li>
+<p>US Department of Homeland Security. <a href="https://ics-cert.us-cert.gov/sites/default/files/documents/WMI_for_Detection_and_Response_S508C.pdf?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3B9G70WaahSY2Z0vfHlD4oXg%3D%3D">WMI for Detection and Response</a>, 2016</p>
+</li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2017/powershell_remoting_ir/">
+                        PowerShell Remoting and Incident Response
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2018/invoke-liveresponse/">
+                        Invoke-LiveResponse
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

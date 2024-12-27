@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en-us"
+  dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="https://mgreen27.github.io//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://mgreen27.github.io//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://mgreen27.github.io//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://mgreen27.github.io//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://mgreen27.github.io//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    Binary Rename 2 | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="https://mgreen27.github.io/posts/2019/binaryrename2/"/>
+
+<meta property="og:url" content="https://mgreen27.github.io/posts/2019/binaryrename2/">
+  <meta property="og:site_name" content="Matt&#39;s DFIR blog">
+  <meta property="og:title" content="Binary Rename 2">
+  <meta property="og:description" content="This is my second Binary Rename post, in this post I am focusing on static detection, that is assessing files on disk. I am going to describe differences between both Yara and Powershell based detections, then share the code.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2019-05-29T00:00:00+00:00">
+    <meta property="article:modified_time" content="2019-05-29T00:00:00+00:00">
+    <meta property="article:tag" content="DFIR">
+    <meta property="article:tag" content="Powershell">
+    <meta property="article:tag" content="Yara">
+    <meta property="article:tag" content="Detection">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+
+
+
+
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="https://mgreen27.github.io/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects &amp; presentations
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2019/binaryrename2/">Binary Rename 2</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">Binary Rename 2</h1>
+    
+    <p class="single-summary">This is my second Binary Rename post, in this post I am focusing on static detection, that is assessing files on disk. I am going to describe differences between both Yara and Powershell based detections, then share the code.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2019-05-29T00:00:00&#43;00:00">May 29, 2019</time>
+      
+
+      
+      &nbsp; · &nbsp;
+      3 min read
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/powershell/">#Powershell</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/yara/">#Yara</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/detection/">#Detection</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>For the first post and a detailed description of what Binary Rename is, please see: <a href="../binaryrename/">Blue Team Hacks - Binary Rename</a>.</p>
+<h1 class="heading" id="yara-detection">
+  Yara Detection
+  <a href="#yara-detection">#</a>
+</h1>
+<p>Firstly Yara - Yara is a command line driven tool used mainly for pattern matching in malware or detection use cases. Rule based, though strings or binary patterns - matching can be leveraged with logic like boolean, counts or regular expressions. Although traditionally pattern based, Yara is modular and expandable such that a &ldquo;PE&rdquo; module is available focusing on querying common binary attributes. The PE module allows you to create rules targeted specifically to the PE file format and file headers, providing functions which can be used to write more effective rules for PE file use cases.</p>
+<p>The example I am using is leveraging pe.versioninfo InternalName attribute:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename2/01yara.png" width="430px" height="143px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>PE module import and InternalName rule for renamed cmd.exe</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>Our Yara use case is interesting as we require to compare an expected filename with the actual filename which is not typically a Yara capability. Florian Roth wrote about an &ldquo;inverse&rdquo; technique back in 2014 leveraging a Powershell script to obtain all files to be scanned and pass each filename into a yara scan as an external variable. The idea is a new yara instance is created for each file, passing in the relevant filename as the variable to allow comparison. In my code below I have expanded out the use case to cover x32 and x64 bit machines.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename2/01inversePS.png" width="739px" height="209px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Powershell: inverseYara.ps1</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>For execution we require the following files in our execution path:</p>
+<ul>
+<li>inverseYara.ps1</li>
+<li>yara binaries x86 or x64</li>
+<li>rename.yar</li>
+</ul>
+<p>Then execution via a bat file or commandline as below:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename2/01yararesults.png" width="593px" height="459px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Yara: Binary Rename detection results</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>This technique works very well from a detection standpoint, however in my testing performance does not appear to be optimal due to the overhead of generating a new yara process for each file scanned. It is worthy to note, the yara scan could be targeted without the filename match focusing on unexpected locations for the files in scope, but this doesn&rsquo;t match the binary rename usecase as required.</p>
+<h1 class="heading" id="powershell-detection">
+  Powershell Detection
+  <a href="#powershell-detection">#</a>
+</h1>
+<p>In this case, the preferred detection is moving to Powershell only. The Windows API provides access to PE attributes via the FileVersionInfo Class with support back to Powershell 2.0 /.NET 2. Speed is significantly improved and logic can be optimised adding additional items in the output that may aid analysis. In my script output below you can see I have added a sha1 hash to the output object.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+
+    <div>
+        <img loading="lazy" alt="" src="/posts/2019/binaryrename2/02psresults.png" width="495px" height="428px">
+    </div>
+
+    
+</figure>
+</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><em>Powershell results: 6 times faster than yara!</em></td>
+      </tr>
+  </tbody>
+</table>
+<h1 class="heading" id="limitations">
+  Limitations
+  <a href="#limitations">#</a>
+</h1>
+<p>The biggest limitation with any static detection capability that queries the whole disk is performance. Leveraging Powershell and native Windows API seems to optimise performance significantly. Other optimisations added are setting CPU priority to Idle only and configuring logic to filter effectively to minimise processing footprint. Additional optimisations around performance, could be targeted queries for specific staging locations of interest as part of a targeted detection.</p>
+<p>One consideration to keep in mind is the Powershell method leverages the Windows API. Although not a huge concern for my usecase of renamed binaries in a living off the land scenario, if there was tampering with rootkit like functionality a raw collection would be preferred.</p>
+<h1 class="heading" id="final-thoughts">
+  Final Thoughts
+  <a href="#final-thoughts">#</a>
+</h1>
+<p>Hopefully you will find this summary useful, closing the loop on an open source detection capability for the Binary Rename use case. Feel free to reach out if you have any feedback, questions, or improvements.</p>
+<p>Powershell and Yara detection code can be found here - <a href="https://gist.github.com/mgreen27/036c2b33f928d188ddc60f26b4c9a097">Get-BinaryRename</a></p>
+<h1 class="heading" id="further-reading">
+  Further reading
+  <a href="#further-reading">#</a>
+</h1>
+<ol>
+<li>Green, Matthew. <a href="https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html">Blue Team Hacks - Binary Rename</a>, 2019</li>
+<li>The MITRE Corporation. <a href="https://attack.mitre.org/techniques/T1036/">Technique: Masquerading - MITRE ATT&amp;CK™</a></li>
+<li>MSDN. <a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.fileversioninfo?view=netframework-2.0">FileVersionInfo</a></li>
+<li>Roth, Florian. <a href="https://www.bsk-consulting.de/2014/05/27/inverse-yara-signature-matching/">Inverse Yara Signature Matching (Part 1/2)</a>, 2014</li>
+<li>Roth, Florian. <a href="https://www.bsk-consulting.de/2014/08/28/scan-system-files-manipulations-yara-inverse-matching-22/">Inverse Yara Signature Matching (Part 2/2)</a>, 2014</li>
+<li>YARA v3.10.0. <a href="https://yara.readthedocs.io/en/v3.10.0/modules/pe.html">PE Module</a></li>
+</ol>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/binaryrename/">
+                        Blue Team Hacks - Binary Rename
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+            <div class="single-pagination-container-next">
+                <div class="single-pagination-text">
+                    <a href="/posts/2019/o365_hiddenrules/">
+                        O365: Hidden InboxRules
+                    </a>
+                </div>
+                <div class="single-pagination-text">→</div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

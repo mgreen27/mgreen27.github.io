@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Matt&#39;s DFIR blog</title>
+    <link>https://mgreen27.github.io/posts/</link>
+    <description>Recent content in Posts on Matt&#39;s DFIR blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 05 Apr 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://mgreen27.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Automating Qakbot decode at scale</title>
+      <link>https://mgreen27.github.io/posts/2023/qakbot/</link>
+      <pubDate>Wed, 05 Apr 2023 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2023/qakbot/</guid>
+      <description>This is a technical post covering practical methodology to extract configuration data from recent Qakbot samples. In this blog, I will provide some background on Qakbot, then walk through decode themes in an easy to visualize manner. I will then share a Velociraptor artifact to detect and automate the decode process at scale.</description>
+    </item>
+    <item>
+      <title>WMI Event Consumers: what are you missing?</title>
+      <link>https://mgreen27.github.io/posts/2022/wmi-eventing/</link>
+      <pubDate>Wed, 12 Jan 2022 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2022/wmi-eventing/</guid>
+      <description>WMI Eventing is a fairly well known technique in DFIR, however some tools may not provide the coverage you expect. This article covers WMI eventing visibility and detection including custom namespaces.</description>
+    </item>
+    <item>
+      <title>Cobalt Strike Payload Discovery And Data Manipulation In VQL</title>
+      <link>https://mgreen27.github.io/posts/2021/cobaltstrike_vql/</link>
+      <pubDate>Tue, 09 Nov 2021 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2021/cobaltstrike_vql/</guid>
+      <description>Velociraptor’s ability for data manipulation is a core platform capability that drives a lot of the great content we have available in terms of data parsing for artifacts and live analysis. After a recent engagement with less common encoded Cobalt Strike beacons, and finding sharable files on VirusTotal,  I thought it would be a good opportunity to walk through some workflow around data manipulation with VQL for analysis. In this post I will walk though some background, collection at scale, and finally talk about processing target files to extract key indicators.</description>
+    </item>
+    <item>
+      <title>Windows IPSEC for endpoint quarantine</title>
+      <link>https://mgreen27.github.io/posts/2020/ipsec/</link>
+      <pubDate>Thu, 23 Jul 2020 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2020/ipsec/</guid>
+      <description>This post is going to talk about using Windows IPSec for a quarantine use case. Im going to explain the background, how to configure a policy and some of the design decisions as I was initially looking at building an endpoint based containment capability.</description>
+    </item>
+    <item>
+      <title>Local Live Response with Velociraptor &#43;&#43;</title>
+      <link>https://mgreen27.github.io/posts/2019/local_liveresponse_with_vr/</link>
+      <pubDate>Sun, 08 Dec 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/local_liveresponse_with_vr/</guid>
+      <description>In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.</description>
+    </item>
+    <item>
+      <title>Live response automation with Velociraptor</title>
+      <link>https://mgreen27.github.io/posts/2019/liveresponse_with_vr/</link>
+      <pubDate>Sun, 10 Nov 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/liveresponse_with_vr/</guid>
+      <description>This post is going to talk about the Velociraptor project. Specifically, live response and automation I have built for my own engagements. Im going to provide some background and walk through a proof of concept, then share the code.</description>
+    </item>
+    <item>
+      <title>O365: Hidden InboxRules</title>
+      <link>https://mgreen27.github.io/posts/2019/o365_hiddenrules/</link>
+      <pubDate>Sun, 09 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/o365_hiddenrules/</guid>
+      <description>In this post Im going to talk about Office365 hidden inbox rules. Im going to give some background, show rule modification, and talk about detection methodology.</description>
+    </item>
+    <item>
+      <title>Binary Rename 2</title>
+      <link>https://mgreen27.github.io/posts/2019/binaryrename2/</link>
+      <pubDate>Wed, 29 May 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/binaryrename2/</guid>
+      <description>This is my second Binary Rename post, in this post I am focusing on static detection, that is assessing files on disk. I am going to describe differences between both Yara and Powershell based detections, then share the code.</description>
+    </item>
+    <item>
+      <title>Blue Team Hacks - Binary Rename</title>
+      <link>https://mgreen27.github.io/posts/2019/binaryrename/</link>
+      <pubDate>Sun, 12 May 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/binaryrename/</guid>
+      <description>In this post I thought I would share an interesting proof of concept I developed to detect Binary Rename of commonly abused binaries. Im going to describe the detection, its limitations and share the code.</description>
+    </item>
+    <item>
+      <title>Live Response Script Builder</title>
+      <link>https://mgreen27.github.io/posts/2019/invoke-liveresponse_builder/</link>
+      <pubDate>Sun, 07 Apr 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/invoke-liveresponse_builder/</guid>
+      <description>In this post I thought I would share some practical new features implemented in a recent refactor of Invoke-LiveResponse. These features enable fast and modular generation of live response scripts compatible with legacy Powershell. Im going to walk through the background then some of the new features and script creation.</description>
+    </item>
+    <item>
+      <title>Powershell Download Cradles</title>
+      <link>https://mgreen27.github.io/posts/2018/downloadcradle/</link>
+      <pubDate>Mon, 02 Apr 2018 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2018/downloadcradle/</guid>
+      <description>In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about detection from both network and endpoint views.</description>
+    </item>
+    <item>
+      <title>Sharing my BITS</title>
+      <link>https://mgreen27.github.io/posts/2018/sharing_my_bits/</link>
+      <pubDate>Sun, 18 Feb 2018 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2018/sharing_my_bits/</guid>
+      <description>I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on download cradles and an interest in the client side forensics. I’m going to give a brief background, talk about some nuances in collection types and provide some background information when I was thinking about detection.</description>
+    </item>
+    <item>
+      <title>Invoke-LiveResponse</title>
+      <link>https://mgreen27.github.io/posts/2018/invoke-liveresponse/</link>
+      <pubDate>Sun, 14 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2018/invoke-liveresponse/</guid>
+      <description>In this post, I am going to talk about a Powershell module I have authored as a simple implementation for live response and file collections over Powershell remoting. The initial use case was considered after an endpoint vendor appliance failed and capability for raw collections was limited. The module uses Powerforensics over WinRM, and after some interest, I think is worth sharing.</description>
+    </item>
+    <item>
+      <title>Blue Team Hacks - WMI Eventing</title>
+      <link>https://mgreen27.github.io/posts/2017/wmi_eventing/</link>
+      <pubDate>Mon, 03 Apr 2017 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2017/wmi_eventing/</guid>
+      <description>In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. Thinking about this gap led to me looking at WMI starting as an alternate near real time detection fix, and during feature investigation ended with another technically novel solution I thought was interesting enough to share.</description>
+    </item>
+    <item>
+      <title>PowerShell Remoting and Incident Response</title>
+      <link>https://mgreen27.github.io/posts/2017/powershell_remoting_ir/</link>
+      <pubDate>Thu, 12 Jan 2017 12:00:00 +1000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2017/powershell_remoting_ir/</guid>
+      <description>PowerShell is quickly becoming a tool of choice for many IT Operations staff and Security Practitioners alike. This post is a quick overview of using Windows Remote Management and PowerShell for Incident Response. I will also provide some proof of concept setup instructions and general themes for those interested in further research on this topic.</description>
+    </item>
+  </channel>
+</rss>

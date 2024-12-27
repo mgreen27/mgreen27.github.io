@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Powershell on Matt&#39;s DFIR blog</title>
+    <link>https://mgreen27.github.io/tags/powershell/</link>
+    <description>Recent content in Powershell on Matt&#39;s DFIR blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 09 Jun 2019 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://mgreen27.github.io/tags/powershell/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>O365: Hidden InboxRules</title>
+      <link>https://mgreen27.github.io/posts/2019/o365_hiddenrules/</link>
+      <pubDate>Sun, 09 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/o365_hiddenrules/</guid>
+      <description>In this post Im going to talk about Office365 hidden inbox rules. Im going to give some background, show rule modification, and talk about detection methodology.</description>
+    </item>
+    <item>
+      <title>Binary Rename 2</title>
+      <link>https://mgreen27.github.io/posts/2019/binaryrename2/</link>
+      <pubDate>Wed, 29 May 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/binaryrename2/</guid>
+      <description>This is my second Binary Rename post, in this post I am focusing on static detection, that is assessing files on disk. I am going to describe differences between both Yara and Powershell based detections, then share the code.</description>
+    </item>
+    <item>
+      <title>Live Response Script Builder</title>
+      <link>https://mgreen27.github.io/posts/2019/invoke-liveresponse_builder/</link>
+      <pubDate>Sun, 07 Apr 2019 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2019/invoke-liveresponse_builder/</guid>
+      <description>In this post I thought I would share some practical new features implemented in a recent refactor of Invoke-LiveResponse. These features enable fast and modular generation of live response scripts compatible with legacy Powershell. Im going to walk through the background then some of the new features and script creation.</description>
+    </item>
+    <item>
+      <title>Powershell Download Cradles</title>
+      <link>https://mgreen27.github.io/posts/2018/downloadcradle/</link>
+      <pubDate>Mon, 02 Apr 2018 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2018/downloadcradle/</guid>
+      <description>In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about detection from both network and endpoint views.</description>
+    </item>
+    <item>
+      <title>Sharing my BITS</title>
+      <link>https://mgreen27.github.io/posts/2018/sharing_my_bits/</link>
+      <pubDate>Sun, 18 Feb 2018 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2018/sharing_my_bits/</guid>
+      <description>I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on download cradles and an interest in the client side forensics. I’m going to give a brief background, talk about some nuances in collection types and provide some background information when I was thinking about detection.</description>
+    </item>
+    <item>
+      <title>Invoke-LiveResponse</title>
+      <link>https://mgreen27.github.io/posts/2018/invoke-liveresponse/</link>
+      <pubDate>Sun, 14 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2018/invoke-liveresponse/</guid>
+      <description>In this post, I am going to talk about a Powershell module I have authored as a simple implementation for live response and file collections over Powershell remoting. The initial use case was considered after an endpoint vendor appliance failed and capability for raw collections was limited. The module uses Powerforensics over WinRM, and after some interest, I think is worth sharing.</description>
+    </item>
+    <item>
+      <title>Invoke-LiveResponse</title>
+      <link>https://mgreen27.github.io/projects/invoke-liveresponse/</link>
+      <pubDate>Sun, 14 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/projects/invoke-liveresponse/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://github.com/mgreen27/Invoke-LiveResponse&#34;&gt;Invoke-LiveResponse&lt;/a&gt;   is a Powershell module I put together to enable raw disk collections over WinRM and local script execution. Leveraging Powerforensics via a custom Powershell function it enabled collections of key forensic artefacts and stdout of script results typical for live response tasks.&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/mgreen27/Invoke-LiveResponse&#34;&gt;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&#xA;&lt;figure class=&#34;&#34;&gt;&#xA;&#xA;    &lt;div&gt;&#xA;        &lt;img loading=&#34;lazy&#34; alt=&#34;&#34; src=&#34;https://mgreen27.github.io/projects/invoke-liveresponse/powershell.png&#34; width=&#34;1229px&#34; height=&#34;612px&#34;&gt;&#xA;    &lt;/div&gt;&#xA;&#xA;    &#xA;    &lt;div class=&#34;caption-container&#34;&gt;&#xA;        &lt;figcaption&gt; See Invoke-LiveResponse on Github &lt;/figcaption&gt;&#xA;    &lt;/div&gt;&#xA;    &#xA;&lt;/figure&gt;&#xA;&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Blue Team Hacks - WMI Eventing</title>
+      <link>https://mgreen27.github.io/posts/2017/wmi_eventing/</link>
+      <pubDate>Mon, 03 Apr 2017 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2017/wmi_eventing/</guid>
+      <description>In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. Thinking about this gap led to me looking at WMI starting as an alternate near real time detection fix, and during feature investigation ended with another technically novel solution I thought was interesting enough to share.</description>
+    </item>
+    <item>
+      <title>PowerShell Remoting and Incident Response</title>
+      <link>https://mgreen27.github.io/posts/2017/powershell_remoting_ir/</link>
+      <pubDate>Thu, 12 Jan 2017 12:00:00 +1000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2017/powershell_remoting_ir/</guid>
+      <description>PowerShell is quickly becoming a tool of choice for many IT Operations staff and Security Practitioners alike. This post is a quick overview of using Windows Remote Management and PowerShell for Incident Response. I will also provide some proof of concept setup instructions and general themes for those interested in further research on this topic.</description>
+    </item>
+  </channel>
+</rss>
