@@ -15,5 +15,12 @@
       <guid>https://mgreen27.github.io/posts/2024/finding_the_lnk/</guid>
       <description>Malicious exploitation of LNK files, commonly known as Windows shortcuts, is a well-established technique used by threat actors for delivery and persistence. While the value of LNK forensics for cyber threat intelligence (CTI) is fairly well-understood, analysts may overlook less well-known data points and miss valuable insights. In this post, we explore the structure of LNK files using Velociraptor. We will walk through each LNK structure and discuss some analysis techniques frequently used on the Rapid7 Labs team.</description>
     </item>
+    <item>
+      <title>Finding the LNK: Techniques and methodology for advanced analysis</title>
+      <link>https://mgreen27.github.io/posts/2025/finding_the_lnk/</link>
+      <pubDate>Fri, 01 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/posts/2025/finding_the_lnk/</guid>
+      <description>Malicious exploitation of LNK files, commonly known as Windows shortcuts, is a well-established technique used by threat actors for delivery and persistence. While the value of LNK forensics for cyber threat intelligence (CTI) is fairly well-understood, analysts may overlook less well-known data points and miss valuable insights. In this post, we explore the structure of LNK files using Velociraptor. We will walk through each LNK structure and discuss some analysis techniques frequently used on the Rapid7 Labs team.</description>
+    </item>
   </channel>
 </rss>

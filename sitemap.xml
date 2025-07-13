@@ -2,40 +2,49 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://mgreen27.github.io/tags/cti/</loc>
-    <lastmod>2024-11-01T00:00:00+00:00</lastmod>
+    <loc>https://mgreen27.github.io/tags/ai/</loc>
+    <lastmod>2025-04-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://mgreen27.github.io/tags/detection/</loc>
+    <lastmod>2025-04-15T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://mgreen27.github.io/tags/dfir/</loc>
+    <lastmod>2025-04-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://mgreen27.github.io/</loc>
+    <lastmod>2025-04-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://mgreen27.github.io/projects/mcp-velociraptor/</loc>
+    <lastmod>2025-04-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://mgreen27.github.io/projects/</loc>
+    <lastmod>2025-04-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://mgreen27.github.io/tags/</loc>
+    <lastmod>2025-04-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://mgreen27.github.io/tags/velociraptor/</loc>
+    <lastmod>2025-04-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://mgreen27.github.io/tags/vql/</loc>
+    <lastmod>2025-04-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://mgreen27.github.io/tags/cti/</loc>
     <lastmod>2024-11-01T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://mgreen27.github.io/posts/2024/finding_the_lnk/</loc>
     <lastmod>2024-11-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/</loc>
+    <loc>https://mgreen27.github.io/posts/2025/finding_the_lnk/</loc>
     <lastmod>2024-11-01T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://mgreen27.github.io/posts/</loc>
-    <lastmod>2024-11-01T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://mgreen27.github.io/tags/</loc>
-    <lastmod>2024-11-01T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://mgreen27.github.io/tags/velociraptor/</loc>
     <lastmod>2024-11-01T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://mgreen27.github.io/posts/2024/uefi/</loc>
     <lastmod>2024-02-29T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://mgreen27.github.io/projects/deathcon2023-practical-death-by-velociraptor/</loc>
-    <lastmod>2023-11-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://mgreen27.github.io/tags/detection/</loc>
-    <lastmod>2023-11-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://mgreen27.github.io/projects/</loc>
-    <lastmod>2023-11-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://mgreen27.github.io/tags/vql/</loc>
     <lastmod>2023-11-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://mgreen27.github.io/projects/content-management-like-a-boss/</loc>
@@ -46,6 +55,9 @@
   </url><url>
     <loc>https://mgreen27.github.io/tags/malware/</loc>
     <lastmod>2023-04-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://mgreen27.github.io/projects/detectraptor/</loc>
+    <lastmod>2022-11-17T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://mgreen27.github.io/projects/deathcon-2022-velociraptor-workshop/</loc>
     <lastmod>2022-11-05T00:00:00+00:00</lastmod>
@@ -117,5 +129,7 @@
     <lastmod>2017-01-12T12:00:00+10:00</lastmod>
   </url><url>
     <loc>https://mgreen27.github.io/about/</loc>
+  </url><url>
+    <loc>https://mgreen27.github.io/g-g41g20slqn/</loc>
   </url>
 </urlset>

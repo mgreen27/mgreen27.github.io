@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>AI on Matt&#39;s DFIR blog</title>
+    <link>https://mgreen27.github.io/tags/ai/</link>
+    <description>Recent content in AI on Matt&#39;s DFIR blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 15 Apr 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://mgreen27.github.io/tags/ai/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MCP Velociraptor</title>
+      <link>https://mgreen27.github.io/projects/mcp-velociraptor/</link>
+      <pubDate>Tue, 15 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://mgreen27.github.io/projects/mcp-velociraptor/</guid>
+      <description>&lt;p&gt;Velociraptor MCP is a Model Context Protocol bridge for exposing Velociraprtor to MCP.&lt;br&gt;&#xA;&lt;a href=&#34;https://github.com/mgreen27/mcp-velociraptor&#34;&gt;https://github.com/mgreen27/mcp-velociraptor&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

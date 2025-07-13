@@ -50,25 +50,11 @@
 
 
 
-<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+<link rel="stylesheet" href="/assets/combined.min.678b293becfc85716bd430e0d256f68da7ace5a6f49380390b9fde3d35e8bbce.css" media="all">
 
 
 
 
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-G41G20SLQN"></script>
-      <script>
-        var doNotTrack = false;
-        if ( false ) {
-          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
-          var doNotTrack = (dnt == "1" || dnt == "yes");
-        }
-        if (!doNotTrack) {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-G41G20SLQN');
-        }
-      </script>
 
 
 
@@ -449,8 +435,7 @@ as a hex formatted buffer and key in embedded C Sharp code as seen below.</p>
 to post process the result and try to extract more information from the payload.</p>
 <blockquote>
 <p><strong><em>INFO:</em></strong><br>
-The Velociraptor notebook is a gui component that lets the user run VQL directly on the server. In this case we are leveraging the notebook attached to our hunt to post process results opposed to downloading the files and processing offline.</p>
-</blockquote>
+The Velociraptor notebook is a gui component that lets the user run VQL directly on the server. In this case we are leveraging the notebook attached to our hunt to post process results opposed to downloading the files and processing offline.</p></blockquote>
 <p>Our first step of decode is to examine all the files we collected in the hunt.
 The first query enumerates all the individual collections in the hunt, while the
 second query retrieves the files collected for each job.</p>
@@ -529,8 +514,7 @@ size to be larger than default and just larger than the biggest payload in scope
 <p><strong><em>Parse records with regex:</em></strong><br>
 <code>parse_records_with_regex()</code> is a VQL plugin that parses a file with a set of regexp and yields matches as records. The file is read into a large buffer. Then each regular expression is applied to the buffer, and all matches are emitted as rows.
 The regular expressions are specified in the Go syntax. They are expected to contain capture variables to name the matches extracted.</p>
-<p>The aim of this plugin is to split the file into records which can be further parsed. For example, if the file consists of multiple records, this plugin can be used to extract each record, while <code>parse_string_with_regex()</code> can be used to further split each record into elements. This works better than trying to write a more complex regex which tries to capture a lot of details in one pass.</p>
-</blockquote>
+<p>The aim of this plugin is to split the file into records which can be further parsed. For example, if the file consists of multiple records, this plugin can be used to extract each record, while <code>parse_string_with_regex()</code> can be used to further split each record into elements. This works better than trying to write a more complex regex which tries to capture a lot of details in one pass.</p></blockquote>
 <table>
   <thead>
       <tr>

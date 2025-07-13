@@ -18,24 +18,24 @@
 
 <title>
     
-    Invoke-LiveResponse | Matt&#39;s DFIR blog
+    Finding the LNK: Techniques and methodology for advanced analysis | Matt&#39;s DFIR blog
     
 </title>
 
-<link rel="canonical" href="https://mgreen27.github.io/projects/invoke-liveresponse/"/>
+<link rel="canonical" href="https://mgreen27.github.io/posts/2025/finding_the_lnk/"/>
 
-<meta property="og:url" content="https://mgreen27.github.io/projects/invoke-liveresponse/">
+<meta property="og:url" content="https://mgreen27.github.io/posts/2025/finding_the_lnk/">
   <meta property="og:site_name" content="Matt&#39;s DFIR blog">
-  <meta property="og:title" content="Invoke-LiveResponse">
-  <meta property="og:description" content="Invoke-LiveResponse is a Powershell module I put together to enable raw disk collections over WinRM and local script execution. Leveraging Powerforensics via a custom Powershell function it enabled collections of key forensic artefacts and stdout of script results typical for live response tasks.
-See Invoke-LiveResponse on Github">
+  <meta property="og:title" content="Finding the LNK: Techniques and methodology for advanced analysis">
+  <meta property="og:description" content="Malicious exploitation of LNK files, commonly known as Windows shortcuts, is a well-established technique used by threat actors for delivery and persistence. While the value of LNK forensics for cyber threat intelligence (CTI) is fairly well-understood, analysts may overlook less well-known data points and miss valuable insights. In this post, we explore the structure of LNK files using Velociraptor. We will walk through each LNK structure and discuss some analysis techniques frequently used on the Rapid7 Labs team.">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
-    <meta property="article:section" content="projects">
-    <meta property="article:published_time" content="2018-01-14T00:00:00+00:00">
-    <meta property="article:modified_time" content="2018-01-14T00:00:00+00:00">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-11-01T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-11-01T00:00:00+00:00">
     <meta property="article:tag" content="DFIR">
-    <meta property="article:tag" content="Powershell">
+    <meta property="article:tag" content="CTI">
+    <meta property="article:tag" content="Velociraptor">
 
 
 
@@ -135,10 +135,10 @@ See Invoke-LiveResponse on Github">
     <a href="/">Home</a>
     <span class="breadcrumbs-separator"> > </span>
     
-    <a href="/projects/">Projects</a>
+    <a href="/posts/">Posts</a>
     <span class="breadcrumbs-separator"> > </span>
     
-    <a class="breadcrumbs-current" href="/projects/invoke-liveresponse/">Invoke-LiveResponse</a>
+    <a class="breadcrumbs-current" href="/posts/2025/finding_the_lnk/">Finding the LNK: Techniques and methodology for advanced analysis</a>
 </div>
 
 
@@ -149,7 +149,9 @@ See Invoke-LiveResponse on Github">
 
     
 
-    <h1 class="single-title">Invoke-LiveResponse</h1>
+    <h1 class="single-title">Finding the LNK: Techniques and methodology for advanced analysis</h1>
+    
+    <p class="single-summary">Malicious exploitation of LNK files, commonly known as Windows shortcuts, is a well-established technique used by threat actors for delivery and persistence. While the value of LNK forensics for cyber threat intelligence (CTI) is fairly well-understood, analysts may overlook less well-known data points and miss valuable insights. In this post, we explore the structure of LNK files using Velociraptor. We will walk through each LNK structure and discuss some analysis techniques frequently used on the Rapid7 Labs team.</p>
     
 
     
@@ -158,7 +160,7 @@ See Invoke-LiveResponse on Github">
       
       
       
-      <time datetime="2018-01-14T00:00:00&#43;00:00">January 14, 2018</time>
+      <time datetime="2024-11-01T00:00:00&#43;00:00">November 1, 2024</time>
       
 
       
@@ -169,38 +171,45 @@ See Invoke-LiveResponse on Github">
   
 
   
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/cti/">#CTI</a>
+    </span>
+    
+    
+    <span>
+      <a href="https://mgreen27.github.io/tags/velociraptor/">#Velociraptor</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
 
   
 
   
 
   <div class="single-content">
-    <p><a href="https://github.com/mgreen27/Invoke-LiveResponse">Invoke-LiveResponse</a>   is a Powershell module I put together to enable raw disk collections over WinRM and local script execution. Leveraging Powerforensics via a custom Powershell function it enabled collections of key forensic artefacts and stdout of script results typical for live response tasks.</p>
-<p><a href="https://github.com/mgreen27/Invoke-LiveResponse">
-
-
-
-
-
-
-
-
-
-
-
-<figure class="">
-
-    <div>
-        <img loading="lazy" alt="" src="/projects/invoke-liveresponse/powershell.png" width="1229px" height="612px">
-    </div>
-
-    
-    <div class="caption-container">
-        <figcaption> See Invoke-LiveResponse on Github </figcaption>
-    </div>
-    
-</figure>
-</a></p>
+    <p>Redirecting <html>
+ <head>
+<script type="text/JavaScript">
+window.location = "https://www.rapid7.com/blog/post/2024/11/01/finding-the-lnk-techniques-and-methodology-for-advanced-analysis-with-velociraptor/"
+</script>
+ </head>
+</html>
+<a href="https://www.rapid7.com/blog/post/2024/11/01/finding-the-lnk-techniques-and-methodology-for-advanced-analysis-with-velociraptor/">LINK to blog</a></p>
 
     
   </div>
@@ -220,14 +229,23 @@ See Invoke-LiveResponse on Github">
 
         <div class="single-pagination-prev">
             
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2024/uefi/">
+                        How To Hunt For UEFI Malware
+                    </a>
+                </div>
+            </div>
+            
         </div>
 
         <div class="single-pagination-next">
             
             <div class="single-pagination-container-next">
                 <div class="single-pagination-text">
-                    <a href="/projects/endpoint-hunting-in-an-antiedr-world/">
-                        Endpoint Hunting in an AntiEDR World
+                    <a href="/posts/2024/finding_the_lnk/">
+                        Finding the LNK: Techniques and methodology for advanced analysis
                     </a>
                 </div>
                 <div class="single-pagination-text">→</div>

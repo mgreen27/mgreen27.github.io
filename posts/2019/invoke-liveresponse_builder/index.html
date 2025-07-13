@@ -48,25 +48,11 @@
 
 
 
-<link rel="stylesheet" href="/assets/combined.min.186794b3399a702d3092949042cdc215dea303c17e71e7c0254768448de11db8.css" media="all">
+<link rel="stylesheet" href="/assets/combined.min.678b293becfc85716bd430e0d256f68da7ace5a6f49380390b9fde3d35e8bbce.css" media="all">
 
 
 
 
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-G41G20SLQN"></script>
-      <script>
-        var doNotTrack = false;
-        if ( false ) {
-          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
-          var doNotTrack = (dnt == "1" || dnt == "yes");
-        }
-        if (!doNotTrack) {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-G41G20SLQN');
-        }
-      </script>
 
 
 
@@ -637,7 +623,7 @@ Firstly, I am interested in pagefile and swapfile collection targeting the root 
 </table>
 <p>Next, add the custom scriptblock into the Invoke-LiveResponse module folder, load and then execute Invoke-LiveResponse.</p>
 <p>The Command line is:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>PS&gt; <span style="font-weight:bold;font-style:italic">Invoke-LiveResponse</span> -mem -custom -vss -WriteScriptblock -LocalOut:$True
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>PS&gt; <span style="font-weight:bold;font-style:italic">Invoke-LiveResponse</span> -mem -custom -vss -WriteScriptblock -LocalOut:<span style="color:#666;font-weight:bold;font-style:italic">$True</span>
 </span></span></code></pre></div><p>This command will output the generated live response script, to which we need to add a copy of WinPMem to the root of the target location. In my case, this was a removable SSD drive mounted as E:.</p>
 <table>
   <thead>
