@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yara on Matt&#39;s DFIR blog</title>
-    <link>https://mgreen27.github.io/tags/yara/</link>
+    <link>https://dfir.au/tags/yara/</link>
     <description>Recent content in Yara on Matt&#39;s DFIR blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 29 May 2019 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://mgreen27.github.io/tags/yara/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://dfir.au/tags/yara/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Binary Rename 2</title>
-      <link>https://mgreen27.github.io/posts/2019/binaryrename2/</link>
+      <link>https://dfir.au/posts/2019/binaryrename2/</link>
       <pubDate>Wed, 29 May 2019 00:00:00 +0000</pubDate>
-      <guid>https://mgreen27.github.io/posts/2019/binaryrename2/</guid>
+      <guid>https://dfir.au/posts/2019/binaryrename2/</guid>
       <description>This is my second Binary Rename post, in this post I am focusing on static detection, that is assessing files on disk. I am going to describe differences between both Yara and Powershell based detections, then share the code.</description>
     </item>
   </channel>

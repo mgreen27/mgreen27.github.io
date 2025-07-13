@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>O365 on Matt&#39;s DFIR blog</title>
-    <link>https://mgreen27.github.io/tags/o365/</link>
+    <link>https://dfir.au/tags/o365/</link>
     <description>Recent content in O365 on Matt&#39;s DFIR blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 09 Jun 2019 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://mgreen27.github.io/tags/o365/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://dfir.au/tags/o365/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>O365: Hidden InboxRules</title>
-      <link>https://mgreen27.github.io/posts/2019/o365_hiddenrules/</link>
+      <link>https://dfir.au/posts/2019/o365_hiddenrules/</link>
       <pubDate>Sun, 09 Jun 2019 00:00:00 +0000</pubDate>
-      <guid>https://mgreen27.github.io/posts/2019/o365_hiddenrules/</guid>
+      <guid>https://dfir.au/posts/2019/o365_hiddenrules/</guid>
       <description>In this post Im going to talk about Office365 hidden inbox rules. Im going to give some background, show rule modification, and talk about detection methodology.</description>
     </item>
   </channel>

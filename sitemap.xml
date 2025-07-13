@@ -2,134 +2,131 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://mgreen27.github.io/tags/ai/</loc>
+    <loc>https://dfir.au/tags/ai/</loc>
     <lastmod>2025-04-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/detection/</loc>
+    <loc>https://dfir.au/tags/detection/</loc>
     <lastmod>2025-04-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/dfir/</loc>
+    <loc>https://dfir.au/tags/dfir/</loc>
     <lastmod>2025-04-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/</loc>
+    <loc>https://dfir.au/</loc>
     <lastmod>2025-04-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/projects/mcp-velociraptor/</loc>
+    <loc>https://dfir.au/projects/mcp-velociraptor/</loc>
     <lastmod>2025-04-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/projects/</loc>
+    <loc>https://dfir.au/projects/</loc>
     <lastmod>2025-04-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/</loc>
+    <loc>https://dfir.au/tags/</loc>
     <lastmod>2025-04-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/velociraptor/</loc>
+    <loc>https://dfir.au/tags/velociraptor/</loc>
     <lastmod>2025-04-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/vql/</loc>
+    <loc>https://dfir.au/tags/vql/</loc>
     <lastmod>2025-04-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/cti/</loc>
+    <loc>https://dfir.au/tags/cti/</loc>
     <lastmod>2024-11-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2024/finding_the_lnk/</loc>
+    <loc>https://dfir.au/posts/2024/finding_the_lnk/</loc>
     <lastmod>2024-11-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2025/finding_the_lnk/</loc>
+    <loc>https://dfir.au/posts/</loc>
     <lastmod>2024-11-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/</loc>
-    <lastmod>2024-11-01T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://mgreen27.github.io/posts/2024/uefi/</loc>
+    <loc>https://dfir.au/posts/2024/uefi/</loc>
     <lastmod>2024-02-29T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/projects/deathcon2023-practical-death-by-velociraptor/</loc>
+    <loc>https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/</loc>
     <lastmod>2023-11-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/projects/content-management-like-a-boss/</loc>
+    <loc>https://dfir.au/projects/content-management-like-a-boss/</loc>
     <lastmod>2023-09-13T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2023/qakbot/</loc>
+    <loc>https://dfir.au/posts/2023/qakbot/</loc>
     <lastmod>2023-04-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/malware/</loc>
+    <loc>https://dfir.au/tags/malware/</loc>
     <lastmod>2023-04-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/projects/detectraptor/</loc>
+    <loc>https://dfir.au/projects/detectraptor/</loc>
     <lastmod>2022-11-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/projects/deathcon-2022-velociraptor-workshop/</loc>
+    <loc>https://dfir.au/projects/deathcon-2022-velociraptor-workshop/</loc>
     <lastmod>2022-11-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/projects/notebook-and-vql-data-munging-your-way-to-victory/</loc>
+    <loc>https://dfir.au/projects/notebook-and-vql-data-munging-your-way-to-victory/</loc>
     <lastmod>2022-09-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/wmi/</loc>
+    <loc>https://dfir.au/tags/wmi/</loc>
     <lastmod>2022-01-12T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2022/wmi-eventing/</loc>
+    <loc>https://dfir.au/posts/2022/wmi-eventing/</loc>
     <lastmod>2022-01-12T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2021/cobaltstrike_vql/</loc>
+    <loc>https://dfir.au/posts/2021/cobaltstrike_vql/</loc>
     <lastmod>2021-11-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2020/ipsec/</loc>
+    <loc>https://dfir.au/posts/2020/ipsec/</loc>
     <lastmod>2020-07-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2019/local_liveresponse_with_vr/</loc>
+    <loc>https://dfir.au/posts/2019/local_liveresponse_with_vr/</loc>
     <lastmod>2019-12-08T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2019/liveresponse_with_vr/</loc>
+    <loc>https://dfir.au/posts/2019/liveresponse_with_vr/</loc>
     <lastmod>2019-11-10T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/edr/</loc>
+    <loc>https://dfir.au/tags/edr/</loc>
     <lastmod>2019-06-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/projects/endpoint-hunting-in-an-antiedr-world/</loc>
+    <loc>https://dfir.au/projects/endpoint-hunting-in-an-antiedr-world/</loc>
     <lastmod>2019-06-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/o365/</loc>
+    <loc>https://dfir.au/tags/o365/</loc>
     <lastmod>2019-06-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2019/o365_hiddenrules/</loc>
+    <loc>https://dfir.au/posts/2019/o365_hiddenrules/</loc>
     <lastmod>2019-06-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/powershell/</loc>
+    <loc>https://dfir.au/tags/powershell/</loc>
     <lastmod>2019-06-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2019/binaryrename2/</loc>
+    <loc>https://dfir.au/posts/2019/binaryrename2/</loc>
     <lastmod>2019-05-29T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/tags/yara/</loc>
+    <loc>https://dfir.au/tags/yara/</loc>
     <lastmod>2019-05-29T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2019/binaryrename/</loc>
+    <loc>https://dfir.au/posts/2019/binaryrename/</loc>
     <lastmod>2019-05-12T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2019/invoke-liveresponse_builder/</loc>
+    <loc>https://dfir.au/posts/2019/invoke-liveresponse_builder/</loc>
     <lastmod>2019-04-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2018/downloadcradle/</loc>
+    <loc>https://dfir.au/posts/2018/downloadcradle/</loc>
     <lastmod>2018-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2018/sharing_my_bits/</loc>
+    <loc>https://dfir.au/posts/2018/sharing_my_bits/</loc>
     <lastmod>2018-02-18T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2018/invoke-liveresponse/</loc>
+    <loc>https://dfir.au/posts/2018/invoke-liveresponse/</loc>
     <lastmod>2018-01-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/projects/invoke-liveresponse/</loc>
+    <loc>https://dfir.au/projects/invoke-liveresponse/</loc>
     <lastmod>2018-01-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2017/wmi_eventing/</loc>
+    <loc>https://dfir.au/posts/2017/wmi_eventing/</loc>
     <lastmod>2017-04-03T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/posts/2017/powershell_remoting_ir/</loc>
+    <loc>https://dfir.au/posts/2017/powershell_remoting_ir/</loc>
     <lastmod>2017-01-12T12:00:00+10:00</lastmod>
   </url><url>
-    <loc>https://mgreen27.github.io/about/</loc>
+    <loc>https://dfir.au/about/</loc>
   </url><url>
-    <loc>https://mgreen27.github.io/g-g41g20slqn/</loc>
+    <loc>https://dfir.au/g-g41g20slqn/</loc>
   </url>
 </urlset>
