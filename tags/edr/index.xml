@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>EDR on Matt's DFIR blog</title><link>https://dfir.au/tags/edr/</link><description>Recent content in EDR on Matt's DFIR blog</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Wed, 26 Jun 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://dfir.au/tags/edr/index.xml" rel="self" type="application/rss+xml"/><item><title>Endpoint Hunting in an AntiEDR World</title><link>https://dfir.au/projects/endpoint-hunting-in-an-antiedr-world/</link><pubDate>Wed, 26 Jun 2019 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/endpoint-hunting-in-an-antiedr-world/</guid><description>&lt;p&gt;With the proliferation of EDR we have seen attackers at all levels upping their game to bypass brittle (and not so brittle) endpoint detection. This talk showcases the background to EDR technology and some practical real world examples of detection bypasses.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/mgreen27/mgreen27.github.io/raw/master/static/talks/2019-06-26-AntiEDR.pdf"&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure class=" img-small"&gt;
+
+ &lt;div&gt;
+ &lt;img loading="lazy" alt="" src="https://dfir.au/projects/endpoint-hunting-in-an-antiedr-world/hunting.png#small" width="439px" height="436px"&gt;
+ &lt;/div&gt;
+
+ 
+ &lt;div class="caption-container"&gt;
+ &lt;figcaption&gt; Download slides &lt;/figcaption&gt;
+ &lt;/div&gt;
+ 
+&lt;/figure&gt;
+&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Originally presented at a local SANs and community event (modification with additional presentations since).&lt;/p&gt;</description></item></channel></rss>

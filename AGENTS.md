@@ -1,7 +1,9 @@
 # Repository Guide
 
-This repository is the source for `https://dfir.au/`. It is a Hugo site
-deployed to GitHub Pages by GitHub Actions.
+This repository is the source for `https://dfir.au/`. It is a Hugo site. The
+source lives in Hugo directories, and generated files are currently committed at
+the repository root so GitHub Pages can publish the existing `master` branch
+source while the Pages settings are still using branch publishing.
 
 ## Layout
 
@@ -12,8 +14,10 @@ deployed to GitHub Pages by GitHub Actions.
 - `static/` contains source-controlled files that should remain browseable in
   GitHub, including downloadable artifacts such as `static/DownloadCradle`.
 - `static/CNAME` preserves the custom domain in the generated Pages artifact.
-- `.github/workflows/pages.yml` builds Hugo and deploys the generated `public/`
-  directory to GitHub Pages.
+- Top-level generated files such as `index.html`, `posts/`, `projects/`,
+  `tags/`, `assets/`, feeds, and sitemaps are the published branch-root output.
+- `.github/workflows/pages.yml` can build Hugo and deploy the generated
+  `public/` directory once GitHub Pages is configured to use GitHub Actions.
 
 The old standalone source repo at `~/git/mgreen27dev` is now a backup. New
 edits should happen in this repository.
@@ -32,6 +36,7 @@ Build locally:
 hugo --gc --minify
 mkdir -p public/static
 rsync -a static/ public/static/
+rsync -a public/ ./
 ```
 
 The `rsync` step preserves legacy published paths under `/static/...` while
@@ -39,19 +44,21 @@ keeping the source files in `static/...` for GitHub browsing links.
 
 ## Publishing Workflow
 
-Commit source changes to `master` and push. GitHub Actions builds and deploys
-the site from `public/`.
+Commit source changes and regenerated branch-root output to `master`, then push.
+This keeps the site live with branch-root GitHub Pages publishing.
 
 The repository should have GitHub Pages configured to use **GitHub Actions** as
-the build and deployment source.
+the build and deployment source when you are ready to stop committing generated
+root output. After that switch, generated root output can be removed and only
+source changes need to be committed.
 
 ## Important Rules
 
 - Edit Markdown in `content/`, not generated HTML.
 - Edit templates in `layouts/` or `themes/typo/`.
 - Keep `public/`, `resources/`, and `.hugo_build.lock` untracked.
-- Do not commit generated HTML, generated feeds, generated tag pages, or
-  generated assets from `public/`.
+- Generated root output is committed for the current branch-root publishing
+  setup. Do not edit generated HTML directly; edit Hugo source and rebuild.
 - Keep `static/CNAME` as `dfir.au`.
 - Be careful with old links that point to GitHub folders such as
   `static/DownloadCradle`; those rely on the source files remaining under
