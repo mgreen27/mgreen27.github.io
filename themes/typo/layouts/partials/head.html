@@ -1,0 +1,44 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+{{ $faviconPath := (.Site.Params.faviconPath | default "" | absURL) }}
+
+<link rel="icon" type="image/ico" href="{{ $faviconPath }}/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ $faviconPath }}/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ $faviconPath }}/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ $faviconPath }}/android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ $faviconPath }}/apple-touch-icon.png">
+
+{{ with .OutputFormats.Get "rss" -}}
+{{ printf `<link rel=%q type=%q href=%q title=%q>` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
+{{ end }}
+
+{{- if .IsHome -}}
+<meta name="description" content="{{ site.Params.Description }}"/>
+{{- else -}}
+<meta name="description" content="{{ .Params.Description }}"/>
+{{- end }}
+
+<title>
+    {{ if .IsHome }}
+    {{ site.Title }}
+    {{ else }}
+    {{ printf "%s | %s" .Title site.Title }}
+    {{ end }}
+</title>
+
+<link rel="canonical" href="{{ .Permalink }}"/>
+
+{{ template "_internal/opengraph.html" . }}
+
+{{ partialCached "head/css.html" . }}
+{{ partialCached "head/js.html" . }}
+
+{{ if hugo.IsProduction }}
+{{ template "_internal/google_analytics.html" . }}
+
+{{ if .Site.Params.umami.enable }}
+{{ partial "umami.html" . }}
+{{ end }}
+{{ end }}
+

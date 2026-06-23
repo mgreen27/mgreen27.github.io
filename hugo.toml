@@ -1,0 +1,79 @@
+baseURL = 'https://dfir.au/'
+locale = 'en-US'
+title = "Matt's DFIR blog"
+#title = "Matthew Green"
+theme = 'typo'
+
+[taxonomies]
+tag = 'tags'
+
+# Google analytics code
+googleAnalytics = "G-G41G20SLQN"
+
+[params]
+# Meta description
+description = "Matt's DFIR blog: Incident Response, DFIR, CTI, Detection, Threat Hunting, Velociraptor, RE, Malware, Programming."
+
+# Appearance settings
+theme = 'auto'
+colorPalette = 'default'
+hideHeader = false
+
+
+# Intro on main page, content is markdown
+#homeIntroTitle = "Matthew Green"
+homeIntroContent = """
+Im a seasoned cybersecurity professional with a passion for incident response, threat intelligence and research.   
+This is a personal DFIR and technology blog to document some of my projects.   
+"""
+
+# Collection to display on home
+homeCollectionTitle = "Posts"
+homeCollection = 'posts'
+
+# Lists parameters
+paginationSize = 25
+listSummaries = true
+
+# Breadcrumbs
+breadcrumbs = true
+
+# Social icons
+[[params.social]]
+name = "github"
+url = "https://github.com/mgreen27"
+
+[[params.social]]
+name = "linkedin"
+url = "https://www.linkedin.com/in/mgreen27/"
+
+[[params.social]]
+name = "x"
+url = "https://x.com/mgreen27"
+
+[[params.social]]
+name = "bluesky"
+url = "https://bsky.app/profile/mgreen27.bsky.social"
+
+# Main menu pages
+[[params.menu]]
+name = "home"
+url = "/"
+
+[[params.menu]]
+name = "posts"
+url = "/posts"
+
+[[params.menu]]
+name = "about"
+url = "/about"
+social = true
+
+[[params.menu]]
+name = "projects"
+url = "/projects"
+
+# Syntax highligth on code blocks
+[markup]
+[markup.highlight]
+style = 'algol'

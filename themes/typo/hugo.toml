@@ -1,0 +1,9 @@
+baseURL = 'https://example.org/'
+locale = 'en-US'
+defaultContentLanguage = 'en-us'
+title = 'typo'
+
+[module]
+[module.hugoVersion]
+extended = false
+min = "0.116.0"

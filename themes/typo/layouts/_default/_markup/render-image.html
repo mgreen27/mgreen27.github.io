@@ -1,0 +1,58 @@
+{{/*
+To get page resources and relative paths to work. Copied as is from default
+hook:
+https://github.com/gohugoio/hugo/blob/89bd02/tpl/tplimpl/embedded/templates/_default/_markup/render-image.html
+*/}}
+{{- $u := urls.Parse .Destination -}}
+{{- $url := $u.String -}}
+{{- $imgResource := .Page.Scratch.Get "typoNilVariable" -}}
+{{- if not $u.IsAbs -}}
+  {{- $path := strings.TrimPrefix "./" $u.Path -}}
+  {{/* Check if this is a page bundle or standalone page */}}
+  {{- if .PageInner.Resources -}}
+    {{- $imgResource = .PageInner.Resources.Get $path -}}
+  {{- else if (or .PageInner.Parent .PageInner.Parent.Resources) -}}
+    {{- $imgResource = .PageInner.Parent.Resources.Get $path -}}
+  {{- end -}}
+  {{- $imgResource := or $imgResource (resources.Get $path) -}}
+  {{- with $imgResource -}}
+    {{- $url = .RelPermalink -}}
+    {{- with $u.RawQuery -}}
+      {{- $url = printf "%s?%s" $url . -}}
+    {{- end -}}
+    {{- with $u.Fragment -}}
+      {{- $url = printf "%s#%s" $url . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{/* Split URL at # */}}
+{{ $url = $url | safeURL }}
+{{ $file_name_array := split $url "#" }}
+
+{{/*
+Iterate over all tags, which are in pos 1 to len array - 1,
+and build the img class string as "img-tag1 img-tag2 ..."
+*/}}
+
+{{ $classes := "" }}
+
+{{ range $idx := seq (sub (len $file_name_array) 1) }}
+{{ $tag := index $file_name_array $idx }}
+{{ $classes = printf "%s img-%s" $classes $tag}}
+{{ end }}
+
+
+{{/* Use the computed classes on the rendered figure */}}
+<figure class="{{ $classes }}">
+
+    <div>
+        <img loading="lazy" alt="{{ .Text }}" src="{{ $url }}" {{ with $imgResource }}width="{{ .Width }}px" height="{{ .Height }}px"{{ end }}>
+    </div>
+
+    {{ with .Title }}
+    <div class="caption-container">
+        <figcaption> {{ . | markdownify}} </figcaption>
+    </div>
+    {{ end }}
+</figure>

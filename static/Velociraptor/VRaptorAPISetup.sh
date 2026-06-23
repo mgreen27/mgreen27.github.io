@@ -86,7 +86,7 @@ wget -P $FOLDER https://raw.githubusercontent.com/Velocidex/velociraptor/master/
 sudo touch /usr/local/lib64/python3.6/site-packages/google/__init__.py
 
 # download client latest release
-wget -P $FOLDER https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/static/other/Velociraptor/processing.py
+wget -P $FOLDER https://raw.githubusercontent.com/mgreen27/mgreen27.github.io/master/static/Velociraptor/processing.py
 wget -P $FOLDER https://github.com/Velocidex/velociraptor/blob/master/bindings/python/client_example.py
 
 
