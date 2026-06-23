@@ -4,7 +4,7 @@ title: "Finding the LNK: Techniques and methodology for advanced analysis"
 date: 2024-11-01
 tags: [DFIR,CTI,Velociraptor]
 showTags: true
-summary: Malicious exploitation of LNK files, commonly known as Windows shortcuts, is a well-established technique used by threat actors for delivery and persistence. While the value of LNK forensics for cyber threat intelligence (CTI) is fairly well-understood, analysts may overlook less well-known data points and miss valuable insights. In this post, we explore the structure of LNK files using Velociraptor. We will walk through each LNK structure and discuss some analysis techniques frequently used on the Rapid7 Labs team.
+summary: Advanced LNK analysis with Velociraptor, covering shortcut structures, suspicious fields, and useful clustering points for DFIR and CTI workflows.
 originalUrl: "https://www.rapid7.com/blog/post/2024/11/01/finding-the-lnk-techniques-and-methodology-for-advanced-analysis-with-velociraptor/"
 ---
 

@@ -4,7 +4,7 @@ title: "CLRaptor: Hunting reflected assemblies with Velociraptor"
 date: 2025-12-01
 tags: [Threat Hunting,DFIR,Velociraptor]
 showTags: true
-summary: ".NET reflection is a common technique used by threat actors throughout the attack lifecycle. In this post, I introduce two Velociraptor capabilities for hunting reflection-loaded assemblies and detecting patched or downgraded CLR instances. I also share techniques to dump suspicious assemblies for analysis, with the goal to help responders identify and investigate suspicious .NET at scale."
+summary: Hunt reflected .NET assemblies at scale with Velociraptor, detect CLR visibility gaps, and dump suspicious in-memory assemblies for analysis.
 originalUrl: "https://labs.infoguard.ch/posts/clraptor_hunting_for_assemblies/"
 ---
 
