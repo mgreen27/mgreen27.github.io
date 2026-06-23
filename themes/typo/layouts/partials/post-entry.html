@@ -8,8 +8,15 @@
     <p class="line-date">{{ .Date | time.Format $dateFormat }} </p>
 
     <div>
+        {{ $href := .RelPermalink }}
+        {{ $isExternal := false }}
+        {{ with .Params.originalUrl }}
+            {{ $href = . }}
+            {{ $isExternal = true }}
+        {{ end }}
+
         <p class="line-title">
-            <a href="{{ .RelPermalink }}">
+            <a href="{{ $href }}"{{ if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end }}>
                 {{ .Title }}
             </a>
         </p>

@@ -5,9 +5,10 @@ date: 2025-12-01
 tags: [Threat Hunting,DFIR,Velociraptor]
 showTags: true
 summary: ".NET reflection is a common technique used by threat actors throughout the attack lifecycle. In this post, I introduce two Velociraptor capabilities for hunting reflection-loaded assemblies and detecting patched or downgraded CLR instances. I also share techniques to dump suspicious assemblies for analysis, with the goal to help responders identify and investigate suspicious .NET at scale."
+originalUrl: "https://labs.infoguard.ch/posts/clraptor_hunting_for_assemblies/"
 ---
 
-> Originally published on [InfoGuard Labs](https://labs.infoguard.ch/posts/clraptor_hunting_for_assemblies/). This local copy is kept here so the article remains available from dfir.au if the external post changes or is removed.
+> This is a local backup. Read the original article on [InfoGuard Labs](https://labs.infoguard.ch/posts/clraptor_hunting_for_assemblies/).
 
 In many intrusions attackers are observed using .NET across the attack lifecycle: payload execution by PowerShell cradles or other “living-off-the-land” binaries; ASP.NET webshells; in-memory C2 agents or capability for specific objectives. A key component of this activity is reflection - the ability to load assemblies and execute code dynamically at runtime.
 

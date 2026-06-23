@@ -5,9 +5,10 @@ date: 2024-11-01
 tags: [DFIR,CTI,Velociraptor]
 showTags: true
 summary: Malicious exploitation of LNK files, commonly known as Windows shortcuts, is a well-established technique used by threat actors for delivery and persistence. While the value of LNK forensics for cyber threat intelligence (CTI) is fairly well-understood, analysts may overlook less well-known data points and miss valuable insights. In this post, we explore the structure of LNK files using Velociraptor. We will walk through each LNK structure and discuss some analysis techniques frequently used on the Rapid7 Labs team.
+originalUrl: "https://www.rapid7.com/blog/post/2024/11/01/finding-the-lnk-techniques-and-methodology-for-advanced-analysis-with-velociraptor/"
 ---
 
-> Originally published on the [Rapid7 blog](https://www.rapid7.com/blog/post/2024/11/01/finding-the-lnk-techniques-and-methodology-for-advanced-analysis-with-velociraptor/). This local copy is kept here so the article remains available from dfir.au if the external post changes or is removed.
+> This is a local backup. Read the original article on the [Rapid7 blog](https://www.rapid7.com/blog/post/2024/11/01/finding-the-lnk-techniques-and-methodology-for-advanced-analysis-with-velociraptor/).
 
 Malicious exploitation of LNK files, commonly known as Windows shortcuts, is a well-established technique used by threat actors for delivery and persistence. While the value of LNK forensics for cyber [threat intelligence](https://www.rapid7.com/fundamentals/what-is-threat-intelligence/) (CTI) is fairly well-understood, analysts may overlook less well-known data points and miss valuable insights. In this post, we explore the structure of LNK files using Velociraptor, our open-source [digital forensics and incident response (DFIR)](https://www.rapid7.com/fundamentals/digital-forensics-and-incident-response-dfir/) tool. We will walk through each LNK structure and discuss some analysis techniques frequently used on the Rapid7 Labs team. Many of these capabilities are now featured in the latest Velociraptor, which we have shared with the community in the [0.73 release](https://github.com/Velocidex/velociraptor/releases/tag/v0.73).
 
