@@ -43,5 +43,14 @@ Both the local build script and the Actions build run the check. The current
 GitHub Pages configuration publishes committed branch-root files from `master`;
 use `--publish-root`, then review, commit and push to publish new decisions.
 The Actions deployment requires Pages to be configured for GitHub Actions.
-There is no scheduled monitor or per-click check. A remote failure after the
-last build is handled on the next checked build and deployment.
+The Pages workflow runs an **Original articles must be reachable** job alongside
+the build, on pushes to `master` and manual workflow runs. It uses the read-only
+checker and fails for unavailable or inconclusive results, with URL details in
+the run summary. Deployment depends only on the build job, so a link-check
+failure does not prevent the build's local fallback from being published.
+There is no scheduled monitor or per-click check.
+
+Enable GitHub Actions email/web notifications, optionally **Send notifications
+for failed workflows only**, in your GitHub notification settings. Delivery is
+controlled by GitHub and your account preferences; the workflow itself does not
+send email.

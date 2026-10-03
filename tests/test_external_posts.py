@@ -77,6 +77,19 @@ class LinkChecks(unittest.TestCase):
             with self.subTest(error=error), patch.object(links, 'urlopen', side_effect=error):
                 self.assertEqual(links.probe(ARTICLE)[0], expected)
 
+    def test_read_only_cli_fails_for_unavailable_or_unknown_without_writing_state(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / 'state.json'
+            state.write_text('{}\n')
+            for status, expected in [('available', 0), ('unavailable', 1), ('unknown', 1)]:
+                result = dict(status=status, use_backup=status == 'unavailable', detail='test', attempts=3)
+                with self.subTest(status=status), patch.object(links, 'STATE', state), \
+                     patch.object(links, 'articles', return_value=[ARTICLE]), \
+                     patch.object(links, 'check', return_value=result), \
+                     patch('sys.argv', ['check_external_posts.py']), patch('builtins.print'):
+                    self.assertEqual(links.main(), expected)
+                    self.assertEqual(state.read_text(), '{}\n')
+
     def test_three_failures_select_backup(self):
         result = links.check(ARTICLE, {}, delay=0, fetch=lambda _: ('unavailable', 'HTTP 404'))
         self.assertTrue(result['use_backup'])

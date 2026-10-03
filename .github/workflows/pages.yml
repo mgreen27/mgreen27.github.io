@@ -55,3 +55,46 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  check-links:
+    name: Original articles must be reachable
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Check original article URLs
+        id: check
+        shell: bash
+        run: |
+          # pipefail preserves the checker's failure status through tee.
+          set -o pipefail
+          python3 scripts/check_external_posts.py | tee "$RUNNER_TEMP/article-links.txt"
+
+      - name: Publish link-check report
+        if: always()
+        shell: bash
+        env:
+          CHECK_OUTCOME: ${{ steps.check.outcome }}
+        run: |
+          {
+            echo '## Original article link check'
+            echo
+            echo '```text'
+            if [ -f "$RUNNER_TEMP/article-links.txt" ]; then
+              cat "$RUNNER_TEMP/article-links.txt"
+            else
+              echo 'No report produced. Inspect the checkout and check step logs.'
+            fi
+            echo '```'
+            if [ "$CHECK_OUTCOME" != 'success' ]; then
+              echo
+              echo 'Action required: review unavailable or inconclusive URLs in the report and step logs. Verify the original in a browser, update originalUrl if it moved, or rebuild and deploy to activate the local backup for confirmed outages.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CHECK_OUTCOME" != 'success' ]; then
+            echo '::error title=Original article links need attention::An original article is unavailable, could not be verified, or the checker failed. See the run summary and logs.'
+          fi
