@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en-US"
+  dir="ltr">
+
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+
+<link rel="icon" type="image/ico" href="http://localhost:1313//favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313//favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313//favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="http://localhost:1313//android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="http://localhost:1313//apple-touch-icon.png">
+
+<meta name="description" content=""/>
+
+<title>
+    
+    AI Ate My DFIR Homework | Matt&#39;s DFIR blog
+    
+</title>
+
+<link rel="canonical" href="http://localhost:1313/posts/2026/ai-ate-my-dfir-homework/"/>
+
+<meta property="og:url" content="http://localhost:1313/posts/2026/ai-ate-my-dfir-homework/">
+	<meta property="og:site_name" content="Matt&#39;s DFIR blog">
+	<meta property="og:title" content="AI Ate My DFIR Homework">
+	<meta property="og:description" content="Notes from research into automated AI-assisted DFIR analysis, including Velociraptor workflows, repeatable analysis skills, and where human judgement still matters.">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-06-24T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-06-24T00:00:00+00:00">
+		<meta property="article:tag" content="DFIR">
+		<meta property="article:tag" content="AI">
+		<meta property="article:tag" content="Velociraptor">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/assets/combined.min.3754dd52cfca457629cb7a992ab2e642318caccd6423e457dbf5be99d9192899.css" media="all">
+
+
+
+
+
+  </head>
+
+  
+
+  
+  
+  
+
+  <body class="auto">
+
+    <div class="content">
+      <header>
+        
+
+<div class="header">
+
+    
+
+    <h1 class="header-title">
+        <a href="http://localhost:1313/">Matt&#39;s DFIR blog</a>
+    </h1>
+
+    <div class="flex">
+        
+
+        
+        
+      
+        <p class="small ">
+            <a href="/" >
+                /home
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/posts" >
+                /posts
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/about" >
+                /about
+            </a>
+        </p>
+        
+      
+        <p class="small ">
+            <a href="/projects" >
+                /projects
+            </a>
+        </p>
+        
+        
+    </div>
+
+    
+
+</div>
+
+      </header>
+
+      <main class="main">
+        
+
+
+
+
+
+<div class="breadcrumbs">
+    
+    <a href="/">Home</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a href="/posts/">Posts</a>
+    <span class="breadcrumbs-separator"> > </span>
+    
+    <a class="breadcrumbs-current" href="/posts/2026/ai-ate-my-dfir-homework/">AI Ate My DFIR Homework</a>
+</div>
+
+
+
+<div >
+
+  <div class="single-intro-container">
+
+    
+
+    <h1 class="single-title">AI Ate My DFIR Homework</h1>
+    
+    <p class="single-summary">Notes from research into automated AI-assisted DFIR analysis, including Velociraptor workflows, repeatable analysis skills, and where human judgement still matters.</p>
+    
+
+    
+
+    <p class="single-readtime">
+      
+      
+      
+      <time datetime="2026-06-24T00:00:00&#43;00:00">June 24, 2026</time>
+      
+
+      
+    </p>
+
+  </div>
+
+  
+
+  
+  
+
+  <div class="single-tags">
+    
+    <span>
+      <a href="http://localhost:1313/tags/dfir/">#DFIR</a>
+    </span>
+    
+    
+    <span>
+      <a href="http://localhost:1313/tags/ai/">#AI</a>
+    </span>
+    
+    
+    <span>
+      <a href="http://localhost:1313/tags/velociraptor/">#Velociraptor</a>
+    </span>
+    
+    
+  </div>
+
+  
+  
+
+  
+
+  
+
+  
+
+  <div class="single-content">
+    <p>I have been spending time researching how AI can help with DFIR analysis without turning the whole process into a magic black box. The short version is: AI can eat some of the homework, but it still needs a good analyst setting the task, checking the reasoning, and deciding what matters.</p>
+<p>This post is a starting point for sharing that work. I will be releasing some AI skills and talking through the analysis patterns behind them: what worked, what failed, and where automation actually made investigations faster.</p>
+<h2 class="heading" id="why-this-matters">
+  Why This Matters
+  <a href="#why-this-matters">#</a>
+</h2>
+<p>DFIR work often involves a lot of repetitive interpretation:</p>
+<ul>
+<li>reviewing endpoint collections</li>
+<li>summarising suspicious process activity</li>
+<li>pulling signal out of noisy event logs</li>
+<li>comparing artifacts across hosts</li>
+<li>turning notebook output into investigation notes</li>
+<li>deciding what to inspect next</li>
+</ul>
+<p>None of those tasks disappear just because AI is in the loop. The question I am interested in is more practical: can we give an analyst a reliable assistant that handles the first pass, preserves evidence, explains its reasoning, and makes the next decision easier?</p>
+<p>That is the area I have been testing.</p>
+<h2 class="heading" id="where-velociraptor-fits">
+  Where Velociraptor Fits
+  <a href="#where-velociraptor-fits">#</a>
+</h2>
+<p>Velociraptor is a great place to explore this because it already gives us structured, repeatable collection and analysis. VQL notebooks, artifacts, hunts, and offline collections all provide data with enough shape that an AI workflow can reason over it more safely than a raw pile of logs.</p>
+<p>The pattern I keep coming back to is:</p>
+<ol>
+<li>collect the right data with Velociraptor</li>
+<li>reduce it into a useful analysis view</li>
+<li>ask AI to explain, cluster, enrich, or prioritise the results</li>
+<li>keep the analyst in control of the conclusion</li>
+</ol>
+<p>In other words, I am not trying to replace the DFIR workflow. I am trying to make the boring parts less boring and the important parts easier to see.</p>
+<h2 class="heading" id="skills-not-spells">
+  Skills, Not Spells
+  <a href="#skills-not-spells">#</a>
+</h2>
+<p>One of the traps with AI tooling is pretending that a single prompt can do everything. In practice, the useful work comes from narrower skills that know their job.</p>
+<p>For DFIR, that might mean skills that can:</p>
+<ul>
+<li>summarise a Velociraptor collection</li>
+<li>review process execution for suspicious chains</li>
+<li>explain a VQL notebook result</li>
+<li>triage persistence artifacts</li>
+<li>generate investigation notes from evidence</li>
+<li>identify gaps in the collection</li>
+<li>suggest follow-up Velociraptor artifacts to run</li>
+</ul>
+<p>The skill needs to be small enough to test, repeat, and improve. If it cannot explain how it got to an answer, it is probably not ready for incident response.</p>
+<h2 class="heading" id="what-i-am-looking-for">
+  What I Am Looking For
+  <a href="#what-i-am-looking-for">#</a>
+</h2>
+<p>The research so far has focused on a few practical questions:</p>
+<ul>
+<li>How much context does the AI need before it starts making useful observations?</li>
+<li>Which DFIR tasks are safe to automate, and which should only be assisted?</li>
+<li>How do we keep citations back to evidence instead of producing unsupported summaries?</li>
+<li>Can we make Velociraptor output easier to review without hiding the raw data?</li>
+<li>What does a good handoff between AI and analyst look like?</li>
+</ul>
+<p>The answer is not &ldquo;just add AI.&rdquo; The better answer is careful workflow design: structured inputs, constrained tasks, visible reasoning, and fast validation.</p>
+<h2 class="heading" id="next-steps">
+  Next Steps
+  <a href="#next-steps">#</a>
+</h2>
+<p>I will be sharing some of the AI skills I have been building and using this blog to talk through the analysis behind them. Expect a mix of Velociraptor, DFIR workflow notes, and practical examples from automated analysis experiments.</p>
+<p>AI did not really eat my DFIR homework. But it might help sort the pile, highlight the weird bits, and leave me more time to do the actual investigation.</p>
+
+    
+  </div>
+
+  
+
+
+  
+
+  
+  
+
+<div class="single-pagination">
+    <hr />
+
+    <div class="flex">
+
+        <div class="single-pagination-prev">
+            
+            <div class="single-pagination-container-prev">
+                <div class="single-pagination-text">←</div>
+                <div class="single-pagination-text">
+                    <a href="/posts/2025/clraptor_hunting_for_assemblies/">
+                        CLRaptor: Hunting reflected assemblies with Velociraptor
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="single-pagination-next">
+            
+        </div>
+
+    </div>
+
+    <hr />
+</div>
+
+
+
+  
+
+  
+
+  
+  <div class="back-to-top">
+    <a href="#top">
+      back to top
+    </a>
+  </div>
+  
+
+</div>
+
+
+      </main>
+    </div>
+
+    <footer>
+      
+
+    
+    <p>Powered by
+        <a href="https://gohugo.io/">Hugo</a>
+        and
+        <a href="https://github.com/tomfran/typo">tomfran/typo</a>
+    </p>
+    
+    
+    
+
+
+    </footer>
+
+    
+
+  </body>
+
+  <script>
+
+  function isAuto() {
+    return document.body.classList.contains("auto");
+  }
+
+  function setTheme() {
+    if (!isAuto()) {
+      return
+    }
+
+    document.body.classList.remove("auto");
+    let cls = "light";
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      cls = "dark";
+    }
+
+    document.body.classList.add(cls);
+  }
+
+  function invertBody() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+  }
+
+  if (isAuto()) {
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(invertBody);
+  }
+
+  setTheme();
+
+</script>
+
+</html>

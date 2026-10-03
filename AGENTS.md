@@ -33,13 +33,12 @@ hugo server --bind 127.0.0.1
 Build locally:
 
 ```sh
-hugo --gc --minify
-mkdir -p public/static
-rsync -a static/ public/static/
-rsync -a public/ ./
+sh scripts/build-site.sh --publish-root
 ```
 
-The `rsync` step preserves legacy published paths under `/static/...` while
+The build checks original article URLs, saves fallback decisions, verifies local
+backup pages and images, and refreshes branch-root output. See `hugo.md` for
+link-check behaviour. The `rsync` steps preserve legacy published paths under `/static/...` while
 keeping the source files in `static/...` for GitHub browsing links.
 
 ## Publishing Workflow

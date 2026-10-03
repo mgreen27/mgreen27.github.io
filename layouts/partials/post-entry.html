@@ -1,0 +1,30 @@
+<div class="post-line">
+    {{ $dateFormat := "2 Jan 2006" }}
+    {{ with .Site.Params.listDateFormat }}{{ $dateFormat = . }}{{ end }}
+    <p class="line-date">{{ .Date | time.Format $dateFormat }}</p>
+    <div>
+        {{ $href := .RelPermalink }}
+        {{ $isExternal := false }}
+        {{ $useBackup := false }}
+        {{ with .Params.originalUrl }}
+            {{ with index (hugo.Data.original_links | default dict) . }}
+                {{ $useBackup = .use_backup | default false }}
+            {{ end }}
+            {{ if not $useBackup }}
+                {{ $href = . }}
+                {{ $isExternal = true }}
+            {{ end }}
+        {{ end }}
+        <p class="line-title">
+            <a href="{{ $href }}"{{ if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Title }}</a>
+        </p>
+        {{ if .Site.Params.listSummaries }}
+        <p class="line-summary">{{ .Summary }}</p>
+        {{ end }}
+        {{ with .Params.originalUrl }}
+        <p class="line-summary">
+            <a href="{{ $.RelPermalink }}">Local backup</a>{{ if $useBackup }} · Original currently unavailable{{ end }}
+        </p>
+        {{ end }}
+    </div>
+</div>

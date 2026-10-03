@@ -38,10 +38,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Build
-        run: |
-          hugo --gc --minify
-          mkdir -p public/static
-          rsync -a static/ public/static/
+        run: sh scripts/build-site.sh
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
