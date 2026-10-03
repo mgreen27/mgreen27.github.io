@@ -1,0 +1,11 @@
+{{- $description := .Description -}}
+{{- if not $description -}}
+    {{- if .IsHome -}}
+        {{- $description = site.Params.description -}}
+    {{- else if .IsPage -}}
+        {{- $description = .Summary | plainify | htmlUnescape | replaceRE `\s+` " " | strings.TrimSpace | truncate 170 -}}
+    {{- else -}}
+        {{- $description = printf "%s from Matthew Green’s DFIR blog: incident response, threat intelligence, Velociraptor and security research." .Title -}}
+    {{- end -}}
+{{- end -}}
+{{- return $description -}}

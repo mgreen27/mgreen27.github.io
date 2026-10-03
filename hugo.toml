@@ -7,12 +7,13 @@ theme = 'typo'
 [taxonomies]
 tag = 'tags'
 
-# Google analytics code
-googleAnalytics = "G-G41G20SLQN"
+[services.googleAnalytics]
+id = "G-G41G20SLQN"
 
 [params]
 # Meta description
-description = "Matt's DFIR blog: Incident Response, DFIR, CTI, Detection, Threat Hunting, Velociraptor, RE, Malware, Programming."
+description = "DFIR research, incident response techniques and open-source security tools by Matthew Green, including Velociraptor hunting and forensic analysis."
+authorName = "Matthew Green"
 
 # Appearance settings
 theme = 'auto'
@@ -23,8 +24,7 @@ hideHeader = false
 # Intro on main page, content is markdown
 #homeIntroTitle = "Matthew Green"
 homeIntroContent = """
-Im a seasoned cybersecurity professional with a passion for incident response, threat intelligence and research.   
-This is a personal DFIR and technology blog to document some of my projects.   
+I’m a cybersecurity professional focused on incident response, threat intelligence and research. This blog shares my DFIR projects, tools and technical findings.
 """
 
 # Collection to display on home
@@ -50,10 +50,6 @@ url = "https://www.linkedin.com/in/mgreen27/"
 [[params.social]]
 name = "x"
 url = "https://x.com/mgreen27"
-
-[[params.social]]
-name = "bluesky"
-url = "https://bsky.app/profile/mgreen27.bsky.social"
 
 # Main menu pages
 [[params.menu]]

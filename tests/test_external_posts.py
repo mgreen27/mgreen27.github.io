@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from unittest.mock import patch
 from urllib.error import HTTPError, URLError
 from io import BytesIO
@@ -14,6 +15,33 @@ spec = importlib.util.spec_from_file_location('links', ROOT / 'scripts/check_ext
 links = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(links)
 ARTICLE = dict(title='AI Ate My Velociraptor', url='https://example.test/article/', path='posts/test')
+
+
+class SEOHead(links.HTMLParser):
+    def __init__(self, html):
+        super().__init__()
+        self.description = None
+        self.canonical = None
+        self.schema_text = ''
+        self.in_schema = False
+        self.feed(html)
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == 'meta' and attrs.get('name') == 'description':
+            self.description = attrs.get('content')
+        if tag == 'link' and attrs.get('rel') == 'canonical':
+            self.canonical = attrs['href']
+        if tag == 'script' and attrs.get('type') == 'application/ld+json':
+            self.in_schema = True
+
+    def handle_endtag(self, tag):
+        if tag == 'script':
+            self.in_schema = False
+
+    def handle_data(self, text):
+        if self.in_schema:
+            self.schema_text += text
 
 
 class Response(BytesIO):
@@ -105,15 +133,34 @@ class HugoRouting(unittest.TestCase):
                                cwd=ROOT, check=True, capture_output=True, text=True)
                 for listing in ['index.html', 'posts/index.html', 'tags/dfir/index.html']:
                     html = (output / listing).read_text()
+                    title_links = '\n'.join(links.re.findall(r'<p class=["\']?line-title["\']?>.*?</p>', html, links.re.S))
                     for item in items:
                         # Minified Hugo output can omit quotes around href values.
                         expected = '/' + item['path'] + '/' if use_backup else item['url']
-                        self.assertRegex(html, 'href=["\']?' + links.re.escape(expected))
-                        self.assertIn('/' + item['path'] + '/', html)
+                        self.assertRegex(title_links, 'href=["\']?' + links.re.escape(expected))
+                        if not use_backup:
+                            self.assertNotIn('/' + item['path'] + '/', title_links)
                         if use_backup:
-                            self.assertNotIn(item['url'], html)
-                if use_backup:
-                    self.assertIn('Original currently unavailable', (output / 'index.html').read_text())
+                            self.assertNotIn(item['url'], title_links)
+                sitemap = {node.text for node in ET.parse(output / 'sitemap.xml').iter()
+                           if node.tag.endswith('}loc')}
+                self.assertFalse(any('g-g41g20slqn' in url for url in sitemap))
+                self.assertFalse((output / 'g-g41g20slqn/index.html').exists())
+                self.assertIn('Sitemap: https://dfir.au/sitemap.xml', (output / 'robots.txt').read_text())
+                for item in items:
+                    local = 'https://dfir.au/' + item['path'] + '/'
+                    page = SEOHead((output / item['path'] / 'index.html').read_text())
+                    self.assertTrue(page.description)
+                    self.assertEqual(page.canonical, local if use_backup else item['url'])
+                    self.assertEqual(local in sitemap, use_backup)
+                    schema = json.loads(page.schema_text)
+                    self.assertEqual(schema['@type'], 'BlogPosting')
+                    self.assertEqual(schema['mainEntityOfPage'], page.canonical)
+                    self.assertEqual(schema['author']['name'], 'Matthew Green')
+                    self.assertIn('datePublished', schema)
+                for path in ['index.html', 'about/index.html', 'posts/index.html',
+                             'projects/index.html', 'projects/velociraptor-skills/index.html']:
+                    self.assertTrue(SEOHead((output / path).read_text()).description, path)
                 links.validate_backups(items, output)
 
 

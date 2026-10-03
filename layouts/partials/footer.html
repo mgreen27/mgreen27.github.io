@@ -1,0 +1,10 @@
+{{ if ne .Site.Params.showFooter false }}
+<div class="site-footer">
+    {{ partial "social-links.html" . }}
+    {{ with .Site.Params.footerContent }}
+    <p>{{ . | markdownify }}</p>
+    {{ else }}
+    <p>Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/tomfran/typo">tomfran/typo</a></p>
+    {{ end }}
+</div>
+{{ end }}

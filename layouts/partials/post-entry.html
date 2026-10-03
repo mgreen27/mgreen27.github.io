@@ -21,10 +21,5 @@
         {{ if .Site.Params.listSummaries }}
         <p class="line-summary">{{ .Summary }}</p>
         {{ end }}
-        {{ with .Params.originalUrl }}
-        <p class="line-summary">
-            <a href="{{ $.RelPermalink }}">Local backup</a>{{ if $useBackup }} · Original currently unavailable{{ end }}
-        </p>
-        {{ end }}
     </div>
 </div>

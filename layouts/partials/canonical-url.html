@@ -1,0 +1,6 @@
+{{- $url := .Permalink -}}
+{{- with .Params.originalUrl -}}
+    {{- $state := index (hugo.Data.original_links | default dict) . | default dict -}}
+    {{- if not ($state.use_backup | default false) -}}{{- $url = . -}}{{- end -}}
+{{- end -}}
+{{- return $url -}}

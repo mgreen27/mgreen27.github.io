@@ -6,12 +6,15 @@ sh scripts/build-site.sh                # Check links and build public/
 sh scripts/build-site.sh --publish-root # Also refresh branch-root Pages output
 ```
 
-The build does not commit, push, or change GitHub Pages settings.
+The build clears stale files from the generated `public/` directory before
+validating and copying output. It does not commit, push, or change GitHub Pages
+settings.
 
 ## External articles and local backups
 
 Posts with `originalUrl` retain their full article and local images on this site.
-Listings normally open the original, with a separate **Local backup** link.
+Listings normally open the original. Local copies remain available at their own
+URLs and are used automatically when the saved routing decision selects a backup.
 The checker follows HTTP redirects and verifies the article title or H1, so a
 200 response from an unrelated landing page is not treated as healthy.
 
@@ -41,5 +44,4 @@ GitHub Pages configuration publishes committed branch-root files from `master`;
 use `--publish-root`, then review, commit and push to publish new decisions.
 The Actions deployment requires Pages to be configured for GitHub Actions.
 There is no scheduled monitor or per-click check. A remote failure after the
-last build is handled on the next checked build and deployment; the visible
-local backup link remains available immediately.
+last build is handled on the next checked build and deployment.
