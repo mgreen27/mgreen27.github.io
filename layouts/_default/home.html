@@ -3,7 +3,7 @@
   <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> MATTHEW GREEN / AUSTRALIA</p>
   <h1 id="hero-title">AI engineering.<br>For DFIR &amp;<br><em>threat intelligence.</em></h1>
   <p class="hero-description">I help DFIR and threat intelligence teams build AI-assisted workflows for evidence analysis, research and enrichment—grounded in investigation experience and evaluated against real tasks.</p>
-  <div class="actions"><a class="button primary" href="{{ "/contact/" | relURL }}">Discuss a project <span aria-hidden="true">↗</span></a><a class="text-link" href="{{ "/posts/" | relURL }}">Explore the research <span aria-hidden="true">→</span></a></div>
+  <div class="actions"><a class="button primary" href="{{ "/contact/" | relURL }}">Discuss a project <span aria-hidden="true">↗</span></a><a class="text-link" href="{{ "/posts/" | relURL }}">Explore the articles <span aria-hidden="true">→</span></a></div>
   <div class="expertise-strip"><span>DIGITAL FORENSICS</span><span>INCIDENT RESPONSE</span><span>THREAT INTELLIGENCE</span><span>AI ENGINEERING</span></div>
 </section>
 <section class="home-section" aria-labelledby="services-title">
@@ -19,7 +19,7 @@
   </div>
 </section>
 <section class="home-section research-section" aria-labelledby="research-title">
-  <div class="section-heading"><div><p class="eyebrow">FROM THE FIELD</p><h2 id="research-title">Research &amp; writing</h2></div><a class="text-link" href="{{ "/posts/" | relURL }}">All articles <span aria-hidden="true">→</span></a></div>
+  <div class="section-heading"><div><p class="eyebrow">FROM THE FIELD</p><h2 id="research-title">Latest articles</h2></div><a class="text-link" href="{{ "/posts/" | relURL }}">All articles <span aria-hidden="true">→</span></a></div>
   {{ range first 4 (where site.RegularPages "Section" "posts").ByDate.Reverse }}{{ partial "post-entry.html" . }}{{ end }}
 </section>
 <section class="contact-band"><div><p class="eyebrow">LET’S WORK THROUGH IT</p><h2>What does your team need to do better?</h2><p>Discuss a DFIR or threat intelligence workflow you want to improve with AI.</p></div><a class="button primary" href="{{ "/contact/" | relURL }}">Discuss a project <span aria-hidden="true">↗</span></a></section>

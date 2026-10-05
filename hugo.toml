@@ -28,7 +28,7 @@ I help DFIR and threat intelligence teams build and evaluate AI-assisted investi
 """
 
 # Collection to display on home
-homeCollectionTitle = "Posts"
+homeCollectionTitle = "Latest articles"
 homeCollection = 'posts'
 
 # Lists parameters
@@ -57,7 +57,7 @@ name = "consulting"
 url = "/consulting/"
 
 [[params.menu]]
-name = "research"
+name = "articles"
 url = "/posts/"
 
 [[params.menu]]
