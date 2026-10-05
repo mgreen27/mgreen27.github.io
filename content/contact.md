@@ -4,7 +4,9 @@ title: Let’s discuss your project
 eyebrow: GET IN TOUCH
 description: Tell me what you need to investigate, review or improve in your DFIR and threat intelligence workflows.
 ---
-For consulting enquiries, contact me through [LinkedIn](https://www.linkedin.com/in/mgreen27/). I’m based in Australia.
+For consulting enquiries, email [matt@dfir.au](mailto:matt@dfir.au). I’m based in Australia.
+
+You can also contact me through [LinkedIn](https://www.linkedin.com/in/mgreen27/).
 
 ## What to include
 
