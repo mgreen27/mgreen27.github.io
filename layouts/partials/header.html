@@ -1,6 +1,12 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 <div class="site-header" id="top">
-  <a class="brand" href="{{ "/" | relURL }}" aria-label="Matthew Green — home"><img class="brand-icon" src="{{ "/brand-smiley.png" | relURL }}" alt="" width="48" height="48"><span class="brand-name">Matthew Green<span>{{ partial "site-label.html" . }}</span></span></a>
+  <div class="brand">
+    <a href="{{ "/" | relURL }}" aria-label="Matthew Green — home"><img class="brand-icon" src="{{ "/brand-smiley.png" | relURL }}" alt="" width="48" height="48"></a>
+    <div>
+      <div class="brand-identity"><a class="brand-name" href="{{ "/" | relURL }}">Matthew Green</a><span class="brand-handle"><span aria-hidden="true">· </span><a href="https://x.com/mgreen27" rel="me" aria-label="@mgreen27 on X">@mgreen27</a></span></div>
+      <span class="brand-tagline">{{ partial "site-label.html" . }}</span>
+    </div>
+  </div>
   <nav aria-label="Main navigation">
     {{ $page := . }}
     {{ range site.Params.menu }}

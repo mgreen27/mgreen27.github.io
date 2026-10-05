@@ -9,11 +9,16 @@ a:hover { color: var(--accent); }
 a:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
 .skip-link { position: absolute; left: -10000px; }
 .skip-link:focus { left: 24px; top: 8px; z-index: 5; background: var(--background); padding: 12px; }
-.site-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 30px 0; border-bottom: 1px solid var(--line); font-family: var(--sans); }
-.brand { display: flex; align-items: center; gap: 15px; text-decoration: none; }
+.site-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; padding: 30px 0; border-bottom: 1px solid var(--line); font-family: var(--sans); }
+.brand { display: flex; min-width: 0; align-items: center; gap: 15px; text-decoration: none; }
 .brand-icon { display: block; width: 48px; height: 48px; flex-shrink: 0; image-rendering: pixelated; }
+.brand a { text-decoration: none; }
+.brand-identity { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 7px; }
+.brand-handle { white-space: nowrap; font-size: 12px; color: var(--content-secondary); }
+.brand-handle a { color: inherit; }
+.brand-handle a:hover, .brand-handle a:focus-visible { color: var(--accent); }
 .brand-name { font-size: 16px; font-weight: 650; line-height: 1.5; }
-.brand-name > span { display: block; font-family: var(--font-mono); font-size: 8px; letter-spacing: .07em; font-weight: 400; color: var(--content-secondary); }
+.brand-tagline { display: block; font-family: var(--font-mono); font-size: 8px; letter-spacing: .07em; font-weight: 400; color: var(--content-secondary); }
 .site-header nav { display: flex; align-items: center; gap: 22px; }
 .site-header nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; text-decoration: none; }
 .site-header nav a[aria-current] { text-decoration: underline; text-decoration-color: var(--accent); }

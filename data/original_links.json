@@ -4,34 +4,34 @@
     "use_backup": false,
     "detail": "HTTP 200: https://www.rapid7.com/blog/post/2024/11/01/finding-the-lnk-techniques-and-methodology-for-advanced-analysis-with-velociraptor/",
     "attempts": 1,
-    "checked_at": "2026-10-05T11:45:42+00:00"
+    "checked_at": "2026-10-05T11:54:29+00:00"
   },
   "https://www.rapid7.com/globalassets/_pdfs/whitepaperguide/rapid7-Kimsukys-Phishing-and-Payload-Tactics_wp.pdf": {
     "status": "available",
     "use_backup": false,
     "detail": "HTTP 200: https://www.rapid7.com/globalassets/_pdfs/whitepaperguide/rapid7-Kimsukys-Phishing-and-Payload-Tactics_wp.pdf (PDF SHA-256 verified)",
     "attempts": 1,
-    "checked_at": "2026-10-05T11:45:42+00:00"
+    "checked_at": "2026-10-05T11:54:29+00:00"
   },
   "https://www.rapid7.com/blog/post/2024/02/29/how-to-hunt-for-uefi-malware-using-velociraptor/": {
     "status": "available",
     "use_backup": false,
     "detail": "HTTP 200: https://www.rapid7.com/blog/post/2024/02/29/how-to-hunt-for-uefi-malware-using-velociraptor/",
     "attempts": 1,
-    "checked_at": "2026-10-05T11:45:42+00:00"
+    "checked_at": "2026-10-05T11:54:29+00:00"
   },
   "https://labs.infoguard.ch/posts/clraptor_hunting_for_assemblies/": {
     "status": "available",
     "use_backup": false,
     "detail": "HTTP 200: https://labs.infoguard.ch/posts/clraptor_hunting_for_assemblies/",
     "attempts": 1,
-    "checked_at": "2026-10-05T11:45:42+00:00"
+    "checked_at": "2026-10-05T11:54:29+00:00"
   },
   "https://labs.infoguard.ch/posts/ai_ate_my_velociraptor/": {
     "status": "available",
     "use_backup": false,
     "detail": "HTTP 200: https://labs.infoguard.ch/posts/ai_ate_my_velociraptor/",
     "attempts": 1,
-    "checked_at": "2026-10-05T11:45:42+00:00"
+    "checked_at": "2026-10-05T11:54:29+00:00"
   }
 }
