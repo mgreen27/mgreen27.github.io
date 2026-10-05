@@ -4,7 +4,7 @@ title: Let’s discuss your project
 eyebrow: GET IN TOUCH
 description: Tell me which DFIR or threat intelligence workflow you want to improve with AI.
 ---
-For consulting enquiries, contact me through [LinkedIn](https://www.linkedin.com/in/mgreen27/). I’m based in Sydney, Australia.
+For consulting enquiries, contact me through [LinkedIn](https://www.linkedin.com/in/mgreen27/). I’m based in Australia.
 
 ## What to include
 

@@ -1,7 +1,7 @@
 ---
 layout: page
 title: About
-description: "Matthew Green — DFIR, threat intelligence and AI engineering. Based in Sydney, Australia."
+description: "Matthew Green — DFIR, threat intelligence and AI engineering. Based in Australia."
 permalink: /about/
 ---
 I’m a cybersecurity professional focused on DFIR, threat intelligence and AI engineering.
