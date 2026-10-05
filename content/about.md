@@ -7,7 +7,7 @@ permalink: /about/
 ---
 I’m an Australian cybersecurity professional focused on DFIR, threat intel and research.
 
-My interests centre on adversary behaviour, malware and the technical evidence that helps explain an intrusion. I combine that research with Windows forensics, threat hunting and detection engineering. I also explore practical applications of AI and automation in DFIR and threat intelligence workflows.
+My interests centre on adversary behaviour, malware and technical intrusion analysis. I combine that research with Windows forensics, threat hunting and detection engineering. I also explore practical applications of AI and automation in DFIR and threat intelligence workflows.
 
 This site shares my research, open-source tools and technical findings. For questions, feedback or collaboration, [get in touch](/contact/).
 
