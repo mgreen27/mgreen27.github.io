@@ -10,6 +10,7 @@ summary: "My 2024 Rapid7 research with Natalie Zargarov and Anna Širokova on Ki
 hideDescription: true
 reportUrl: "https://www.rapid7.com/globalassets/_pdfs/whitepaperguide/rapid7-Kimsukys-Phishing-and-Payload-Tactics_wp.pdf"
 reportPages: 18
+reportReadingTime: 17
 reportFile: "kimsuky-phishing-payload-tactics.pdf"
 reportSha256: "807adcc3a7f4b8308d67f7f3c66403f3b088bc504fb24091e0fbc122e9f8e36c"
 showTags: true

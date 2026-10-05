@@ -4,7 +4,11 @@
   {{ if .Params.reportUrl }}
   <span>{{ .Params.reportPages }}-page PDF</span>
   <span aria-hidden="true">·</span>
+  {{ with .Params.reportReadingTime }}
+  <span title="Estimated from the full white paper at 200 words per minute">{{ . }} min read</span>
+  {{ else }}
   <span title="Estimated from the overview text">{{ math.Max 1 .ReadingTime }} min overview</span>
+  {{ end }}
   {{ else }}
   <span title="Estimated from the article text">{{ math.Max 1 .ReadingTime }} min read</span>
   {{ end }}
