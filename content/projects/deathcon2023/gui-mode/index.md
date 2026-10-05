@@ -33,6 +33,8 @@ Internet access if you would like to do content import.
 
 ## Tasks
 
+{{< workshop-task number="1" >}}
+
 ### Download and run Velociraptor in GUI mode
 
 1. Download latest velociraptor release
@@ -46,7 +48,7 @@ Internet access if you would like to do content import.
 
 Please copy the downloaded exe to the desktop and rename to velociraptor.exe
 
-1. Open cmd.exe as administrator and cd to your desktop. Run `velociraptor.exe -h` to scope options via help
+2. Open cmd.exe as administrator and cd to your desktop. Run `velociraptor.exe -h` to scope options via help
 
 ![GUI mode and lab setup: Download and run Velociraptor in GUI mode (02)](screenshot-02.png)
 
@@ -58,7 +60,7 @@ As we are running GUI mode run: `velociraptor.exe gui -h`
 
 By default Velociraptor will use a datastore in the temp folder. This may not be desired as the OS may purge temp folders and we may loose our work. We can use the datastore switch to specify a path.
 
-1. Create VRdata folder and run Velociraptor
+3. Create VRdata folder and run Velociraptor
 
 `mkdir VRdata`
 
@@ -80,7 +82,7 @@ Open a browser and goto:
 
 ![GUI mode and lab setup: Download and run Velociraptor in GUI mode (05)](screenshot-05.png)
 
-1. Explore GUI and follow demo.
+4. Explore GUI and follow demo.
 
 Ensure you familiarise yourself with items important for detection development.
 
@@ -88,6 +90,11 @@ Ensure you familiarise yourself with items important for detection development.
 - Collection
 - Artifacts
 - Notebook
+
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="2" >}}
 
 ### Import additional content
 
@@ -111,10 +118,11 @@ You should now have several Exchange prefixed artifacts in your artifact view.
 
 We will use several of these artifacts later 🙂
 
-1. Run the same import process for **Exchange.Server.Import.DetectRaptor**
+2. Run the same import process for **Exchange.Server.Import.DetectRaptor**
 
 ![GUI mode and lab setup: Import additional content (11)](screenshot-11.png)
 
 ![GUI mode and lab setup: Import additional content (12)](screenshot-12.png)
 
-👈 To go back, tap the link at the top left, or swipe from left to right across your screen.
+
+{{< /workshop-task >}}

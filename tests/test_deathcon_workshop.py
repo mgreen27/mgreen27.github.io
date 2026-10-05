@@ -21,10 +21,32 @@ class Document(HTMLParser):
         super().__init__()
         self.links, self.images, self.ids, self.paging = [], [], set(), {}
         self.h1 = self.blocks = self.callouts = self.project_rows = 0
+        self.tasks, self.details_stack, self.list_stack = [], [], []
+        self.current_task = None
         self.feed(text)
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
+        if tag == 'details':
+            is_task = attrs.get('class') == 'workshop-task'
+            self.details_stack.append((is_task, self.current_task))
+            if is_task:
+                if self.current_task:
+                    self.current_task['children'] += 1
+                self.current_task = {'open': 'open' in attrs, 'headings': [],
+                                     'lists': [], 'next_step': 1, 'children': 0,
+                                     'list_depth': len(self.list_stack)}
+                self.tasks.append(self.current_task)
+        if self.current_task and tag == 'h3':
+            self.current_task['headings'].append(attrs.get('id'))
+        if tag in ('ol', 'ul'):
+            if self.current_task and tag == 'ol' and len(self.list_stack) == self.current_task['list_depth']:
+                self.current_task['lists'].append((int(attrs.get('start', 1)),
+                                                   self.current_task['next_step']))
+            self.list_stack.append(tag)
+        if (tag == 'li' and self.current_task and self.list_stack[-1:] == ['ol']
+                and len(self.list_stack) == self.current_task['list_depth'] + 1):
+            self.current_task['next_step'] += 1
         if 'id' in attrs:
             self.ids.add(attrs['id'])
         if tag == 'a' and 'href' in attrs:
@@ -37,6 +59,14 @@ class Document(HTMLParser):
         self.blocks += tag == 'pre'
         self.callouts += tag == 'blockquote'
         self.project_rows += tag == 'div' and attrs.get('class') == 'post-line'
+
+    def handle_endtag(self, tag):
+        if tag == 'details':
+            is_task, parent_task = self.details_stack.pop()
+            if is_task:
+                self.current_task = parent_task
+        if tag in ('ol', 'ul'):
+            self.list_stack.pop()
 
 
 @unittest.skipUnless(shutil.which('hugo'), 'Hugo is required')
@@ -94,6 +124,9 @@ class WorkshopMigration(unittest.TestCase):
             self.assertEqual(doc.blocks, len(lesson['code_sha256']))
             self.assertEqual(doc.callouts, lesson['callouts'])
             self.assertEqual(len([im for im in doc.images if 'screenshot-' in im['src']]), len(lesson['images']))
+            for image in doc.images:
+                if 'screenshot-' in image['src']:
+                    self.assertIn(image['src'], doc.links)
             expected = {}
             if i:
                 expected['prev'] = BASE + lessons[i-1]['slug'] + '/'
@@ -113,6 +146,24 @@ class WorkshopMigration(unittest.TestCase):
         for lesson in MANIFEST['lessons']:
             self.assertIn('https://dfir.au' + BASE + lesson['slug'] + '/', sitemap)
         self.assertIn(BASE, (self.output / 'tags/dfir/index.html').read_text())
+
+    def test_tasks_collapse_with_continuous_numbering_and_linkable_headings(self):
+        for lesson, count in zip(MANIFEST['lessons'], [2, 9, 2, 5, 8, 4]):
+            with self.subTest(lesson=lesson['slug']):
+                doc = self.document(BASE + lesson['slug'] + '/')
+                self.assertEqual(len(doc.tasks), count)
+                for task in doc.tasks:
+                    self.assertFalse(task['open'])
+                    self.assertEqual(len(task['headings']), 1)
+                    self.assertIn('#' + task['headings'][0], doc.links)
+                    self.assertTrue(task['lists'] or task['children'])
+                    for actual, expected in task['lists']:
+                        self.assertEqual(actual, expected, task['headings'][0])
+
+    @unittest.skipUnless(shutil.which('node'), 'Node is required for interaction checks')
+    def test_task_controls_and_deep_links(self):
+        subprocess.run(['node', str(ROOT / 'tests/workshop-controls.cjs')],
+                       cwd=ROOT, check=True, capture_output=True, text=True)
 
 
 if __name__ == '__main__':

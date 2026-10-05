@@ -29,6 +29,8 @@ The Velociraptor GUI is configured to open automatically upon start, but the cre
 
 ## Tasks
 
+{{< workshop-task number="1" >}}
+
 ### Disk queries
 
 Often we have a choice between using a Windows API (glob) or NTFS (glob & parse_mft) based search when hunting on Windows systems.
@@ -142,6 +144,11 @@ However, the fastest was **Generic.Detection.Yara.Glob** knowing the path and us
 
 ![VQL performance and YARA: Disk queries (09)](screenshot-09.png)
 
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="2" >}}
+
 ### Memory queries
 
 Similar to disk yara; targeted memory yara is significantly much faster.
@@ -186,7 +193,7 @@ Most Velociraptor Yara artifacts are configured to stop after one hit for optima
 
 ![VQL performance and YARA: Memory queries (12)](screenshot-12.png)
 
-1. Next, I want to show you an optimal way to improve detections with data reduction prior to Yara. Windows.System.VAD artifact we discussed previously enables running Yara over individual sections with memory attribute targeting.
+3. Next, I want to show you an optimal way to improve detections with data reduction prior to Yara. Windows.System.VAD artifact we discussed previously enables running Yara over individual sections with memory attribute targeting.
 
     Open your test machine collection view and run a new **Windows.System.VAD** collection we want to copy the yara run in the previous artifact. I usually reselect the Yara.Process and copy out the yara then run **Windows.System.VAD** with the yara rule in my clipboard.
 
@@ -215,7 +222,7 @@ We can see Velociraptor.exe has several hits. **Windows.Detection.Yara.Process**
 >
 > Often we can see strings that indicate a security product or why the hit has occurred.
 
-1. Rerun the query above and increase the ContextBytes to 2000. This should show enough context on our hit to determine FPs.
+4. Rerun the query above and increase the ContextBytes to 2000. This should show enough context on our hit to determine FPs.
 
 ![VQL performance and YARA: Memory queries (15)](screenshot-15.png)
 
@@ -229,10 +236,11 @@ Clicking on the HitContext on our velociraptor.exe hits we can see clearly VQL a
 
 ![VQL performance and YARA: Memory queries (18)](screenshot-18.png)
 
+
+{{< /workshop-task >}}
+
 ### References:
 
 1. [Neo23x0 - YARA-Performance-Guidelines](https://github.com/Neo23x0/YARA-Performance-Guidelines)
 2. [Hexacorn - Writing better Yara rules in 2023…](https://www.hexacorn.com/blog/2023/08/26/writing-better-yara-rules-in-2023/)
 3. [Yara documentation - Writing rules](https://yara.readthedocs.io/en/stable/writingrules.html)
-
-👈 To go back, tap the link at the top left, or swipe from left to right across your screen.

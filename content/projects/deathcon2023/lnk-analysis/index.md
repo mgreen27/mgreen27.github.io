@@ -28,6 +28,8 @@ The Velociraptor GUI is configured to open automatically upon boot, but the cred
 
 ## Tasks
 
+{{< workshop-task number="1" >}}
+
 ### Generate Data
 
 1. Run the following Powershell to import a LNK for analysis
@@ -57,8 +59,8 @@ The Powershell will download a zip with two lnk files. It will then extract the 
 
 I have only included two files as these are quite large due to embedded decoys inside, this size is what originally caught my attention as a good example to show multiple capabilities of Velociraptor.
 
-1. Open explorer and type %temp% into the search bar to open your users temp folder
-2. ⚠️THIS STEP IS RUNNING MALWARE!⚠️
+2. Open explorer and type %temp% into the search bar to open your users temp folder
+3. ⚠️THIS STEP IS RUNNING MALWARE!⚠️
 
     Take a snapshot and move your VM to host only networking or skip ths step!
 
@@ -77,6 +79,11 @@ You can google this actor and find further leads for hunting 🇰🇵🇰🇵�
 
 Can you determine any lnk builder toolmarks?
 
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="2" >}}
+
 ### LNK Analysis
 
 1. Since 0.7.0 Velociraptor has an advanced LNK parser. The first step is review the artifact: [Windows.Forensics.Lnk](https://docs.velociraptor.app/artifact_references/pages/windows.forensics.lnk/).
@@ -91,7 +98,7 @@ In my own processing of a collection of ~ 17500 lnk files, processing took only 
 
 Due to the process speeds we have capabilities for not only analysis, but as a dynamic hunting tool.
 
-1. The main goal of this lab is to walk through parsing lnk files and decode in Velociraptor. This technique can be used for bulk analysis.
+2. The main goal of this lab is to walk through parsing lnk files and decode in Velociraptor. This technique can be used for bulk analysis.
 
     Open a new notebook notebook and run the following:
 
@@ -106,7 +113,7 @@ Due to the process speeds we have capabilities for not only analysis, but as a d
 
     This particular sample has its main payload extraction in the StringData.Arguments field.
 
-2. Add a new cell from the processed cell.
+3. Add a new cell from the processed cell.
 
     This gives us the opportunity to use data from a completed cell without reprocessing each refresh. In our example this is not too costly, but when bulk processing or reverse engineering with Velociraptor, this can save valuable seconds each reset.
 
@@ -132,6 +139,8 @@ Due to the process speeds we have capabilities for not only analysis, but as a d
     These scripts are dropping and executing a decoy, then dropping and executing the payload in powershell.
 
     Can you decode in VQL?
+
+    {{< workshop-task >}}
 
     ### **EXPAND FOR SOLUTION!**
 
@@ -188,7 +197,7 @@ Due to the process speeds we have capabilities for not only analysis, but as a d
 
     ![LNK analysis: LNK Analysis (10)](screenshot-10.png)
 
-    1. For the second sample we can run a similar method of extraction but a better way is to make the extraction generic so we can process future samples in bulk 😎
+    2. For the second sample we can run a similar method of extraction but a better way is to make the extraction generic so we can process future samples in bulk 😎
 
         Below I am leveraging a dynamic function named fund_offset to regex the argument field and pull out offsets. We can reuse dynamic functions like built in functions.
 
@@ -231,7 +240,7 @@ Due to the process speeds we have capabilities for not only analysis, but as a d
 
     Interestingly the ping commands appears to wait for a significant time before the mshta execution starts.
 
-    1. As we have a generic extraction of the payload and decoy. Other functions that may be added are:
+    3. As we have a generic extraction of the payload and decoy. Other functions that may be added are:
 
         `hash(accessor='data',path=Decoy) as DecoyHash`
 
@@ -241,6 +250,14 @@ Due to the process speeds we have capabilities for not only analysis, but as a d
 
         To assist hunting for dropped files with these hashes in the %temp% folder.
 
+
+
+    {{< /workshop-task >}}
+
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="3" >}}
 
 ### Hunting for IOCs
 
@@ -262,7 +279,7 @@ WHERE Data.value =~ IocRegex
 
 ![LNK analysis: Hunting for IOCs (13)](screenshot-13.png)
 
-1. Powershell
+2. Powershell
 
 ```sql
 LET IocRegex = '''api\.onedrive\.com|bian0151|cafe24\.com|ping/s+-|Cmshta/s+https?://|::GlobalAlloc|::VirtualProtect|::CreateThread'''
@@ -272,7 +289,7 @@ SELECT * FROM Artifact.Windows.EventLogs.EvtxHunter(EvtxGlob=TargetGlob,IocRegex
 
 ![LNK analysis: Hunting for IOCs (14)](screenshot-14.png)
 
-1. We can also run **Windows.Forensics.Lnk** aimed at Temp/User download paths targeting strings of interest or alternatively, one of our yara detection artifacts
+3. We can also run **Windows.Forensics.Lnk** aimed at Temp/User download paths targeting strings of interest or alternatively, one of our yara detection artifacts
 
     A simple yara rule to detect these LNK files.
 
@@ -308,4 +325,5 @@ We can clearly see a hit for our zip downloaded as part of the session setup. In
 
 ![LNK analysis: Hunting for IOCs (16)](screenshot-16.png)
 
-👈 To go back, tap the link at the top left, or swipe from left to right across your screen.
+
+{{< /workshop-task >}}

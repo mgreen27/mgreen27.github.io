@@ -37,6 +37,8 @@ The Velociraptor GUI is configured to open automatically upon start, but the cre
 
 ## Tasks
 
+{{< workshop-task number="1" >}}
+
 ### Enabling UEFI on your Virtual Machine
 
 Probably the most confusing task for users when unfamiliar with UEFI is how to setup their virtualisation environment to support UEFI.
@@ -59,21 +61,26 @@ A configuration on MacOS VMFusion for a fresh Windows 11 install is as follows:
 
 ![UEFI and BlackLotus: Enabling UEFI on your Virtual Machine (02)](screenshot-02.png)
 
-1. Install a Trusted Platform Module (TPM) chip
+2. Install a Trusted Platform Module (TPM) chip
 
 ![UEFI and BlackLotus: Enabling UEFI on your Virtual Machine (03)](screenshot-03.png)
 
-1. Enable Encryption
+3. Enable Encryption
 
 ![UEFI and BlackLotus: Enabling UEFI on your Virtual Machine (04)](screenshot-04.png)
 
-1. Processors and Memory should be enabled and greyed out
+4. Processors and Memory should be enabled and greyed out
 
 ![UEFI and BlackLotus: Enabling UEFI on your Virtual Machine (05)](screenshot-05.png)
 
 Please take a snapshot after install of Windows.
 
 UEFI secure boot may cause blue screens if there is an issue during the boot process. I have found after installing BlackLotus a rare occurrence of a BlueScreen during the boot process (after successful testing).I was able to boot after this successfully, so try to reboot and see if it resolves your issue.
+
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="2" >}}
 
 ### Walk through EFI API visibility
 
@@ -97,7 +104,7 @@ You can see the variable name and namespace listed but no values. Using the ? in
 
 ![UEFI and BlackLotus: Walk through EFI API visibility (07)](screenshot-07.png)
 
-1. Rerun the query with `efivariables( value=’Y’)`
+2. Rerun the query with `efivariables( value=’Y’)`
 
     Review the efi variables available on your machine. Note some entries are text, others binary.
 
@@ -106,7 +113,7 @@ You can see the variable name and namespace listed but no values. Using the ? in
 
 I encourage you to read this description on UEFI variable keys [James Bottomley  - The Meaning of all the UEFI Keys](https://blog.hansenpartnership.com/the-meaning-of-all-the-uefi-keys/)
 
-1. Open the Velociraptor artifact view and search for Generic.System.EfiSignatures
+3. Open the Velociraptor artifact view and search for Generic.System.EfiSignatures
 
     Review the VQL:
 
@@ -121,7 +128,7 @@ I encourage you to read this description on UEFI variable keys [James Bottomley 
     The Hashes scope focuses on the Revoked Signatures Database (dbx)
 
 
-1. Run Generic.System.EfiSignatures either in a collection view or in your previous notebook
+4. Run Generic.System.EfiSignatures either in a collection view or in your previous notebook
 
     ```sql
     SELECT * FROM Artifact.Generic.System.EfiSignatures()
@@ -133,6 +140,11 @@ As you can see in the results and from the previous description these datapoints
 ![UEFI and BlackLotus: Walk through EFI API visibility (11)](screenshot-11.png)
 
 ![UEFI and BlackLotus: Walk through EFI API visibility (12)](screenshot-12.png)
+
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="3" >}}
 
 ### Install BlackLotus
 
@@ -153,6 +165,11 @@ One of the interesting features of BlackLotus is that it removes token privilege
 
 Note: This may not work all the time as the implementation is buggy if Defender process restarts but it is a good indicator if your BlackLotus deployment is successful.
 
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="4" >}}
+
 ### Query the EFI System Partition (ESP)
 
 1. First open the reference Microsoft article: [Guidance for investigating attacks using CVE-2022-21894: The BlackLotus campaign](https://www.microsoft.com/en-us/security/blog/2023/04/11/guidance-for-investigating-attacks-using-cve-2022-21894-the-blacklotus-campaign/)
@@ -171,7 +188,7 @@ Note: This may not work all the time as the implementation is buggy if Defender 
 
     The default glob which returns all `**/*.efi` files on the partition.
 
-    1. Open collection view and run **Exchange.Windows.Forensics.UEFI.**
+    2. Open collection view and run **Exchange.Windows.Forensics.UEFI.**
 
         We want to target `\efi\microsoft\boot\*.efi`
 
@@ -182,7 +199,7 @@ Note: This may not work all the time as the implementation is buggy if Defender 
 
     I have included authenticode data in this artifact, mainly for signing details. Due to the way secureboot implements trust we can ignore the Authenticode.Trusted field for this artifact. We can however, spot other Certificate or PE abnormalities.
 
-    1. Change the results notebook to target fields of interest
+    3. Change the results notebook to target fields of interest
 
     ```sql
     SELECT OSPath, Size, Mtime,Btime,Attr,IsDeleted,ShortName,Hash.SHA256
@@ -193,7 +210,7 @@ Note: This may not work all the time as the implementation is buggy if Defender 
 
     It should also be easy to spot both the timestamps on malicious files and deleted original EFI files.
 
-    1. Next open the reference Microsoft article: [Guidance for investigating attacks using CVE-2022-21894: The BlackLotus campaign](https://www.microsoft.com/en-us/security/blog/2023/04/11/guidance-for-investigating-attacks-using-cve-2022-21894-the-blacklotus-campaign/)
+    4. Next open the reference Microsoft article: [Guidance for investigating attacks using CVE-2022-21894: The BlackLotus campaign](https://www.microsoft.com/en-us/security/blog/2023/04/11/guidance-for-investigating-attacks-using-cve-2022-21894-the-blacklotus-campaign/)
 
         Review the section on **BlackLotus staging directory presence**
 
@@ -213,6 +230,11 @@ Note: This may not work all the time as the implementation is buggy if Defender 
     Publicly available BattonDrop iso contents on Github
 
 
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="5" >}}
+
 ### Yara EFI System Partition (ESP)
 
 As Velociraptor has the ability to query the ESP via the fat accessor, we can also add a yara hunt easily.
@@ -224,6 +246,11 @@ As Velociraptor has the ability to query the ESP via the fat accessor, we can al
 As you can see the default rule for this artifact is the BlackLotus rule available on Malpedia
 
 ![UEFI and BlackLotus: Yara EFI System Partition (ESP) (24)](screenshot-24.png)
+
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="6" >}}
 
 ### MeasuredBoot logs
 
@@ -266,6 +293,11 @@ As you can see the default rule for this artifact is the BlackLotus rule availab
 >
 > When hunting: I do not recommend selecting AllParsedTCGLog unless you are running a small machine size triage as the size of the AllParsed collection may be high across thousands of machines.
 
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="7" >}}
+
 ### HVCI registry
 
 [From Microsoft](https://learn.microsoft.com/en-us/windows/security/hardware-security/enable-virtualization-based-protection-of-code-integrity): “**Memory integrity** (HVCI) is a virtualization-based security (VBS) feature available in Windows. Memory integrity and VBS improve the threat model of Windows and provide stronger protections against malware trying to exploit the Windows kernel. VBS uses the Windows hypervisor to create an isolated virtual environment that becomes the root of trust of the OS that assumes the kernel can be compromised. Memory integrity is a critical component that protects and hardens Windows by running kernel mode code integrity within the isolated virtual environment of VBS. Memory integrity also restricts kernel memory allocations that could be used to compromise the system.”
@@ -277,7 +309,7 @@ As you can see the default rule for this artifact is the BlackLotus rule availab
 
 ![UEFI and BlackLotus: HVCI registry (28)](screenshot-28.png)
 
-1. In a default VM install I did not have this feature installed, so we want to generate data for this testing.
+2. In a default VM install I did not have this feature installed, so we want to generate data for this testing.
 
     From an elevated cmd prompt and run:
 
@@ -287,7 +319,7 @@ As you can see the default rule for this artifact is the BlackLotus rule availab
 
     ![UEFI and BlackLotus: HVCI registry (29)](screenshot-29.png)
 
-2. **Windows.Registry.HVCI** will return any items in the Hypervisor-protected Code Integrity (HVCI) registry path. An adversary may set the Enabled key to 0 if they intend to manipulate UEFI boot process.
+3. **Windows.Registry.HVCI** will return any items in the Hypervisor-protected Code Integrity (HVCI) registry path. An adversary may set the Enabled key to 0 if they intend to manipulate UEFI boot process.
 
     Open a new collection and run **Exchange.Windows.Registry.HVCI**
 
@@ -299,6 +331,11 @@ As you can see the default rule for this artifact is the BlackLotus rule availab
 
     This artifact can be useful in a stacked hunt or monitoring capacity.
 
+
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="8" >}}
 
 ### Event Logs
 
@@ -322,7 +359,7 @@ Review the section on **Event logs entries - t**here are 2 main potential EventL
     ![UEFI and BlackLotus: Event Logs (33)](screenshot-33.png)
 
 
-1. Run a collection for **Windows.EventLogs.EvtxHunter** targeting the details above:
+2. Run a collection for **Windows.EventLogs.EvtxHunter** targeting the details above:
 
 ![UEFI and BlackLotus: Event Logs (34)](screenshot-34.png)
 
@@ -332,6 +369,9 @@ Review the section on **Event logs entries - t**here are 2 main potential EventL
 
 ![UEFI and BlackLotus: Event Logs (37)](screenshot-37.png)
 
+
+{{< /workshop-task >}}
+
 ### References:
 
 1. [ESET, Martin Smolar - BlackLotus UEFI bootkit: Myth confirmed](https://www.welivesecurity.com/2023/03/01/blacklotus-uefi-bootkit-myth-confirmed/)
@@ -340,5 +380,3 @@ Review the section on **Event logs entries - t**here are 2 main potential EventL
 4. [Microsoft - Enable virtualization-based protection of code integrity](https://learn.microsoft.com/en-us/windows/security/hardware-security/enable-virtualization-based-protection-of-code-integrity)
 5. [How to enable TPM and Secure Boot on VMware to install Windows 11](https://pureinfotech.com/enable-tpm-secure-boot-vmware-install-windows-11/)
 6. [Adam Paulina - Running Malware Below the OS – The State of UEFI Firmware Exploitation](https://www.binarydefense.com/resources/blog/running-malware-below-the-os-the-state-of-uefi-firmware-exploitation/)
-
-👈 To go back, tap the link at the top left, or swipe from left to right across your screen.

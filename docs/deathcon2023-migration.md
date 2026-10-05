@@ -35,6 +35,27 @@ renders each lab with an archive notice, expandable contents and previous/next
 navigation. The landing-page cards come from `workshop-lessons.html`, ordered by
 lesson weight. `assets/css/workshop.css` provides scoped responsive styling.
 
+Task groups now render as native, initially collapsed disclosures, using the
+archived level-three headings. References stay outside the disclosures. This
+reconstructs the expandable grouping from the Markdown export and the author's
+description; the original Notion UI could not be checked because browser access
+was blocked by its administrator-policy verification.
+
+The `workshop-task` shortcode retains heading IDs; `workshop-toc.html` builds
+the contents menu from the rendered headings, including the nested LNK solution.
+Nested shortcode output is kept separate from Markdown rendering so its HTML
+is preserved without enabling unsafe raw HTML. The optional
+`assets/js/workshop.js` adds expand/collapse-all controls and opens a task when
+following a contents link or loading a fragment URL. Individual disclosures work
+without JavaScript. Step numbers now continue across screenshot/code interruptions
+within a task group and restart in the next group; fenced code remains unchanged.
+
+Presentation refinements add explicit task numbers, five nested Process topics,
+a compact expandable archive notice, and full-size screenshot links that open a
+new tab. Notion-specific swipe/back instructions were removed. Some Process
+blocks use the shortcode's `dedent` option to normalise their inherited list
+indentation only during rendering; the original code bytes remain preserved.
+
 ## Validation
 
 Run `python3 -m unittest discover -s tests -v` and a clean Hugo build.

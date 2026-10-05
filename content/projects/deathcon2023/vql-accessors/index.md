@@ -31,24 +31,26 @@ The Velociraptor GUI is configured to open automatically upon start, but the cre
 
 ## Tasks
 
+{{< workshop-task number="1" >}}
+
 ### **Setup working notebook**
 
 1. In your Velociraptor GUI, on the left hand side menu, click `Notebooks`
 
 ![VQL and accessors: Setup working notebook (01)](screenshot-01.png)
 
-1. Create a new notebook
+2. Create a new notebook
 
 ![VQL and accessors: Setup working notebook (02)](screenshot-02.png)
 
-1. Typically we can add a VQL cell or markdown for presentation.
+3. Typically we can add a VQL cell or markdown for presentation.
 
     In this case we select newly created notebook > Add Cell (+)  > new VQL cell
 
 
 ![VQL and accessors: Setup working notebook (03)](screenshot-03.png)
 
-1. Use the up and down arrows to position your VQL cell
+4. Use the up and down arrows to position your VQL cell
 
 ![VQL and accessors: Setup working notebook (04)](screenshot-04.png)
 
@@ -65,6 +67,11 @@ function:
 arguments:
 
 ![VQL and accessors: Setup working notebook (07)](screenshot-07.png)
+
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="2" >}}
 
 ### Disk
 
@@ -94,7 +101,7 @@ NOTE: TargetGlob is using multiple ‘ else we would need to escape the backslas
 
 ![VQL and accessors: Disk (10)](screenshot-10.png)
 
-1. Query the Velociraptor exe on disk with ntfs access to the above query.
+2. Query the Velociraptor exe on disk with ntfs access to the above query.
 
 As we have downloaded the velociraptor binary - we expect to see a Zone.Identifier alternate data stream.
 
@@ -109,7 +116,7 @@ NOTE: if you have obtained the Velociraptor binary in a different way, please mo
 
 Compare other locations. `C:\*` is another good comparison to see ntfs special files
 
-1. Leverage the mft accessor to view the Zone.Identifier.
+3. Leverage the mft accessor to view the Zone.Identifier.
 
 Velociraptor’s power comes from the ability to manipulate data and execute enrichment as desired whilst accessing use cases that may otherwise be difficult. In this case we are only interested in the Zone.Identifier so we want to add a filter. We also want to view the Zone.Identifer data .
 
@@ -124,7 +131,7 @@ WHERE OSPath =~ 'Zone\.Identifier$'
 
 ![VQL and accessors: Disk (12)](screenshot-12.png)
 
-1. Finally we can extract fields of interest from the ADS field using a regex function. Modify your VQL to add the function below.
+4. Finally we can extract fields of interest from the ADS field using a regex function. Modify your VQL to add the function below.
 
 ```sql
 parse_string_with_regex(string=ADS,
@@ -137,7 +144,7 @@ parse_string_with_regex(string=ADS,
 
 ![VQL and accessors: Disk (13)](screenshot-13.png)
 
-1. When creating content its often easier to find artifacts similar to your desired use case.
+5. When creating content its often easier to find artifacts similar to your desired use case.
 
 Search for Zone.Identifier in the artifacts view.
 
@@ -148,6 +155,11 @@ Generally, in client/server setup a system notebook would run queries against th
 ![VQL and accessors: Disk (15)](screenshot-15.png)
 
 > 💡 Other good sources of finding content are the [Velociraptor Artifact Exchange](https://docs.velociraptor.app/exchange/) and searching the [artifact reference documentation](https://docs.velociraptor.app/artifact_references/).
+
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="3" >}}
 
 ### Registry
 
@@ -171,7 +183,7 @@ Generally, in client/server setup a system notebook would run queries against th
 REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v VRNotepad /t REG_SZ /d "C:\Windows\notepad.exe"
 ```
 
-1. Run the following VQL in your notebook to query the WIndows API for the key we added:
+2. Run the following VQL in your notebook to query the WIndows API for the key we added:
 
 ```sql
 LET TargetGlob = '''HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\*'''
@@ -188,7 +200,7 @@ FROM glob(globs=TargetGlob, accessor="registry")
 >
 > The raw_registry accessor enables this use case.
 
-1. A simplified version of raw registry query targeting the local user.
+3. A simplified version of raw registry query targeting the local user.
 
 ```sql
 LET TargetGlob = '''SOFTWARE\Microsoft\Windows\CurrentVersion\Run\*'''
@@ -208,11 +220,16 @@ FROM glob(  globs=TargetGlob,
 
 ![VQL and accessors: Registry (17)](screenshot-17.png)
 
-1. Review artifact: **Windows.Registry.NTUser.**
+4. Review artifact: **Windows.Registry.NTUser.**
 
 Observe how it combines accessors. It collects user hive paths, uses the ntfs and raw_registry accessor to parse a registry key glob.
 
 Try to run **Windows.Registry.NTUser** `SOFTWARE\Microsoft\Windows\CurrentVersion\Run\*`
+
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="4" >}}
 
 ### Process
 
@@ -226,6 +243,10 @@ Try to run **Windows.Registry.NTUser** `SOFTWARE\Microsoft\Windows\CurrentVersio
 
 Velociraptor enables access to this data through the use of plugins and functions.
 
+{{< workshop-task number="4.1" >}}
+
+### List processes
+
 1. Search for Process orientated artifacts: `Pslist|dlls|process|memory`
 
     The Velociraptor search takes regex and searches accross Artifact name and description paragraph. You can see some non process artifacts return in results (this is expected).
@@ -235,11 +256,11 @@ Velociraptor enables access to this data through the use of plugins and function
 
 Take a minute to review and ensure to check **Windows.System.Pslist**. This artifact uses the pslist() plugin which is the cornerstone of obtaining process data for additional use cases.
 
-1. Run notepad.exe and type any string - e.g DEATHcon rocks!
+2. Run notepad.exe and type any string - e.g DEATHcon rocks!
 
 ![VQL and accessors: Process (19)](screenshot-19.png)
 
-1. In a new Velociraptor notebook cell add in:
+3. In a new Velociraptor notebook cell add in:
 
 ```sql
 SELECT *
@@ -248,6 +269,12 @@ WHERE Name =~ 'notepad'
 ```
 
 ![VQL and accessors: Process (20)](screenshot-20.png)
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="4.2" >}}
+
+### Enrich processes with token information
 
 1. Generally the Pid is the main metadata we need to leverage further process enrichment.
 
@@ -261,6 +288,12 @@ WHERE Name =~ 'notepad'
     ```
 
     ![VQL and accessors: Process (21)](screenshot-21.png)
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="4.3" dedent="4" >}}
+
+    ### Scan process memory with YARA
 
     1. We can take a selection of processes and run yara over them. Replace the string you ran in notepad inside the yara below.
 
@@ -292,6 +325,12 @@ WHERE Name =~ 'notepad'
     Try running with no process name filter, adding in hit context and hit limits for better understanding how the yara plugin works. **Windows.Detection.Yara.Process** is a production ready artifact for this malware hunting use case!
 
     > 💡 Velociraptor does have some OS enforced limitations when accessing processes. A good example is system protected processes, in which velociraptor may not be able to access to extract additional data.
+
+{{< /workshop-task >}}
+
+{{< workshop-task number="4.4" dedent="4" >}}
+
+    ### Scan memory sections with VAD
 
     Next we are going to work through my favourite Velociraptor memory use case - the vad() plugin.
 
@@ -371,6 +410,12 @@ WHERE Name =~ 'notepad'
 
     In this example I have targeted the yara plugin, but we could also use a similar ‘offset’ accessor to upload a file, or easily use other features like the binary_parser.
 
+{{< /workshop-task >}}
+
+{{< workshop-task number="4.5" dedent="4" >}}
+
+    ### Inspect loaded DLLs and exports
+
     1. Open up a new Powershell prompt and run:
 
         `Invoke-WebRequest -Uri "https://www.google.com" -UseBasicParsing`
@@ -417,9 +462,12 @@ WHERE Name =~ 'notepad'
 
         Hopefully you have an extended appreciation of potential Process based collections and data enrichment we can run in Velociraptor. For bonus points, run parse_pe against the file on disk and compare the results.
 
-        1. Try to run **Windows.System.VAD** - this artifact is a production ready capability of the steps above.
+        2. Try to run **Windows.System.VAD** - this artifact is a production ready capability of the steps above.
 
+
+{{< /workshop-task >}}
 
 The above is an introduction to Velociraptor accessors and not a complete overview of all available use cases. Please continue in further labs for some more interesting examples.
 
-👈 To go back, tap the link at the top left, or swipe from left to right across your screen.
+
+{{< /workshop-task >}}

@@ -7,7 +7,11 @@
   <p class="page-lead">{{ .Description }}</p>
   {{ partial "workshop-note.html" . }}
   <div class="workshop-links"><a href="{{ .Parent.RelPermalink }}">All workshop labs</a>{{ with .Params.videoUrl }}<a href="{{ . }}">Watch recording ↗</a>{{ end }}</div>
-  <details class="workshop-toc"><summary>On this page</summary>{{ .TableOfContents }}</details>
+  <details class="workshop-toc"><summary>On this page</summary>{{ partial "workshop-toc.html" . }}</details>
+  <div class="workshop-task-controls" hidden>
+    <button type="button" data-workshop-expand>Expand all tasks</button>
+    <button type="button" data-workshop-collapse>Collapse all tasks</button>
+  </div>
   <div class="single-content">{{ .Content }}</div>
   <nav class="workshop-pagination" aria-label="Workshop lessons">
     {{ $current := . }}
@@ -19,4 +23,7 @@
     {{ end }}
   </nav>
 </article>
+{{ with resources.Get "js/workshop.js" | minify | fingerprint }}
+<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>
+{{ end }}
 {{ end }}

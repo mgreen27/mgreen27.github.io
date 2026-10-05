@@ -1,0 +1,26 @@
+{{- $inner := .InnerDeindent -}}
+{{- with .Get "dedent" -}}
+  {{/* Some archived blocks retain list indentation to preserve code checksums. */}}
+  {{- $inner = replaceRE (printf `(?m)^ {%s}` .) "" $.Inner -}}
+{{- end -}}
+{{- $inner = strings.TrimSpace $inner -}}
+{{- $heading := index (split $inner "\n") 0 -}}
+{{- $title := $heading | .Page.RenderString (dict "display" "block") -}}
+{{- $title = replaceRE `(?s)\s*<a\b[^>]*>.*?</a>` "" $title -}}
+{{- with .Get "number" -}}
+  {{- $title = replaceRE `(<h3\b[^>]*>)` (printf `${1}<span class="workshop-task-number">Task %s · </span>` .) $title -}}
+{{- end -}}
+{{- $body := strings.TrimPrefix $heading $inner | .Page.RenderString (dict "display" "block") -}}
+{{- range .Page.Store.Get "workshopTaskChildren" -}}
+  {{- $body = replace $body (printf "<p>%s</p>" .token) .html -}}
+  {{- $body = replace $body .token .html -}}
+{{- end -}}
+{{- $html := printf `<details class="workshop-task"><summary>%s</summary><div class="workshop-task-body">%s</div></details>` $title $body -}}
+{{- if .Parent -}}
+  {{/* Keep a nested task's trusted HTML out of the parent's Markdown renderer. */}}
+  {{- $token := printf "WORKSHOPTASKCHILD%dTOKEN" .Ordinal -}}
+  {{- .Page.Store.Add "workshopTaskChildren" (slice (dict "token" $token "html" $html)) -}}
+  {{- $token -}}
+{{- else -}}
+  {{- $html | safeHTML -}}
+{{- end -}}
