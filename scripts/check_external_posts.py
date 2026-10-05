@@ -56,7 +56,7 @@ def articles(root=ROOT):
         if not text.startswith('---\n'):
             continue
         front = text.split('---', 2)[1]
-        fields = dict(re.findall(r'^(title|originalUrl|reportUrl|reportSha256):\s*(.*?)\s*$', front, re.M))
+        fields = dict(re.findall(r'^(title|originalUrl|reportUrl|reportSha256|reportFile):\s*(.*?)\s*$', front, re.M))
         if not ('originalUrl' in fields or 'reportUrl' in fields):
             continue
         fields = {key: value.strip('\"\'') for key, value in fields.items()}
@@ -69,11 +69,17 @@ def articles(root=ROOT):
         digest = fields.get('reportSha256', '').lower()
         if kind == 'pdf' and not re.fullmatch(r'[0-9a-f]{64}', digest):
             raise ValueError(f'PDF report requires a verified reportSha256 in {path}')
+        report_file = fields.get('reportFile', '')
+        if kind == 'pdf' and (not re.fullmatch(r'[\w.-]+\.pdf', report_file) or path.name != 'index.md'):
+            raise ValueError(f'PDF report requires a reportFile filename in a leaf bundle: {path}')
         route = path.relative_to(root / 'content').with_suffix('')
         if path.name == 'index.md':
             route = route.parent
-        result.append(dict(title=fields['title'], url=url, kind=kind,
-                           sha256=digest, path=route.as_posix()))
+        article = dict(title=fields['title'], url=url, kind=kind,
+                       sha256=digest, path=route.as_posix())
+        if kind == 'pdf':
+            article['report_file'] = report_file
+        result.append(article)
     if not result:
         raise ValueError('No originalUrl/reportUrl posts found')
     return result
@@ -134,6 +140,13 @@ def check(article, previous, attempts=3, delay=1, fetch=probe):
 def validate_backups(items, site):
     for article in items:
         path = site / article['path'] / 'index.html'
+        if article.get('kind') == 'pdf':
+            pdf = path.parent / article['report_file']
+            if not pdf.is_file() or pdf.stat().st_size > MAX_PDF_BYTES:
+                raise ValueError(f'Archived PDF missing or oversized: {pdf}')
+            body = pdf.read_bytes()
+            if not body.startswith(b'%PDF-') or b'%%EOF' not in body[-1024:] or hashlib.sha256(body).hexdigest() != article['sha256']:
+                raise ValueError(f'Archived PDF does not match reviewed report: {pdf}')
         html = path.read_text()
         page = Page(html)
         if page.redirect or re.search(r'window\.location\s*=', html):

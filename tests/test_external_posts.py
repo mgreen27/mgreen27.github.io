@@ -18,7 +18,8 @@ spec.loader.exec_module(links)
 ARTICLE = dict(title='AI Ate My Velociraptor', url='https://example.test/article/', path='posts/test')
 PDF_BYTES = b'%PDF-1.4\nreviewed report\n%%EOF\n'
 REPORT = dict(title='Kimsuky report', url='https://example.test/report.pdf',
-              path='posts/report', kind='pdf', sha256=hashlib.sha256(PDF_BYTES).hexdigest())
+              path='posts/report', kind='pdf', sha256=hashlib.sha256(PDF_BYTES).hexdigest(),
+              report_file='report.pdf')
 
 
 class SEOHead(links.HTMLParser):
@@ -88,8 +89,24 @@ class LinkChecks(unittest.TestCase):
             page.write_text(front + '---\nOverview')
             with self.assertRaises(ValueError):
                 links.articles(root)
-            page.write_text(front + f'reportSha256: {REPORT["sha256"]}\n---\nOverview')
+            page.write_text(front + f'reportSha256: {REPORT["sha256"]}\nreportFile: report.pdf\n---\nOverview')
             self.assertEqual(links.articles(root), [REPORT])
+
+    def test_archived_pdf_must_exist_and_match_verified_document(self):
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            folder = site / REPORT['path']
+            folder.mkdir(parents=True)
+            (folder / 'index.html').write_text('<h1>Kimsuky report</h1>' + 'overview ' * 110)
+            with self.assertRaisesRegex(ValueError, 'Archived PDF missing'):
+                links.validate_backups([REPORT], site)
+            pdf = folder / REPORT['report_file']
+            for body in [b'<html>Unavailable</html>', PDF_BYTES.replace(b'reviewed', b'changed')]:
+                pdf.write_bytes(body)
+                with self.assertRaisesRegex(ValueError, 'does not match'):
+                    links.validate_backups([REPORT], site)
+            pdf.write_bytes(PDF_BYTES)
+            links.validate_backups([REPORT], site)
 
     def test_verified_article_and_redirect_destination(self):
         with patch.object(links, 'urlopen', return_value=Response(b'<title>AI Ate My Velociraptor - Labs</title>')):
@@ -193,7 +210,8 @@ class HugoRouting(unittest.TestCase):
                                 candidate in title_links for candidate in [item['url'], '/' + item['path'] + '/']):
                             continue
                         # Minified Hugo output can omit quotes around href values.
-                        expected = '/' + item['path'] + '/' if use_backup else item['url']
+                        backup_url = '/' + item['path'] + '/' + item.get('report_file', '')
+                        expected = backup_url if use_backup else item['url']
                         self.assertRegex(title_links, 'href=["\']?' + links.re.escape(expected))
                         if not use_backup:
                             self.assertNotIn('/' + item['path'] + '/', title_links)
@@ -216,6 +234,14 @@ class HugoRouting(unittest.TestCase):
                     self.assertEqual(schema['mainEntityOfPage'], page.canonical)
                     self.assertEqual(schema['author']['name'], 'Matthew Green')
                     self.assertIn('datePublished', schema)
+                    if item.get('kind') == 'pdf':
+                        pdf_url = '/' + item['path'] + '/' + item['report_file']
+                        full_page = (output / item['path'] / 'index.html').read_text()
+                        main_report_url = pdf_url if use_backup else item['url']
+                        self.assertRegex(full_page, r'<strong><a href=["\']?' + links.re.escape(main_report_url))
+                        self.assertIn(pdf_url, full_page)
+                        self.assertEqual(schema['datePublished'][:10], '2024-07-16')
+                        self.assertTrue((output / 'posts/2026/kimsuky-phishing-payload-tactics/index.html').is_file())
                 for path in ['index.html', 'about/index.html', 'posts/index.html',
                              'projects/index.html', 'projects/velociraptor-skills/index.html']:
                     self.assertTrue(SEOHead((output / path).read_text()).description, path)

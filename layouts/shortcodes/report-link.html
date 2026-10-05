@@ -1,0 +1,3 @@
+{{ $target := partial "report-target.html" .Page }}
+<p><strong><a href="{{ $target.href }}">Read the full white paper (PDF, {{ .Page.Params.reportPages }} pages)</a>.</strong></p>
+<p class="entry-source">Originally published {{ .Page.Date.Format "2 January 2006" }} · {{ with .Page.Resources.Get .Page.Params.reportFile }}<a href="{{ .RelPermalink }}">Archived PDF</a>{{ end }}</p>

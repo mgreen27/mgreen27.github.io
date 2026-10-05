@@ -15,14 +15,10 @@
                 {{ $isExternal = true }}
             {{ end }}
         {{ end }}
-        {{ with .Params.reportUrl }}
-            {{ with index (hugo.Data.original_links | default dict) . }}
-                {{ $useBackup = .use_backup | default false }}
-            {{ end }}
-            {{ if not $useBackup }}
-            {{ $href = . }}
-            {{ $isExternal = true }}
-            {{ end }}
+        {{ if .Params.reportUrl }}
+            {{ $report := partial "report-target.html" . }}
+            {{ $href = $report.href }}
+            {{ $isExternal = $report.external }}
         {{ end }}
         <p class="line-title">
             <a href="{{ $href }}"{{ if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Title }}</a>
@@ -43,6 +39,9 @@
         {{ $host := (urls.Parse $href).Hostname }}
         {{ $publishers := dict "labs.infoguard.ch" "InfoGuard Labs" "www.rapid7.com" "Rapid7" }}
         <p class="entry-source">{{ if .Params.reportUrl }}Report at{{ else }}Published at{{ end }} {{ index $publishers $host | default $host }}{{ if .Params.reportUrl }} (PDF){{ end }} <span aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span>{{ if .Params.reportUrl }} · <a href="{{ .RelPermalink }}">Read illustrated overview</a>{{ end }}</p>
+        {{ end }}
+        {{ if and .Params.reportUrl (not $isExternal) }}
+        <p class="entry-source">Rapid7 report (PDF) · <a href="{{ .RelPermalink }}">Read illustrated overview</a></p>
         {{ end }}
     </div>
 </div>

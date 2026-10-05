@@ -23,9 +23,13 @@ Posts with `reportUrl` are checked in the same workflow. PDF reports require a
 redirects, downloads at most 16 MiB, checks the PDF header/end marker, and verifies
 the digest. HTML landing pages, truncated files, oversized responses and changed
 PDFs are inconclusive rather than healthy; review a changed report before updating
-its digest. Confirmed outages route listings to the illustrated local overview,
-not a full copy of the PDF. That overview retains its own canonical URL and sitemap
-entry, and its local images are validated along with the HTML article backups.
+its digest. Each report is a leaf bundle with a `reportFile` naming the complete,
+unchanged PDF stored alongside `index.md`. Confirmed outages route listings and
+the overview's main report link to that archived PDF. Build validation requires
+the archived file to match the reviewed digest. The illustrated overview retains
+its own canonical URL and sitemap entry, and its local images are validated along
+with the HTML article backups. The overview also provides an always-available
+archive link.
 
 ```sh
 python3 scripts/check_external_posts.py                   # Read-only live check
