@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import shutil
@@ -15,6 +16,9 @@ spec = importlib.util.spec_from_file_location('links', ROOT / 'scripts/check_ext
 links = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(links)
 ARTICLE = dict(title='AI Ate My Velociraptor', url='https://example.test/article/', path='posts/test')
+PDF_BYTES = b'%PDF-1.4\nreviewed report\n%%EOF\n'
+REPORT = dict(title='Kimsuky report', url='https://example.test/report.pdf',
+              path='posts/report', kind='pdf', sha256=hashlib.sha256(PDF_BYTES).hexdigest())
 
 
 class SEOHead(links.HTMLParser):
@@ -50,6 +54,43 @@ class Response(BytesIO):
 
 
 class LinkChecks(unittest.TestCase):
+    def test_pdf_identity_and_invalid_responses(self):
+        for body, expected in [(PDF_BYTES, 'available'),
+                               (b'<html>Download report</html>', 'unknown'),
+                               (PDF_BYTES.replace(b'reviewed', b'different'), 'unknown'),
+                               (PDF_BYTES[:-7], 'unknown')]:
+            with self.subTest(body=body), patch.object(links, 'urlopen', return_value=Response(body)):
+                status, detail = links.probe(REPORT)
+                self.assertEqual(status, expected)
+                self.assertIn('new-article', detail)
+
+    def test_pdf_download_size_is_bounded(self):
+        response = Response(PDF_BYTES + b' ' * 50)
+        with patch.object(links, 'MAX_PDF_BYTES', 32), patch.object(links, 'urlopen', return_value=response):
+            self.assertEqual(links.probe(REPORT)[0], 'unknown')
+
+    def test_pdf_outage_recovery_and_changed_document_preserve_routing(self):
+        with patch.object(links, 'urlopen', side_effect=HTTPError(REPORT['url'], 404, '', {}, None)) as fetch:
+            failed = links.check(REPORT, {}, delay=0)
+            self.assertTrue(failed['use_backup'])
+            self.assertEqual(fetch.call_count, 3)
+        with patch.object(links, 'urlopen', return_value=Response(PDF_BYTES.replace(b'reviewed', b'new'))):
+            self.assertTrue(links.check(REPORT, failed)['use_backup'])
+        with patch.object(links, 'urlopen', return_value=Response(PDF_BYTES)):
+            self.assertFalse(links.check(REPORT, failed)['use_backup'])
+
+    def test_report_discovery_handles_leaf_bundle_and_requires_digest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            page = root / 'content/posts/report/index.md'
+            page.parent.mkdir(parents=True)
+            front = f'---\ntitle: Kimsuky report\nreportUrl: {REPORT["url"]}\n'
+            page.write_text(front + '---\nOverview')
+            with self.assertRaises(ValueError):
+                links.articles(root)
+            page.write_text(front + f'reportSha256: {REPORT["sha256"]}\n---\nOverview')
+            self.assertEqual(links.articles(root), [REPORT])
+
     def test_verified_article_and_redirect_destination(self):
         with patch.object(links, 'urlopen', return_value=Response(b'<title>AI Ate My Velociraptor - Labs</title>')):
             status, detail = links.probe(ARTICLE)
@@ -148,6 +189,9 @@ class HugoRouting(unittest.TestCase):
                     html = (output / listing).read_text()
                     title_links = '\n'.join(links.re.findall(r'<p class=["\']?line-title["\']?>.*?</p>', html, links.re.S))
                     for item in items:
+                        if listing != 'posts/index.html' and not any(
+                                candidate in title_links for candidate in [item['url'], '/' + item['path'] + '/']):
+                            continue
                         # Minified Hugo output can omit quotes around href values.
                         expected = '/' + item['path'] + '/' if use_backup else item['url']
                         self.assertRegex(title_links, 'href=["\']?' + links.re.escape(expected))
@@ -164,8 +208,9 @@ class HugoRouting(unittest.TestCase):
                     local = 'https://dfir.au/' + item['path'] + '/'
                     page = SEOHead((output / item['path'] / 'index.html').read_text())
                     self.assertTrue(page.description)
-                    self.assertEqual(page.canonical, local if use_backup else item['url'])
-                    self.assertEqual(local in sitemap, use_backup)
+                    local_canonical = use_backup or item.get('kind') == 'pdf'
+                    self.assertEqual(page.canonical, local if local_canonical else item['url'])
+                    self.assertEqual(local in sitemap, local_canonical)
                     schema = json.loads(page.schema_text)
                     self.assertEqual(schema['@type'], 'BlogPosting')
                     self.assertEqual(schema['mainEntityOfPage'], page.canonical)

@@ -16,8 +16,13 @@
             {{ end }}
         {{ end }}
         {{ with .Params.reportUrl }}
+            {{ with index (hugo.Data.original_links | default dict) . }}
+                {{ $useBackup = .use_backup | default false }}
+            {{ end }}
+            {{ if not $useBackup }}
             {{ $href = . }}
             {{ $isExternal = true }}
+            {{ end }}
         {{ end }}
         <p class="line-title">
             <a href="{{ $href }}"{{ if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Title }}</a>

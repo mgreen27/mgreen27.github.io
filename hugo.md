@@ -18,6 +18,15 @@ URLs and are used automatically when the saved routing decision selects a backup
 The checker follows HTTP redirects and verifies the article title or H1, so a
 200 response from an unrelated landing page is not treated as healthy.
 
+Posts with `reportUrl` are checked in the same workflow. PDF reports require a
+`reportSha256` containing the SHA-256 of the reviewed document. The checker follows
+redirects, downloads at most 16 MiB, checks the PDF header/end marker, and verifies
+the digest. HTML landing pages, truncated files, oversized responses and changed
+PDFs are inconclusive rather than healthy; review a changed report before updating
+its digest. Confirmed outages route listings to the illustrated local overview,
+not a full copy of the PDF. That overview retains its own canonical URL and sitemap
+entry, and its local images are validated along with the HTML article backups.
+
 ```sh
 python3 scripts/check_external_posts.py                   # Read-only live check
 python3 scripts/check_external_posts.py --write           # Save routing decisions
