@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Get in touch
+lead: Questions, feedback or collaboration on DFIR, threat intel and research.
 description: Questions, feedback or collaboration on DFIR, threat intelligence and research.
 ---
 Email [matt@dfir.au](mailto:matt@dfir.au) or contact me through [LinkedIn](https://www.linkedin.com/in/mgreen27/). I’m based in Australia.

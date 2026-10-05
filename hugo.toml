@@ -24,7 +24,7 @@ hideHeader = false
 # Intro on main page, content is markdown
 #homeIntroTitle = "Matthew Green"
 homeIntroContent = """
-I’m a cybersecurity professional focused on DFIR, threat intelligence and research. This site shares my articles, open-source tools and technical findings.
+I’m a cybersecurity professional focused on DFIR, threat intel and research. This site shares my articles, open-source tools and technical findings.
 """
 
 # Collection to display on home
