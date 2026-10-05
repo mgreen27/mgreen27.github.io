@@ -2,7 +2,7 @@
 {{- if .IsHome -}}{{- $title = site.Title -}}{{- end -}}
 {{- $description := partial "seo-description.html" . -}}
 {{- $image := "social-preview.png" | absURL -}}
-{{- $imageAlt := "Matthew Green's grey smile icon with DFIR & threat intel. Research, tools & practical AI. dfir.au." -}}
+{{- $imageAlt := "Matthew Green's grey smile icon with DFIR & threat intel. Research, tools & practical AI. dfir.au · @mgreen27." -}}
 {{- $article := and .IsPage (eq .Section "posts") -}}
 <meta property="og:title" content="{{ $title }}">
 <meta property="og:description" content="{{ $description }}">
