@@ -71,3 +71,9 @@ send email.
 ### Article metadata
 
 Give each post one main area with `areas: ["DFIR"]` (or Threat Intel, Threat Hunting, Detection Engineering, Malware Analysis, AI & Automation). Hugo generates `/areas/` archives; the main-area label links to its archive. Use `tags` for overlapping topics and tools, and a short `summary` for listings. Keep historical limitations in summaries where examples have been superseded.
+
+### Sharing previews and agent discovery
+
+`layouts/partials/social-meta.html` emits Open Graph and X card metadata using each page's title and SEO description, the existing canonical routing logic, and `static/social-preview.png`. The homepage uses the full site title. The 1200 × 630 PNG reuses the existing smile icon and can be regenerated on macOS with `swift scripts/render-social-card.swift`; Hugo builds use the committed PNG without needing Swift.
+
+`static/llms.txt` is a curated site guide, linked from the page head. Keep its links and descriptions current when featured resources change. It does not change crawler access or guarantee indexing. After deploying, verify the domain in Search Console if needed and submit `https://dfir.au/sitemap.xml`; no account verification token is included here.

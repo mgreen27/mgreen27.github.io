@@ -9,6 +9,7 @@ import unittest
 import xml.etree.ElementTree as ET
 from unittest.mock import patch
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
 from io import BytesIO
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +27,7 @@ class SEOHead(links.HTMLParser):
     def __init__(self, html):
         super().__init__()
         self.description = None
+        self.meta = {}
         self.canonical = None
         self.schema_text = ''
         self.in_schema = False
@@ -33,6 +35,9 @@ class SEOHead(links.HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
+        if tag == 'meta':
+            key = attrs.get('property') or attrs.get('name')
+            self.meta.setdefault(key, []).append(attrs.get('content'))
         if tag == 'meta' and attrs.get('name') == 'description':
             self.description = attrs.get('content')
         if tag == 'link' and attrs.get('rel') == 'canonical':
@@ -228,6 +233,7 @@ class HugoRouting(unittest.TestCase):
                     self.assertTrue(page.description)
                     local_canonical = use_backup or item.get('kind') == 'pdf'
                     self.assertEqual(page.canonical, local if local_canonical else item['url'])
+                    self.assertEqual(page.meta['og:url'], [page.canonical])
                     self.assertEqual(local in sitemap, local_canonical)
                     schema = json.loads(page.schema_text)
                     self.assertEqual(schema['@type'], 'BlogPosting')
@@ -244,7 +250,33 @@ class HugoRouting(unittest.TestCase):
                         self.assertTrue((output / 'posts/2026/kimsuky-phishing-payload-tactics/index.html').is_file())
                 for path in ['index.html', 'about/index.html', 'posts/index.html',
                              'projects/index.html', 'projects/velociraptor-skills/index.html']:
-                    self.assertTrue(SEOHead((output / path).read_text()).description, path)
+                    page = SEOHead((output / path).read_text())
+                    self.assertTrue(page.description, path)
+                    for key in ['og:title', 'og:type', 'og:url', 'og:image',
+                                'og:image:alt', 'twitter:title', 'twitter:card',
+                                'twitter:image', 'twitter:image:alt']:
+                        self.assertEqual(len(page.meta[key]), 1, (path, key))
+                        self.assertTrue(page.meta[key][0], (path, key))
+                    self.assertEqual(page.meta['og:description'], [page.description])
+                    self.assertEqual(page.meta['twitter:description'], [page.description])
+                    self.assertEqual(page.meta['twitter:title'], page.meta['og:title'])
+                    self.assertEqual(page.meta['twitter:image'], page.meta['og:image'])
+                    self.assertEqual(page.meta['twitter:card'], ['summary_large_image'])
+                    self.assertEqual(page.meta['og:url'], [page.canonical])
+                    image_url = urlparse(page.meta['og:image'][0])
+                    self.assertEqual(image_url.scheme, 'https')
+                    self.assertEqual(image_url.netloc, 'dfir.au')
+                    image = (output / image_url.path.lstrip('/')).read_bytes()
+                    self.assertEqual(image[:8], b'\x89PNG\r\n\x1a\n')
+                    self.assertEqual(int.from_bytes(image[16:20], 'big'), int(page.meta['og:image:width'][0]))
+                    self.assertEqual(int.from_bytes(image[20:24], 'big'), int(page.meta['og:image:height'][0]))
+                    if path == 'index.html':
+                        self.assertIn('Matthew Green', page.meta['og:title'][0])
+                        self.assertNotEqual(page.meta['og:title'], ['Home'])
+                guide = (output / 'llms.txt').read_text()
+                for target in links.re.findall(r'\]\((https://dfir\.au/[^)]+)\)', guide):
+                    resource = output / urlparse(target).path.lstrip('/')
+                    self.assertTrue(resource.is_file() or (resource / 'index.html').is_file(), target)
                 links.validate_backups(items, output)
 
 

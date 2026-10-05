@@ -26,7 +26,8 @@
 <link rel="canonical" href="{{ partial "canonical-url.html" . }}"/>
 {{ partial "article-schema.html" . }}
 
-{{ template "_internal/opengraph.html" . }}
+{{ partial "social-meta.html" . }}
+<link rel="describedby" href="{{ "llms.txt" | absURL }}" type="text/plain">
 
 {{ partialCached "head/css.html" . }}
 {{ partialCached "head/js.html" . }}

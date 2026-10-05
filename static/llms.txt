@@ -1,0 +1,25 @@
+# Matthew Green — DFIR, Threat Intelligence & Research
+
+> Personal website of Matthew Green, an Australian cybersecurity professional. Articles, research and open-source tools covering digital forensics, incident response, threat intelligence and practical AI.
+
+Research reflects its publication date. Some older technical examples have been superseded; check the notes in each article. Mirrored articles identify their original publisher and retain local fallbacks. The Kimsuky overview links to the original Rapid7 white paper and an archived PDF; cite the report's authors and original publication date when using that research.
+
+## Site
+
+- [About Matthew Green](https://dfir.au/about/): Background, experience and research interests.
+- [Articles](https://dfir.au/posts/): Published research and technical articles, with main areas, tags, word counts and reading times.
+- [Projects](https://dfir.au/projects/): Open-source tools, workshops and conference material.
+- [Contact](https://dfir.au/contact/): Questions, feedback and collaboration.
+
+## Research and tools
+
+- [Kimsuky's Phishing and Payload Tactics](https://dfir.au/posts/2024/kimsuky-phishing-payload-tactics/): Overview of the Rapid7 white paper published 16 July 2024, co-authored with Natalie Zargarov and Anna Širokova; includes original and archived PDF links.
+- [Velociraptor Skills](https://dfir.au/projects/velociraptor-skills/): Reusable AI skills for Velociraptor investigation workflows, with a link to the source repository.
+- [DetectRaptor](https://dfir.au/projects/detectraptor/): Detection content for Velociraptor, with a link to the source repository.
+- [Invoke-LiveResponse](https://dfir.au/projects/invoke-liveresponse/): PowerShell live response and collection tooling, with a link to the source repository.
+
+## Optional
+
+- [RSS feed](https://dfir.au/index.xml): Feed of site updates.
+- [Sitemap](https://dfir.au/sitemap.xml): Canonical pages for discovery.
+- [GitHub](https://github.com/mgreen27): Source code and public projects.
