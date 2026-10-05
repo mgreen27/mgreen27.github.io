@@ -10,14 +10,6 @@
   <div class="section-heading"><div><p class="eyebrow">HOW I CAN HELP</p><h2 id="services-title">Support for the investigation.<br>Capability for what comes next.</h2></div><a class="text-link" href="{{ "/consulting/" | relURL }}">Consulting services <span aria-hidden="true">→</span></a></div>
   <div class="work-grid offer-grid">{{ range hugo.Data.offers }}<article class="work-card"><h3><a href="{{ printf "/consulting/#%s" .id | relURL }}">{{ .title }} <span aria-hidden="true">↗</span></a></h3><p>{{ .description }}</p><span class="work-label">{{ .label }}</span></article>{{ end }}</div>
 </section>
-<section class="home-section" aria-labelledby="work-title">
-  <div class="section-heading"><div><p class="eyebrow">BUILT &amp; SHARED</p><h2 id="work-title">Selected work</h2></div><a class="text-link" href="{{ "/projects/" | relURL }}">All projects <span aria-hidden="true">→</span></a></div>
-  <div class="work-grid">
-    <article class="work-card"><p class="eyebrow">AUTOMATION / OPEN SOURCE</p><h3><a href="{{ "/projects/velociraptor-skills/" | relURL }}">Velociraptor Skills <span aria-hidden="true">↗</span></a></h3><p>Reusable AI skills and tooling for evidence collection, threat hunting and host analysis.</p><span class="work-label">Tools that support investigation</span></article>
-    <article class="work-card"><p class="eyebrow">HUNTING / OPEN SOURCE</p><h3><a href="{{ "/projects/detectraptor/" | relURL }}">DetectRaptor <span aria-hidden="true">↗</span></a></h3><p>Public detection content that helps teams look for adversary activity with Velociraptor.</p><span class="work-label">From behaviour to detection</span></article>
-    <article class="work-card"><p class="eyebrow">MALWARE / TECHNICAL RESEARCH</p><h3><a href="{{ "/posts/2023/qakbot/" | relURL }}">Inside Qakbot <span aria-hidden="true">↗</span></a></h3><p>Extracting malware configuration data and automating the decode process to support investigation at scale.</p><span class="work-label">Malware configuration analysis</span></article>
-  </div>
-</section>
 <section class="home-section research-section" aria-labelledby="research-title">
   <div class="section-heading"><div><p class="eyebrow">FROM THE FIELD</p><h2 id="research-title">Latest articles</h2></div><a class="text-link" href="{{ "/posts/" | relURL }}">All articles <span aria-hidden="true">→</span></a></div>
   {{ range first 4 (where site.RegularPages "Section" "posts").ByDate.Reverse }}{{ partial "post-entry.html" . }}{{ end }}
