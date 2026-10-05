@@ -1,0 +1,29 @@
+{{ define "main" }}
+{{ $lessons := .Parent.RegularPages.ByWeight }}
+<article class="editorial-page workshop-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="{{ "projects/" | relURL }}">Projects</a> <span aria-hidden="true">›</span> <a href="{{ .Parent.RelPermalink }}">DEATHcon 2023</a> <span aria-hidden="true">›</span> <span aria-current="page">{{ .Title }}</span></nav>
+  <p class="workshop-position">Lab {{ .Weight }} of {{ len $lessons }}</p>
+  <h1>{{ .Title }}</h1>
+  <p class="page-lead">{{ .Description }}</p>
+  {{ partial "workshop-note.html" . }}
+  <div class="workshop-links"><a href="{{ .Parent.RelPermalink }}">All workshop labs</a>{{ with .Params.videoUrl }}<a href="{{ . }}">Watch recording ↗</a>{{ end }}</div>
+  <details class="workshop-toc"><summary>On this page</summary>{{ partial "workshop-toc.html" . }}</details>
+  <div class="workshop-task-controls" hidden>
+    <button type="button" data-workshop-expand>Expand all tasks</button>
+    <button type="button" data-workshop-collapse>Collapse all tasks</button>
+  </div>
+  <div class="single-content">{{ .Content }}</div>
+  <nav class="workshop-pagination" aria-label="Workshop lessons">
+    {{ $current := . }}
+    {{ range $i, $lesson := $lessons }}
+      {{ if eq $lesson.RelPermalink $current.RelPermalink }}
+        {{ if gt $i 0 }}{{ with index $lessons (sub $i 1) }}<a rel="prev" href="{{ .RelPermalink }}">← Previous: {{ .Title }}</a>{{ end }}{{ end }}
+        {{ if lt $i (sub (len $lessons) 1) }}{{ with index $lessons (add $i 1) }}<a rel="next" href="{{ .RelPermalink }}">Next: {{ .Title }} →</a>{{ end }}{{ end }}
+      {{ end }}
+    {{ end }}
+  </nav>
+</article>
+{{ with resources.Get "js/workshop.js" | minify | fingerprint }}
+<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>
+{{ end }}
+{{ end }}

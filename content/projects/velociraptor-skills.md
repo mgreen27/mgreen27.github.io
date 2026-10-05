@@ -7,7 +7,7 @@ categories: project
 description: "Reusable AI skills and tooling for investigators using Velociraptor. Covers setup, artifact selection, collection, hunting and host analysis, with the vraptor command-line runtime."
 projectUrl: "https://github.com/ig-labs/velociraptor-skills"
 projectLinkLabel: "GitHub repository"
-tags: [AI,DFIR,Velociraptor,Detection]
+tags: [AI,DFIR,Velociraptor]
 ---
 Reusable AI skills and DFIR tooling for Velociraptor setup, artifact selection, collection, hunting and host analysis. Includes the shared `vraptor` command-line runtime, installation helpers and agent templates.
 

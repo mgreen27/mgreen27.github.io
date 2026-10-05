@@ -1,0 +1,595 @@
+{
+  "source": "User-supplied Notion Markdown export",
+  "archive_sha256": "1d2b959bd4331ff8756b1ca465726d3ff1983792943029f6395198dc07fba140",
+  "lessons": [
+    {
+      "slug": "gui-mode",
+      "source": "Velociraptor DEATHcon 2023/Lab GUI mode walk through bd71f9d076fb4150a54b7f1cb1ad513b.md",
+      "source_sha256": "78eb1c903c7467318ae519125253340abb77b385789c704ef2ad4866b1a4ec17",
+      "code_sha256": [],
+      "images": [
+        {
+          "file": "screenshot-02.png",
+          "sha256": "a26156ec37ac87704a54789d2aeca2266e80bd1a6318f2554c7d00cb9efa03ef"
+        },
+        {
+          "file": "screenshot-11.png",
+          "sha256": "41711393fb98cb3de8f454a7853de1525cad28ab4434c399efed7d4faaae009c"
+        },
+        {
+          "file": "screenshot-12.png",
+          "sha256": "cf241c1fb5354ac75512406e207beb8fc9982dd8ba79185a77c3d1d07cfddf57"
+        },
+        {
+          "file": "screenshot-03.png",
+          "sha256": "785cf511ded489fe39c096f1075ee3e3a6077a07a854bea63ba077b8edde569f"
+        },
+        {
+          "file": "screenshot-04.png",
+          "sha256": "78ffad91d85acf7cba42edee110c8b0fc8603ed065676eea0e15fb2118ccb280"
+        },
+        {
+          "file": "screenshot-05.png",
+          "sha256": "f19a0d9d27b8dbb2766f81f78b4631e6d93b44ae937f869897d4012f78f53b11"
+        },
+        {
+          "file": "screenshot-06.png",
+          "sha256": "fd42d3deb2c4a529a69e009c425d80761f9427bca3cde918d6817f2a81ab975e"
+        },
+        {
+          "file": "screenshot-07.png",
+          "sha256": "fd81fca462d485bdb5cbb4a6f759c2271d0e0a6dcbacafa8544ad73629155123"
+        },
+        {
+          "file": "screenshot-08.png",
+          "sha256": "675ae4332a113cdb2caada0cac834b4e4779e40000a3b746f7a63bb2a05d7906"
+        },
+        {
+          "file": "screenshot-09.png",
+          "sha256": "006ea6aaa17bd41ce392d4f4450d5028dd5e3e197563ec5044b5bc907a707928"
+        },
+        {
+          "file": "screenshot-10.png",
+          "sha256": "870b1dbbf7f6fa3177d139bbbeb26b3e617f184c02b9bea8c293384d7572c62c"
+        },
+        {
+          "file": "screenshot-01.png",
+          "sha256": "168de9c07aa6eda8dd12ec3f3079312476e1a7bb5c464479982b5baf257c721a"
+        }
+      ],
+      "callouts": 0
+    },
+    {
+      "slug": "vql-accessors",
+      "source": "Velociraptor DEATHcon 2023/Lab VQL Accessors 8a6e759016a34b8888c9d09f3b0853e5.md",
+      "source_sha256": "2d41b7e2a604190a1b333d6684075d9c2dc0bcf0a18650b2008ae65714e134e5",
+      "code_sha256": [
+        "931950c5786b2a1a1c9498b0c6f2f301b083ca791ef088b4d32eada486831a13",
+        "2637fe9fdeb286569d2433796054cbac829d19e40555fc41f26984a8b7f76315",
+        "b2a565f144e52a26f96b4c71a902e0cce9d0a4133660d142f14d8e15fa25e4c6",
+        "67445fecfe4aa31f01bcb7c40ef338c8679fffd4d4d1017fcbdcbc77d577d94d",
+        "cfb9bb224d8e562267a4232ba7da1142808ae69cdf48a38c5796ff10e60dcf68",
+        "e376970c3978f6db33932f47e96dcda066df1882514abc8151c514a5dc85844c",
+        "a305054199c467f770fdbdbc5224ac56769dad5bcd77e1a87862848b4514a595",
+        "9a34b6146add24030c7cd70446e618dd3e2a96d398bd996baea335abd457be13",
+        "6ae9f71ccf61f60c9311f527420b84d33cb049d7d698f5773dd3be18019d13aa",
+        "4bcc8d8c5f89a57b0450de41ef41dd8276656bea2bcc5904d9ce1cc6a0380b76",
+        "e568c6382cb71c28a98e68e3a3ee6ce46aebb4edd10bfc458e5daa067809f0d5",
+        "77698c1dacc965646341c6e02b588b1ccd5b09cc73771a0a42f0ec2e309e4e0e"
+      ],
+      "images": [
+        {
+          "file": "screenshot-02.png",
+          "sha256": "21ab164479e654ca0aaf86397d82734cab5b8cc095134da57a825fdf4a2e68c8"
+        },
+        {
+          "file": "screenshot-11.png",
+          "sha256": "931f4b29a886c5def8fc81c6090656b2da5d9346d6f4410fc8cf5bc5861632e7"
+        },
+        {
+          "file": "screenshot-12.png",
+          "sha256": "3ee07883a6bcf3f0911ffb6e393d054802a2d50940b3af4d288711e7d8f5a77e"
+        },
+        {
+          "file": "screenshot-13.png",
+          "sha256": "44b113abb45eb347721a042da0206a0ee317b03480cfca12a0c2630aed35a70a"
+        },
+        {
+          "file": "screenshot-14.png",
+          "sha256": "9a8bb58eef8eb50d3f12d8abdca39a2c4c3b4e2bbde99dca857ffbc583bce695"
+        },
+        {
+          "file": "screenshot-15.png",
+          "sha256": "58163558a62b62828154081ce406a66c31e6f71627016fcc26864ace6b663d09"
+        },
+        {
+          "file": "screenshot-16.png",
+          "sha256": "751c5e3cb677ad4073f1cb2e4f6cec49e1b759402a3110aef3d4cbff2415a07b"
+        },
+        {
+          "file": "screenshot-17.png",
+          "sha256": "3a5b9f60cd3c27c14f5856c0dacc72a66296d64cc21357fd2b583c25732a9d80"
+        },
+        {
+          "file": "screenshot-18.png",
+          "sha256": "67030689e10ee3f731b45f95a061bd11bba197bca3f29122de7672ac69a9152d"
+        },
+        {
+          "file": "screenshot-19.png",
+          "sha256": "4d5f922dd61f4ef0d79770cd633373d5826c36b5727f6e6a46b3caeb2e44715c"
+        },
+        {
+          "file": "screenshot-20.png",
+          "sha256": "f8cf4c43293e2c02f5c6a9dfa8ebbf67eb28109cba1638e69442eee5e499ca7c"
+        },
+        {
+          "file": "screenshot-03.png",
+          "sha256": "0fcda8811bd316c767f6fb4fd814ac86e21c8c3907b5baf9e1d8e69857e995d0"
+        },
+        {
+          "file": "screenshot-21.png",
+          "sha256": "9f7d29dd7856986889b7d71206d35715bdc35cf2798a4b1f5c029af738c540b5"
+        },
+        {
+          "file": "screenshot-22.png",
+          "sha256": "b76472b3e3b50b7c552041db10f600564091ef1eae2b6bb1241208e0b7b3794c"
+        },
+        {
+          "file": "screenshot-23.png",
+          "sha256": "c217d90122f91de0b90c2143d59650dc8f30e1f34629a7bbb3ac2cd342980bd3"
+        },
+        {
+          "file": "screenshot-24.png",
+          "sha256": "00d0e6b71757fe69dec4951e268188f7aca758fd6306f3e5a90ea2278b3e96e3"
+        },
+        {
+          "file": "screenshot-25.png",
+          "sha256": "96f7d8925a7de29bd31b10896b19a1da62a0bec551fe812b604211deeb4eb27e"
+        },
+        {
+          "file": "screenshot-04.png",
+          "sha256": "fd3a8a8c32a02bdbd56a9d8695c61cc64682eedf09d9717816fe673b2aae7472"
+        },
+        {
+          "file": "screenshot-05.png",
+          "sha256": "09594b7773e25a4e0b221b84d5abb89cdf63f144abbd47a6edf7cce5be88cbed"
+        },
+        {
+          "file": "screenshot-06.png",
+          "sha256": "b851105484bceb7111a8d15d7394bd55234bcbc10a8e9e4d1112151a0df0bd19"
+        },
+        {
+          "file": "screenshot-07.png",
+          "sha256": "de1b42704d60719f907075ac7c23df89a1a173da5f2c726255a11e12c7930b92"
+        },
+        {
+          "file": "screenshot-08.png",
+          "sha256": "62351c627b04fe4e58ce4fb53d7ccdddd8d868374fec6c033b8613211b2314b4"
+        },
+        {
+          "file": "screenshot-09.png",
+          "sha256": "b9c4f63d5390f5aec22c941a454750cad07bfdaee80047246afa63232b6ad41c"
+        },
+        {
+          "file": "screenshot-10.png",
+          "sha256": "6b6803140e79d3c4ce4bdd91fab8e7859ecdd36c7ecd487f9b0668ad750316e0"
+        },
+        {
+          "file": "screenshot-01.png",
+          "sha256": "ae70442b11b7072d32a2167616157e5b7c90c6449a52c833a9c6e98146d357d2"
+        }
+      ],
+      "callouts": 8
+    },
+    {
+      "slug": "vql-yara-performance",
+      "source": "Velociraptor DEATHcon 2023/Lab VQL yara performance 535bfcce8ab04192b90f5f72739db7b6.md",
+      "source_sha256": "c3b8e4411a874b965f0d12c9b8d630e85031ac05d4218ecac2b5eb6301b3e3ae",
+      "code_sha256": [
+        "033fb9788324e68a9907191ab3e185485e20a7c4b0c719b881f2ee9369980bef",
+        "a9810891b781ae433d8b4f1ad2fbeea701a1fd2ff6af42b28507bf23f0b9248b",
+        "0feb80819b4d20ad39dded31c4f74588dc8c327e6b3ed701f7facf484eaa9cc5"
+      ],
+      "images": [
+        {
+          "file": "screenshot-02.png",
+          "sha256": "57bba9762b9d3b364af76c479d7d4ec9592e32e933f2d11b037c6be08e6db3ff"
+        },
+        {
+          "file": "screenshot-11.png",
+          "sha256": "361277d4a3119b6c256b47b8da4774e71c200821b3c5f3a9e704b110978d6097"
+        },
+        {
+          "file": "screenshot-12.png",
+          "sha256": "ad2cded5eed19fb87c5288839d921bfa1c5074ffffe1a6fd9e8d11f26c77d240"
+        },
+        {
+          "file": "screenshot-13.png",
+          "sha256": "bae9fe4152ae169f8b59fbd26d592929068caba24d60a5e2804b94f4212ca264"
+        },
+        {
+          "file": "screenshot-14.png",
+          "sha256": "5605eefa34276350de9f9c6a848a8db46e72a631d8febd758432501665f57e30"
+        },
+        {
+          "file": "screenshot-15.png",
+          "sha256": "696d634b6d8990191deb20d54a127c080c2ce027d44a82f21e627a26278224b3"
+        },
+        {
+          "file": "screenshot-16.png",
+          "sha256": "9e2ef80e8c2a5dea583d23b9ba8bbd24ad6c0511681f7bf711a470b768c78e6a"
+        },
+        {
+          "file": "screenshot-17.png",
+          "sha256": "4595a7238f7db32e8852b9460da9c999b5aceeb5588f50e95b5264d7e34f075e"
+        },
+        {
+          "file": "screenshot-18.png",
+          "sha256": "48666246da69dcf3c627f9aa483438c8f304bffee2594f744ef6ee783a7d8734"
+        },
+        {
+          "file": "screenshot-03.png",
+          "sha256": "5c42c2a0a7f44c7dccc061c62efe183ed0c566ef16925dc2140dce4ce4d0d332"
+        },
+        {
+          "file": "screenshot-04.png",
+          "sha256": "31008d46b85e6f12ae2f033d9eed9f896f9202eba4e93d2b21e9278b5a89e099"
+        },
+        {
+          "file": "screenshot-05.png",
+          "sha256": "169f4ddd7b8a12af5c8ffe48185e53da22bb102e14fcc8247d3ca9a621547c07"
+        },
+        {
+          "file": "screenshot-06.png",
+          "sha256": "73e23c3ce8fb2168dc5b5c710429116080b360c363af15e898793d5e0436ed1a"
+        },
+        {
+          "file": "screenshot-07.png",
+          "sha256": "f034344d265eeb00b9669a3d352c355000d999557893846e06916b041b1af965"
+        },
+        {
+          "file": "screenshot-08.png",
+          "sha256": "4865f4a1b9bd85bd90c9cbfffeda881862c7fabe56599f7340e893758f76a84e"
+        },
+        {
+          "file": "screenshot-09.png",
+          "sha256": "59f847fde563b5f1ae38a7c99b24cb4648237ab97c4b3bcf194883b07e307d21"
+        },
+        {
+          "file": "screenshot-10.png",
+          "sha256": "b3a2308140f826065f9fee6f76a23d7029f7f58be558694ea9e221db959dd520"
+        },
+        {
+          "file": "screenshot-01.png",
+          "sha256": "799761403e52c9df90ebfbf91454517db1594cc1eae066e9ace0ff14883b5c23"
+        }
+      ],
+      "callouts": 1
+    },
+    {
+      "slug": "patched-rdp",
+      "source": "Velociraptor DEATHcon 2023/Lab Patched RDP af9898a6e2b044129d10cbfce9f57ab9.md",
+      "source_sha256": "09a83197fd26edabbb49109029a0a811de2d7b56fbb0b6e61c12c567cdcbd0f0",
+      "code_sha256": [
+        "003cb8614f97ed90969136d8760e75f5ae3498d1472e92310f8fa3d0be1992a3",
+        "4c2675994e6fd5308ca941e006cc966e6adb7870972af589e5f3fba9a894925a",
+        "7af90f257934906026d7c98d4054857dbd1309283618acbb05cd5d9880c392ef",
+        "6f8350bccf47030e5ff95e51c888c541ee320e83645629f7d377b6616701ae3e",
+        "5a51da2cb3aa8517f21955398a970e480e0f64224fd70e52f444f990d7d6235e",
+        "e1a8b46a3574d1fb643689a3a834db22e8ebb11c2fb31db3e88853adc5a9c109"
+      ],
+      "images": [
+        {
+          "file": "screenshot-02.png",
+          "sha256": "9f50e725cced2027e8a498ce5e1a60930aa8e41d8405d0eb827ba60d94f7db8d"
+        },
+        {
+          "file": "screenshot-11.png",
+          "sha256": "b7718d099fe0e5ce16a1ba39561e69196a0aa17e9065cfc47da337ad66f51f41"
+        },
+        {
+          "file": "screenshot-12.png",
+          "sha256": "26e6b826d9c8dda912ea1e38def3f12317700330df41ff76984e51f0491ac7d8"
+        },
+        {
+          "file": "screenshot-13.png",
+          "sha256": "e2302e841535c9941e3910df0c5f6c085776c8ac3f0864ac6cd8b1e9078fc999"
+        },
+        {
+          "file": "screenshot-14.png",
+          "sha256": "0303ea751db651772abebc4e2821b9f385c5582a24ae2d1622c7da37642f55ac"
+        },
+        {
+          "file": "screenshot-15.png",
+          "sha256": "1cf67c6fea7173e319886ee6e98f5bf9e59c1aedcfdd33e39a4a8bac4ce5dba6"
+        },
+        {
+          "file": "screenshot-16.png",
+          "sha256": "665e9f5913b9e28b915267d5a2f986fc63b8484d896a30db3b761a2c00eb2cca"
+        },
+        {
+          "file": "screenshot-03.png",
+          "sha256": "dcc690ded70e458eb25003ac24c6e9fa32270e48a910f76b236db71df98fb412"
+        },
+        {
+          "file": "screenshot-04.png",
+          "sha256": "0821892356df1a3dba9eee54ebeac0ff3323f8905e9d12051e0dae184bc69a7f"
+        },
+        {
+          "file": "screenshot-05.png",
+          "sha256": "925c06cd71ec0915a54c86ec07ee34ae628248ebd0660dc8726dc5c3cebe2fd8"
+        },
+        {
+          "file": "screenshot-06.png",
+          "sha256": "9e53cdf7689dc845364abf15e11e77cbbbb730c6d9b258247dd87e62b99836f7"
+        },
+        {
+          "file": "screenshot-07.png",
+          "sha256": "2aa63ce9e6064fdc71232109aa53bd7d96133735dbcd2f2c1de1fe5e26a7b966"
+        },
+        {
+          "file": "screenshot-08.png",
+          "sha256": "f123d263ed63dff70d677c2fd01352562aa7a321f6384cd2794135d873d00932"
+        },
+        {
+          "file": "screenshot-09.png",
+          "sha256": "3b8e069c920983499616fb386bb176ad72bd383f6d26c06ce68157c9a46e5fe3"
+        },
+        {
+          "file": "screenshot-10.png",
+          "sha256": "3e4381f06171a30c1d000878e1233a4056bba37ed686a1131b474ebad05bd791"
+        },
+        {
+          "file": "screenshot-01.png",
+          "sha256": "696030576b9b730d3f0be92dac3bac65cdaa65505686d0ccf4f6d9347328d38f"
+        }
+      ],
+      "callouts": 5
+    },
+    {
+      "slug": "uefi-blacklotus",
+      "source": "Velociraptor DEATHcon 2023/Lab UEFI Black Lotus 64c7329847b54d03bfb848a976f20e1c.md",
+      "source_sha256": "acc7b447deb2ec98c3895b210cd9197b36336999ce9f198e598d2ab65e5bbe37",
+      "code_sha256": [
+        "7b6b71abdb6f386c63e55c653b88a3b3f0472062f259aa5f58bf9b833e5b5e29",
+        "0710fe3cbdd5d1ed65c03ccde7261432153c0924169d87d2a56376774f4fa2cd",
+        "8e69c46d0eb6cd2d9e991c05badeec66b85d1b75620a21c90078d78ea5607b0f",
+        "9eaebf65108a7e8f914535282ea6c1f3ca650e2cb8634a21f3e6f7e61d5f0767"
+      ],
+      "images": [
+        {
+          "file": "screenshot-02.png",
+          "sha256": "b86ed040dda359e3724e97bf914a002eaea5ad0eff098531f3024ac42e3f3710"
+        },
+        {
+          "file": "screenshot-11.png",
+          "sha256": "556c0d3dd621e46f3ce5077987d51edc417ce1bce9f6da81645341b275fca647"
+        },
+        {
+          "file": "screenshot-12.png",
+          "sha256": "6baab430363431a210921b8b5b70135503dd572adfe41e741155262268e974e9"
+        },
+        {
+          "file": "screenshot-13.png",
+          "sha256": "8e19a7b3a45b781196f30590bf87652a65b0722f01b442e4231276a5033e275d"
+        },
+        {
+          "file": "screenshot-14.png",
+          "sha256": "22ddc5b965f70dad052d6a13152f7ddfb045a3293139b167262b0b30c311ac8c"
+        },
+        {
+          "file": "screenshot-15.png",
+          "sha256": "c946c68cb63131065c12df478c402c0956cd39752606120c3368a2715fe6c944"
+        },
+        {
+          "file": "screenshot-16.png",
+          "sha256": "b31d2c8084eccfaa5618c5c76a3599658ebb9387dbadf9d4699c3aa86c06002f"
+        },
+        {
+          "file": "screenshot-17.png",
+          "sha256": "b5918991aa82b35ab714b4c94003f07c9d182c4287e756f7a5132875c2135831"
+        },
+        {
+          "file": "screenshot-18.png",
+          "sha256": "11631a214a09f7cee6255c54898b27e66cdb90a369a2db25498e41f03642bd28"
+        },
+        {
+          "file": "screenshot-19.png",
+          "sha256": "3394aa170b092620d84fa788746f97b4d23ab17e35e80cddec4858d7a4024db9"
+        },
+        {
+          "file": "screenshot-20.png",
+          "sha256": "63d08208542988114731c5b955c56cc035b7f112a8afd4e7c1367201153f4de4"
+        },
+        {
+          "file": "screenshot-03.png",
+          "sha256": "43699acd484296b6007f44c04b73c60a00a90eff48e471cc7d43cef8d6641379"
+        },
+        {
+          "file": "screenshot-21.png",
+          "sha256": "e576ca0ec7d6b19c5472169154c2c0032b85170af0564087072d692a09e343a3"
+        },
+        {
+          "file": "screenshot-22.png",
+          "sha256": "79334955507d08207cce70ef95db14155490aa470ff6092ec070b5519518d32f"
+        },
+        {
+          "file": "screenshot-23.png",
+          "sha256": "0d0b3a69f0b3653b73253f1defe15523249d6506b88f9f2421514d67e0fc5c37"
+        },
+        {
+          "file": "screenshot-24.png",
+          "sha256": "fb75ec1ea7ebfe6df20606a5e30e838ae5dd274096ffcbb809dc5f7ccbcf8892"
+        },
+        {
+          "file": "screenshot-25.png",
+          "sha256": "adc698f3650a189390e15c0d45b5761a59b54698744faa0280c67a8a04fcc905"
+        },
+        {
+          "file": "screenshot-26.png",
+          "sha256": "018b19ffbe091c3259c2611d69ef5dcb9205ac9e3e7e63d9fdd2b2239825f5cd"
+        },
+        {
+          "file": "screenshot-27.png",
+          "sha256": "cfd50a23824650666f6cacab03cdf7b320ae9e8179f177ddb93366b00e5afb03"
+        },
+        {
+          "file": "screenshot-28.png",
+          "sha256": "262cbcfa3b732d47ac1c16feedaa7a0440392fbf29b21116f353b65a9ac775c3"
+        },
+        {
+          "file": "screenshot-29.png",
+          "sha256": "65dc1cb7f7c77937655f9278df747e3ff5ff05d5c39a0c6cefd1159921f84cbd"
+        },
+        {
+          "file": "screenshot-30.png",
+          "sha256": "8093058ae8ff8f882f3e64856a60e401655e46dc952e8b4e35716b749490ebef"
+        },
+        {
+          "file": "screenshot-04.png",
+          "sha256": "25670d5f9031ef4a8851e3a43db9a716bcfdd9e2186ea97da6f9d9aa955110b7"
+        },
+        {
+          "file": "screenshot-31.png",
+          "sha256": "3f0177e4b48a50014b663cd773f418f9b4b31e9bb4a50932aabd8a286f32819f"
+        },
+        {
+          "file": "screenshot-32.png",
+          "sha256": "c897fbebbd0f30ebacad9afcaf6ecce47ba2163da362a40058c75c2d1b1d3115"
+        },
+        {
+          "file": "screenshot-33.png",
+          "sha256": "240af23cbe4e95c2b2ca81752e68cebf69a238c94bb65240684b499ac8e332c7"
+        },
+        {
+          "file": "screenshot-34.png",
+          "sha256": "899285a7aa993e27def602947f4962d265e24f689d84ca919509f3a45e197507"
+        },
+        {
+          "file": "screenshot-35.png",
+          "sha256": "cc36eb41c57c3b9f52ea2a7284f6046798a3e0891c2f81d02122e2ee227a6c3a"
+        },
+        {
+          "file": "screenshot-36.png",
+          "sha256": "c2770fb6065865871ec5059a3120de0b8c3ba69e966c3dbfefbc34a7b5e0f3ce"
+        },
+        {
+          "file": "screenshot-37.png",
+          "sha256": "fa8c90c622ef93d3ef90e39be8a7050cfa3ee6c60f316b7576c9a03cb2b0045d"
+        },
+        {
+          "file": "screenshot-05.png",
+          "sha256": "b60cb607519ce61dbc9d1ae54eb27c185c571ebfbc7d82bb2b67a436c0b447d6"
+        },
+        {
+          "file": "screenshot-06.png",
+          "sha256": "d2fbf04e4b6ce71d9d264efb2c3bfa1d579c83d42eb1f0e5d609854ba7945f94"
+        },
+        {
+          "file": "screenshot-07.png",
+          "sha256": "894092a9f030347c08155b4ee4196a7c652f9f45f2a3c5f5975cafe1252bf763"
+        },
+        {
+          "file": "screenshot-08.png",
+          "sha256": "19d79447ac5c3efa64c2477a684cd8aef1e61922e52fa4c1516e67ae11bb70fe"
+        },
+        {
+          "file": "screenshot-09.png",
+          "sha256": "dfb5271b2c399909a8a483da5c3be65ecba15fc7c58fe24d505f72c05fef428e"
+        },
+        {
+          "file": "screenshot-10.png",
+          "sha256": "416cbe49a85f578040315af8bd9645694a4e3e587cafa473fe5684fd839f27ee"
+        },
+        {
+          "file": "screenshot-01.png",
+          "sha256": "7d1d8cf663594961f20f8033b804354a83bed9fe79dab0a2462c9084f9af1416"
+        }
+      ],
+      "callouts": 2
+    },
+    {
+      "slug": "lnk-analysis",
+      "source": "Velociraptor DEATHcon 2023/Lab LNK analysis 4c6d1522221a4433b01bb6f7d80f3ba7.md",
+      "source_sha256": "cf170738de6eacc0850b4605d11c213bbfe52fd2e9b471a1b750956d9d7b7af1",
+      "code_sha256": [
+        "099657719811735de7a7c2233d0c533ce5ae32f20e158e68ea421d9ed0b66c87",
+        "e84f6763f4c390b2bc70fde6906529ec61e53acb82984a28504704f5e2201779",
+        "e711e62661a54ae10ba7f74935d1aaa7cf14dd11fb4b74aa5f54527683e3e45f",
+        "989444c447e7f60a06a35387019ba7dbcc219be868c6aa56a6b6a24b922286e9",
+        "ed921b0609105e413573dd3ab9a4617407a402e65d363c6f0fc9830cabf4be82",
+        "026f716883decfb0ada84c46273ca312fe7afa4f51de74b2e51a6abb57487b86",
+        "3c41d627b641a2ea4a229e96a3644355b81e9166b4defa15f00ab6f73790dddf",
+        "c48d22802871b961f07636909cc6cdd0fdb0720999f79d4cf342acef5c70fc79",
+        "8141c56c60889ac003866d2fdf0c5f840a9e955d07187f7c73c48c8043b2de63"
+      ],
+      "images": [
+        {
+          "file": "screenshot-02.png",
+          "sha256": "8efb82bb88ada6167467d4494cac356e29ca091e4e743e99b3f86fa44898e7d0"
+        },
+        {
+          "file": "screenshot-11.png",
+          "sha256": "11809e1d058247150ccc64d9c91eb90643110a9d465ab0939dcfb0952de7c36e"
+        },
+        {
+          "file": "screenshot-12.png",
+          "sha256": "02ad38d9b0c68d8499d18dbd4f51b77b62b7c0c9f83f752486cb5c2d79661276"
+        },
+        {
+          "file": "screenshot-13.png",
+          "sha256": "0939d044fa712702f78dbb8756f01fdeb5f8d9d3118a0154b93bdf564a718626"
+        },
+        {
+          "file": "screenshot-14.png",
+          "sha256": "0056c0a6222bd489d5cfb25344453c4b93a42273ec9cd2cc2432459c31b59652"
+        },
+        {
+          "file": "screenshot-15.png",
+          "sha256": "08a160d9f4cca299c7a873f3f918ef4da5f0612fd6f59ad989c3674ad1db3e87"
+        },
+        {
+          "file": "screenshot-16.png",
+          "sha256": "f7e1139965dc13847bbbc6b3dcddd5e41abbc6bdef770c1e4e6df1a029c4e85b"
+        },
+        {
+          "file": "screenshot-03.png",
+          "sha256": "bcd3c462aa99bbe0c7b3dc6f4158557455869b9836a4e501df67d1bf6b9664f7"
+        },
+        {
+          "file": "screenshot-04.png",
+          "sha256": "b88636685838f8452b531fc77ff4481b9956d33b1ab94b829f9351f28d902c9a"
+        },
+        {
+          "file": "screenshot-05.png",
+          "sha256": "8efb82bb88ada6167467d4494cac356e29ca091e4e743e99b3f86fa44898e7d0"
+        },
+        {
+          "file": "screenshot-06.png",
+          "sha256": "c1545e6dd4fe8ab37afb3d2a21aa34805b7f0346a9d24a26058124aa58b4f3cd"
+        },
+        {
+          "file": "screenshot-07.png",
+          "sha256": "4a193efc062e8b0d7b9c3068a5816d4a2fb1a5c2f9bce544095bfca4c6b68f65"
+        },
+        {
+          "file": "screenshot-08.png",
+          "sha256": "04c00838faddddf896c4a1358828a17657495779fca5f8e7b9add16eb0f752c1"
+        },
+        {
+          "file": "screenshot-09.png",
+          "sha256": "4241e18e2f009fe5cfdc485ffd37bf7837e76cb4a7d8f1b28121fa9925119ca1"
+        },
+        {
+          "file": "screenshot-10.png",
+          "sha256": "2a5a195ac626e86e98c299ef5e92afb5f64579ef810fc9f7a274ca4a736bbdf8"
+        },
+        {
+          "file": "screenshot-01.png",
+          "sha256": "02f0ce0d62e79fc7d5100427960a799969d21ba90e223d43a05e0ec92c8b9452"
+        }
+      ],
+      "callouts": 1
+    }
+  ]
+}

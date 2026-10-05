@@ -16,7 +16,7 @@ $CSS := slice
 
 {{ end }}
 
-{{ $CSS = $CSS | append (resources.Get "css/consulting.css") }}
+{{ $CSS = $CSS | append (resources.Get "css/consulting.css") (resources.Get "css/workshop.css") }}
 
 {{
 $combined := $CSS

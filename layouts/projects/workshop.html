@@ -1,0 +1,11 @@
+{{ define "main" }}
+<article class="editorial-page workshop-page">
+  {{ partial "breadcrumbs.html" . }}
+  <h1>{{ .Title }}</h1>
+  <p class="page-lead">{{ .Description }}</p>
+  {{ partial "article-tags.html" . }}
+  {{ with .Resources.Get "skulls.png" }}<img class="workshop-cover" src="{{ .RelPermalink }}" alt="DEATHcon skull artwork" width="{{ .Width }}" height="{{ .Height }}">{{ end }}
+  {{ partial "workshop-note.html" . }}
+  <div class="single-content">{{ .Content }}</div>
+</article>
+{{ end }}
