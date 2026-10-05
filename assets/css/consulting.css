@@ -79,9 +79,9 @@ footer { display: block; max-height: none; font-family: var(--sans); }
 footer a { font-family: var(--sans); margin: 0; text-decoration: none; }
 .footer-brand { display: inline-flex; align-items: center; gap: 12px; }
 .footer-brand img { display: block; width: 32px; height: 32px; flex-shrink: 0; image-rendering: pixelated; }
-.footer-tagline { display: block; font-size: 12px; color: var(--content-secondary); margin-top: 8px; }
+.footer-tagline { display: block; font-size: 12px; line-height: 1.5; color: var(--content-secondary); margin-top: 0; }
 .footer-name { font-size: 15px; font-weight: 600; }
-.footer-identity { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 7px; }
+.footer-identity { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 7px; line-height: 1.5; }
 .footer-handle { white-space: nowrap; font-size: 12px; color: var(--content-secondary); }
 .footer-handle a { color: inherit; }
 .footer-handle a:hover, .footer-handle a:focus-visible { color: var(--accent); }
