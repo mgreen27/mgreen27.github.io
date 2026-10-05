@@ -1,18 +1,19 @@
 baseURL = 'https://dfir.au/'
 locale = 'en-US'
-title = "Matt's DFIR blog"
+title = "Matthew Green | DFIR, Threat Intelligence & Research"
 #title = "Matthew Green"
 theme = 'typo'
 
 [taxonomies]
 tag = 'tags'
+area = 'areas'
 
 [services.googleAnalytics]
 id = "G-G41G20SLQN"
 
 [params]
 # Meta description
-description = "DFIR research, incident response techniques and open-source security tools by Matthew Green, including Velociraptor hunting and forensic analysis."
+description = "DFIR, threat intelligence and security research by Matthew Green. Articles, open-source tools and practical applications of AI in investigation workflows."
 authorName = "Matthew Green"
 
 # Appearance settings
@@ -24,11 +25,11 @@ hideHeader = false
 # Intro on main page, content is markdown
 #homeIntroTitle = "Matthew Green"
 homeIntroContent = """
-I’m a cybersecurity professional focused on incident response, threat intelligence and applied AI research. This blog shares my DFIR projects, tools and technical findings.
+I’m a cybersecurity professional focused on DFIR, threat intel and research. This site shares my articles, open-source tools and technical findings.
 """
 
 # Collection to display on home
-homeCollectionTitle = "Posts"
+homeCollectionTitle = "Latest articles"
 homeCollection = 'posts'
 
 # Lists parameters
@@ -53,21 +54,20 @@ url = "https://x.com/mgreen27"
 
 # Main menu pages
 [[params.menu]]
-name = "home"
-url = "/"
-
-[[params.menu]]
-name = "posts"
-url = "/posts"
-
-[[params.menu]]
-name = "about"
-url = "/about"
-social = true
+name = "articles"
+url = "/posts/"
 
 [[params.menu]]
 name = "projects"
-url = "/projects"
+url = "/projects/"
+
+[[params.menu]]
+name = "about"
+url = "/about/"
+
+[[params.menu]]
+name = "contact"
+url = "/contact/"
 
 # Syntax highligth on code blocks
 [markup]

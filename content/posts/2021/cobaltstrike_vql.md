@@ -1,10 +1,11 @@
 ---
+areas: ["Threat Hunting"]
 layout: post
 title:  "Cobalt Strike Payload Discovery And Data Manipulation In VQL"
 date:   2021-11-09
 categories: posts
-tags: [DFIR,Detection,Velociraptor,VQL]
-summary: Velociraptor’s ability for data manipulation is a core platform capability that drives a lot of the great content we have available in terms of data parsing for artifacts and live analysis. After a recent engagement with less common encoded Cobalt Strike beacons, and finding sharable files on VirusTotal,  I thought it would be a good opportunity to walk through some workflow around data manipulation with VQL for analysis. In this post I will walk though some background, collection at scale, and finally talk about processing target files to extract key indicators.
+tags: [DFIR, Detection, Velociraptor, VQL, Threat Hunting]
+summary: "Discover encoded Cobalt Strike payloads in MSBuild task files, collect them with Velociraptor and use VQL to decode payloads and extract indicators."
 showTags: true
 readTime: true
 aliases: /posts/2021/11/09/VQL.html

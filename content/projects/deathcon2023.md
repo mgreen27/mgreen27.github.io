@@ -4,6 +4,9 @@ title:  "DEATHcon2023: Practical DEATH by Velociraptor"
 slug: "DEATHcon2023: Practical DEATH by Velociraptor"
 date: 2023-11-20
 categories: project
+description: "A practical Velociraptor and VQL workshop for investigators, covering accessors, query performance, RDP patching, BlackLotus and LNK analysis."
+projectUrl: "https://www.notion.so/mgreen27Velociraptor-DEATHcon-2023-25d9760af2ac4b419ff39c2a48f7bb2c"
+projectLinkLabel: "Workshop material"
 tags: [DFIR,Velociraptor,VQL,Detection]
 ---
 [![](skulls.png "Workshop link")](https://www.notion.so/mgreen27Velociraptor-DEATHcon-2023-25d9760af2ac4b419ff39c2a48f7bb2c)

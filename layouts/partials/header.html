@@ -1,0 +1,12 @@
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div class="site-header" id="top">
+  <a class="brand" href="{{ "/" | relURL }}" aria-label="Matthew Green — home"><img class="brand-icon" src="{{ "/brand-smiley.png" | relURL }}" alt="" width="48" height="48"><span class="brand-name">Matthew Green<span>{{ partial "site-label.html" . }}</span></span></a>
+  <nav aria-label="Main navigation">
+    {{ $page := . }}
+    {{ range site.Params.menu }}
+    {{ $active := or (eq $page.RelPermalink .url) (and (ne .url "/") (hasPrefix $page.RelPermalink .url)) }}
+    <a href="{{ .url | relURL }}" class="{{ if eq .name "contact" }}nav-contact{{ end }}"{{ if $active }} aria-current="page"{{ end }}>{{ .name | title }}</a>
+    {{ end }}
+  </nav>
+</div>
+<span id="main-content" tabindex="-1"></span>

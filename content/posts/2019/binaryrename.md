@@ -1,11 +1,12 @@
 ---
+areas: ["Detection Engineering"]
 layout: post
 title:  "Blue Team Hacks - Binary Rename"
 date:   2019-05-12
 categories: posts
 tags: [DFIR,WMI,Detection]
 image: 00title.jpg
-summary: In this post I thought I would share an interesting proof of concept I developed to detect Binary Rename of commonly abused binaries. Im going to describe the detection, its limitations and share the code.
+summary: "Detect renamed Windows binaries by comparing executable metadata with process names and paths. Includes a proof of concept and its limitations."
 aliases: /posts/2019/05/12/BinaryRename.html
 ---
 

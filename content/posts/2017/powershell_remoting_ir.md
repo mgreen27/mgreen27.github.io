@@ -1,4 +1,5 @@
 ---
+areas: ["DFIR"]
 layout: post
 title:  "PowerShell Remoting and Incident Response"
 date:   2017-01-12 12:00:00 +1000
@@ -8,7 +9,7 @@ image: 00PowerShell.png          # (custom) image only for meta `property="og:im
 thumbnail: 00PowerShellthumb.png
 showTags: true
 readTime: true
-summary: PowerShell is quickly becoming a tool of choice for many IT Operations staff and Security Practitioners alike. This post is a quick overview of using Windows Remote Management and PowerShell for Incident Response. I will also provide some proof of concept setup instructions and general themes for those interested in further research on this topic.
+summary: "Use PowerShell remoting and WinRM for incident response, with setup examples, collection options and operational considerations."
 aliases: /posts/2017/01/12/PowerShell_Remoting_IR.html
 ---
 ![ ](00PowerShellthumb.png)

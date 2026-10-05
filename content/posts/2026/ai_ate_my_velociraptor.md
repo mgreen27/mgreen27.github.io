@@ -1,4 +1,5 @@
 ---
+areas: ["AI & Automation"]
 layout: post
 title: "AI Ate My Velociraptor"
 date: 2026-09-28

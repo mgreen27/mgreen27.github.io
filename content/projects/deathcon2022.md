@@ -4,6 +4,9 @@ title:  "DEATHcon 2022 Velociraptor workshop"
 slug: "DEATHcon 2022 Velociraptor workshop"
 date: 2022-11-05
 categories: project
+description: "An introductory Velociraptor workshop for DFIR practitioners, covering VQL, NTFS, event logs, YARA and memory artifacts. Includes lab material and recordings."
+projectUrl: "https://gist.github.com/mgreen27/05f95f27f70234ea7242190c5c62a62a"
+projectLinkLabel: "Lab scripts"
 tags: [DFIR,Velociraptor,VQL,Detection]
 aliases: /projects/DEATHcon2022/
 ---

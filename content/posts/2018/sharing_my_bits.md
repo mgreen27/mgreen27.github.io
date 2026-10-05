@@ -1,4 +1,5 @@
 ---
+areas: ["DFIR"]
 layout: post
 title:  "Sharing my BITS"
 date:   2018-02-18
@@ -7,7 +8,7 @@ tags: [DFIR,Powershell]
 image: 00title.png
 showTags: true
 readTime: true
-summary: I thought I would share some research on Microsoft BITS after a recent tool released by the French ANSSI to parse BITS job artefacts. This tool has sparked my interest due to previous research on download cradles and an interest in the client side forensics. I’m going to give a brief background, talk about some nuances in collection types and provide some background information when I was thinking about detection.
+summary: "Investigate Microsoft BITS job artefacts, collection methods and event logs to identify suspicious transfers and persistence."
 aliases: /posts/2018/02/18/Sharing_my_BITS.html
 ---
 

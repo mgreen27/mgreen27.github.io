@@ -1,4 +1,5 @@
 ---
+areas: ["DFIR"]
 layout: post
 title:  "Invoke-LiveResponse"
 date:   2018-01-14
@@ -7,7 +8,7 @@ tags: [DFIR,Powershell]
 image: 00PowerShell.png
 showTags: true
 readTime: true
-summary: In this post, I am going to talk about a Powershell module I have authored as a simple implementation for live response and file collections over Powershell remoting. The initial use case was considered after an endpoint vendor appliance failed and capability for raw collections was limited. The module uses Powerforensics over WinRM, and after some interest, I think is worth sharing.
+summary: "Collect live response data and raw files over WinRM with Invoke-LiveResponse and PowerForensics. Covers setup, collection modes and forensic footprint."
 aliases: /posts/2018/01/14/Invoke-LiveResponse.html
 ---
 ![ ](00PowerShellthumb.png)

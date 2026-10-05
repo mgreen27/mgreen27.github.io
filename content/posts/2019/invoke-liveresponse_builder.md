@@ -1,4 +1,5 @@
 ---
+areas: ["DFIR"]
 layout: post
 title:  "Live Response Script Builder"
 date:   2019-04-07
@@ -7,7 +8,7 @@ tags: [DFIR, Powershell]
 image: 00title.jpg
 showTags: true
 readTime: true
-summary: In this post I thought I would share some practical new features implemented in a recent refactor of Invoke-LiveResponse. These features enable fast and modular generation of live response scripts compatible with legacy Powershell. Im going to walk through the background then some of the new features and script creation.
+summary: "Build modular live response scripts with Invoke-LiveResponse, including custom collection logic and support for legacy PowerShell."
 aliases: /posts/2019/04/07/ILRScriptBuilder.html
 ---
 

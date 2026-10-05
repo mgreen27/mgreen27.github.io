@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Check original articles and validate their rendered local backups (stdlib only)."""
+"""Check original articles/PDF reports and validate their local pages (stdlib only)."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from http.client import HTTPException
 import json
+import hashlib
 from pathlib import Path
 import re
 import time
@@ -15,6 +16,7 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 STATE = ROOT / 'data/original_links.json'
+MAX_PDF_BYTES = 16 * 1024 * 1024
 
 
 class Page(HTMLParser):
@@ -54,16 +56,32 @@ def articles(root=ROOT):
         if not text.startswith('---\n'):
             continue
         front = text.split('---', 2)[1]
-        fields = dict(re.findall(r'^(title|originalUrl):\s*(.*?)\s*$', front, re.M))
-        if 'originalUrl' not in fields:
+        fields = dict(re.findall(r'^(title|originalUrl|reportUrl|reportSha256|reportFile):\s*(.*?)\s*$', front, re.M))
+        if not ('originalUrl' in fields or 'reportUrl' in fields):
             continue
         fields = {key: value.strip('\"\'') for key, value in fields.items()}
-        if not fields.get('title') or urlsplit(fields['originalUrl']).scheme != 'https':
-            raise ValueError(f'Invalid originalUrl/title in {path}')
-        result.append(dict(title=fields['title'], url=fields['originalUrl'],
-                           path=path.relative_to(root / 'content').with_suffix('').as_posix()))
+        if 'originalUrl' in fields and 'reportUrl' in fields:
+            raise ValueError(f'Use only one of originalUrl/reportUrl in {path}')
+        kind = 'pdf' if 'reportUrl' in fields else 'html'
+        url = fields.get('reportUrl') or fields.get('originalUrl')
+        if not fields.get('title') or urlsplit(url).scheme != 'https':
+            raise ValueError(f'Invalid external URL/title in {path}')
+        digest = fields.get('reportSha256', '').lower()
+        if kind == 'pdf' and not re.fullmatch(r'[0-9a-f]{64}', digest):
+            raise ValueError(f'PDF report requires a verified reportSha256 in {path}')
+        report_file = fields.get('reportFile', '')
+        if kind == 'pdf' and (not re.fullmatch(r'[\w.-]+\.pdf', report_file) or path.name != 'index.md'):
+            raise ValueError(f'PDF report requires a reportFile filename in a leaf bundle: {path}')
+        route = path.relative_to(root / 'content').with_suffix('')
+        if path.name == 'index.md':
+            route = route.parent
+        article = dict(title=fields['title'], url=url, kind=kind,
+                       sha256=digest, path=route.as_posix())
+        if kind == 'pdf':
+            article['report_file'] = report_file
+        result.append(article)
     if not result:
-        raise ValueError('No originalUrl posts found')
+        raise ValueError('No originalUrl/reportUrl posts found')
     return result
 
 
@@ -77,9 +95,18 @@ def probe(article):
     request = Request(article['url'], headers={'User-Agent': 'Mozilla/5.0 (compatible; dfir.au article-link-check)'})
     try:
         with urlopen(request, timeout=10) as response:
+            detail = f'HTTP {response.status}: {response.url}'
+            if article.get('kind') == 'pdf':
+                body = response.read(MAX_PDF_BYTES + 1)
+                if response.status != 200 or len(body) > MAX_PDF_BYTES:
+                    return 'unknown', detail + ' (PDF response incomplete or exceeds 16 MiB limit)'
+                if not body.startswith(b'%PDF-') or b'%%EOF' not in body[-1024:]:
+                    return 'unknown', detail + ' (not a complete PDF)'
+                if hashlib.sha256(body).hexdigest() != article.get('sha256'):
+                    return 'unknown', detail + ' (PDF changed; review before updating reportSha256)'
+                return 'available', detail + ' (PDF SHA-256 verified)'
             html = response.read(2 * 1024 * 1024).decode('utf-8', errors='replace')
             page = Page(html)
-            detail = f'HTTP {response.status}: {response.url}'
             if response.status == 200 and same_article(article['title'], page.headings):
                 return 'available', detail
             if any(re.search(r'\b(404|410|page not found|page removed)\b', h, re.I) for h in page.headings):
@@ -113,11 +140,19 @@ def check(article, previous, attempts=3, delay=1, fetch=probe):
 def validate_backups(items, site):
     for article in items:
         path = site / article['path'] / 'index.html'
+        if article.get('kind') == 'pdf':
+            pdf = path.parent / article['report_file']
+            if not pdf.is_file() or pdf.stat().st_size > MAX_PDF_BYTES:
+                raise ValueError(f'Archived PDF missing or oversized: {pdf}')
+            body = pdf.read_bytes()
+            if not body.startswith(b'%PDF-') or b'%%EOF' not in body[-1024:] or hashlib.sha256(body).hexdigest() != article['sha256']:
+                raise ValueError(f'Archived PDF does not match reviewed report: {pdf}')
         html = path.read_text()
         page = Page(html)
         if page.redirect or re.search(r'window\.location\s*=', html):
             raise ValueError(f'Backup still redirects: {path}')
-        if not same_article(article['title'], page.headings) or len(' '.join(page.text).split()) < 300:
+        minimum_words = 100 if article.get('kind') == 'pdf' else 300
+        if not same_article(article['title'], page.headings) or len(' '.join(page.text).split()) < minimum_words:
             raise ValueError(f'Backup article missing or incomplete: {path}')
         for image in page.images:
             url = urlsplit(image)

@@ -15,11 +15,33 @@
                 {{ $isExternal = true }}
             {{ end }}
         {{ end }}
+        {{ if .Params.reportUrl }}
+            {{ $report := partial "report-target.html" . }}
+            {{ $href = $report.href }}
+            {{ $isExternal = $report.external }}
+        {{ end }}
         <p class="line-title">
             <a href="{{ $href }}"{{ if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Title }}</a>
         </p>
+        {{ if eq .Section "posts" }}{{ partial "article-meta.html" . }}{{ end }}
         {{ if .Site.Params.listSummaries }}
-        <p class="line-summary">{{ .Summary }}</p>
+        {{ if eq .Section "projects" }}
+        <p class="line-summary">{{ .Description }}</p>
+        {{ else }}
+        <p class="line-summary">{{ .Summary | plainify | htmlUnescape }}</p>
+        {{ end }}
+        {{ end }}
+        {{ if eq .Section "posts" }}{{ partial "article-tags.html" . }}{{ end }}
+        {{ with .Params.projectUrl }}
+        <p class="entry-source"><a href="{{ . }}">{{ $.Params.projectLinkLabel | default "Project resource" }} <span aria-hidden="true">↗</span></a></p>
+        {{ end }}
+        {{ if $isExternal }}
+        {{ $host := (urls.Parse $href).Hostname }}
+        {{ $publishers := dict "labs.infoguard.ch" "InfoGuard Labs" "www.rapid7.com" "Rapid7" }}
+        <p class="entry-source">{{ if .Params.reportUrl }}Report at{{ else }}Published at{{ end }} {{ index $publishers $host | default $host }}{{ if .Params.reportUrl }} (PDF){{ end }} <span aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span>{{ if .Params.reportUrl }} · <a href="{{ .RelPermalink }}">Read illustrated overview</a>{{ end }}</p>
+        {{ end }}
+        {{ if and .Params.reportUrl (not $isExternal) }}
+        <p class="entry-source">Rapid7 report (PDF) · <a href="{{ .RelPermalink }}">Read illustrated overview</a></p>
         {{ end }}
     </div>
 </div>

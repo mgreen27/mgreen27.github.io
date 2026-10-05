@@ -18,6 +18,19 @@ URLs and are used automatically when the saved routing decision selects a backup
 The checker follows HTTP redirects and verifies the article title or H1, so a
 200 response from an unrelated landing page is not treated as healthy.
 
+Posts with `reportUrl` are checked in the same workflow. PDF reports require a
+`reportSha256` containing the SHA-256 of the reviewed document. The checker follows
+redirects, downloads at most 16 MiB, checks the PDF header/end marker, and verifies
+the digest. HTML landing pages, truncated files, oversized responses and changed
+PDFs are inconclusive rather than healthy; review a changed report before updating
+its digest. Each report is a leaf bundle with a `reportFile` naming the complete,
+unchanged PDF stored alongside `index.md`. Confirmed outages route listings and
+the overview's main report link to that archived PDF. Build validation requires
+the archived file to match the reviewed digest. The illustrated overview retains
+its own canonical URL and sitemap entry, and its local images are validated along
+with the HTML article backups. The overview also provides an always-available
+archive link.
+
 ```sh
 python3 scripts/check_external_posts.py                   # Read-only live check
 python3 scripts/check_external_posts.py --write           # Save routing decisions
@@ -54,3 +67,7 @@ Enable GitHub Actions email/web notifications, optionally **Send notifications
 for failed workflows only**, in your GitHub notification settings. Delivery is
 controlled by GitHub and your account preferences; the workflow itself does not
 send email.
+
+### Article metadata
+
+Give each post one main area with `areas: ["DFIR"]` (or Threat Intel, Threat Hunting, Detection Engineering, Malware Analysis, AI & Automation). Hugo generates `/areas/` archives; the main-area label links to its archive. Use `tags` for overlapping topics and tools, and a short `summary` for listings. Keep historical limitations in summaries where examples have been superseded.

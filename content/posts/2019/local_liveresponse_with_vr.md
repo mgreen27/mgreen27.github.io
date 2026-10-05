@@ -1,4 +1,5 @@
 ---
+areas: ["DFIR"]
 layout: post
 title:  "Local Live Response with Velociraptor ++"
 date:   2019-12-08
@@ -6,7 +7,7 @@ categories: posts
 tags: [DFIR,Velociraptor,VQL]
 showTags: true
 readTime: true
-summary: In this post im going to talk about a live response use case leveraging the Velociraptor project worth sharing. Specifically, live response with ancillary collection by third party tools embedded to minimise user impact. As usual, im going to provide some background and walk through the steps then share the code.  
+summary: "A historical walkthrough of bundling Velociraptor with WinPMem and Autoruns for local triage. This approach was superseded by the GUI collector builder."
 aliases: /posts/2019/12/08/LocalLRwithVRaptor.html
 ---
 ![](00title.png)

@@ -1,0 +1,12 @@
+{{- $href := .Params.reportUrl -}}
+{{- $external := true -}}
+{{- $state := index (hugo.Data.original_links | default dict) $href | default dict -}}
+{{- if $state.use_backup -}}
+  {{- with .Resources.Get .Params.reportFile -}}
+    {{- $href = .RelPermalink -}}
+    {{- $external = false -}}
+  {{- else -}}
+    {{- errorf "Missing archived PDF for %s" .RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+{{- return (dict "href" $href "external" $external) -}}

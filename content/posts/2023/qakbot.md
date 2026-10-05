@@ -1,14 +1,15 @@
 ---
+areas: ["Malware Analysis"]
 layout: post
 title: "Automating Qakbot decode at scale"
 description: |
    This is a technical post covering practical methodology to extract
    configuration data from recent Qakbot samples.
 date:   2023-04-05
-tags: [Malware,Velociraptor]
+tags: [Malware, Velociraptor, DFIR]
 showTags: true
 readTime: true
-summary: This is a technical post covering practical methodology to extract configuration data from recent Qakbot samples. In this blog, I will provide some background on Qakbot, then walk through decode themes in an easy to visualize manner. I will then share a Velociraptor artifact to detect and automate the decode process at scale.
+summary: "Extract Qakbot configuration data and automate decoding at scale with Velociraptor. Covers payload unpacking, decryption and campaign indicators."
 ---
 
 ![](01qak.png#small "Qak!")

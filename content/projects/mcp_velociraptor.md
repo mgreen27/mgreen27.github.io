@@ -5,10 +5,10 @@ slug: "MCP Velociraptor"
 date: 2025-04-15
 update: 2025-06-13
 categories: project
+description: "A Model Context Protocol bridge that connects AI assistants to Velociraptor for DFIR workflows."
+projectUrl: "https://github.com/mgreen27/mcp-velociraptor"
+projectLinkLabel: "GitHub repository"
 tags: [AI,DFIR,Velociraptor,VQL,Detection]
 ---
-Velociraptor MCP is a Model Context Protocol bridge for exposing Velociraprtor to MCP.  
-https://github.com/mgreen27/mcp-velociraptor
-   
-
-   
+A Model Context Protocol bridge that connects AI assistants to Velociraptor for DFIR workflows.
+[GitHub repository](https://github.com/mgreen27/mcp-velociraptor)

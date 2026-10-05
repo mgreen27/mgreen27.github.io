@@ -1,0 +1,32 @@
+- id: dfir-ai
+  number: "01"
+  title: AI-assisted DFIR workflows
+  description: Build workflows that help analysts collect, triage and interpret forensic evidence.
+  detail: Connect evidence retrieval, host triage and analysis tools into bounded AI-assisted workflows. Use Velociraptor and existing investigation tooling with clear collection scope and analyst review.
+  output: A working investigation workflow, source-linked findings, documented coverage limitations and a technical handover.
+  proof: Explore Velociraptor Skills
+  url: /projects/velociraptor-skills/
+- id: threat-intelligence-ai
+  number: "02"
+  title: Threat intelligence AI workflows
+  description: Help analysts process reporting, enrich observables and develop assessments with traceable sources.
+  detail: Build workflows for report triage, indicator extraction, enrichment and evidence correlation. Support draft assessments that retain sources, uncertainty and alternative explanations for analyst review.
+  output: An integrated intelligence workflow, source-linked outputs and documented review points.
+  proof: Read my threat research
+  url: /posts/
+- id: integrations
+  number: "03"
+  title: Tool integration & automation
+  description: Connect AI workflows to the forensic tools, CTI sources and internal systems your team uses.
+  detail: Develop API and MCP integrations, collection pipelines and orchestration for DFIR and intelligence use cases. Define access boundaries, data handling and failure recovery.
+  output: Tested integrations, repeatable workflows, operating guidance and a technical handover.
+  proof: Explore MCP Velociraptor
+  url: /projects/mcp-velociraptor/
+- id: evaluation
+  number: "04"
+  title: Evaluation & capability handover
+  description: Test AI-assisted analysis against representative cases and prepare your team to operate it.
+  detail: Assess suitable use cases, compare outputs with analyst-reviewed evidence, and measure accuracy and time saved. Document failure modes, source traceability and the decisions that require human review.
+  output: Evaluation results, documented limitations, operating procedures and practical team training.
+  proof: See my investigation tooling
+  url: /projects/velociraptor-skills/
