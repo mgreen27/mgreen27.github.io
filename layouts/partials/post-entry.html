@@ -31,7 +31,7 @@
         <p class="line-summary">{{ .Summary | plainify | htmlUnescape }}</p>
         {{ end }}
         {{ end }}
-        {{ if eq .Section "posts" }}{{ partial "article-tags.html" . }}{{ end }}
+        {{ if in (slice "posts" "projects") .Section }}{{ partial "article-tags.html" . }}{{ end }}
         {{ with .Params.projectUrl }}
         <p class="entry-source"><a href="{{ . }}">{{ $.Params.projectLinkLabel | default "Project resource" }} <span aria-hidden="true">↗</span></a></p>
         {{ end }}

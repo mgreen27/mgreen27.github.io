@@ -1,5 +1,5 @@
 {{ with .GetTerms "tags" }}
-<ul class="article-tags" aria-label="Article tags">
+<ul class="article-tags" aria-label="{{ if eq $.Section "projects" }}Project tags{{ else }}Article tags{{ end }}">
   {{ range . }}
   {{ $labels := dict "powershell" "PowerShell" "yara" "YARA" "cti" "Threat Intel" }}
   <li><a href="{{ .RelPermalink }}">{{ index $labels (lower .LinkTitle) | default .LinkTitle }}</a></li>
