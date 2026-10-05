@@ -1,7 +1,6 @@
 {{ define "main" }}
 <article class="editorial-page">
   {{ partial "breadcrumbs.html" . }}
-  <p class="eyebrow"><a href="{{ "/" | relURL }}">{{ partial "site-label.html" . }}</a></p>
   <h1>{{ .Title }}</h1>
   {{ if not .Params.hideDescription }}{{ with (.Params.lead | default .Description) }}<p class="page-lead">{{ . }}</p>{{ end }}{{ end }}
   <div class="single-content">{{ .Content }}</div>
