@@ -1,6 +1,6 @@
 ---
 layout: page
-title: AI, engineering & threat consulting
+title: AI, DFIR & threat consulting
 eyebrow: THREAT EXPERTISE / ENGINEERING DEPTH / PRACTICAL AI
 description: Build the AI capabilities, workflows and tooling your team needs to understand threats and investigate them effectively.
 ---
