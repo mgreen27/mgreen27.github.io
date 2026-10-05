@@ -19,6 +19,7 @@ a:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--accent); ou
 .site-header nav a[aria-current] { text-decoration: underline; text-decoration-color: var(--accent); }
 .site-header nav .nav-contact { border: 1px solid var(--line); padding: 0 17px; border-radius: 3px; }
 .eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: .09em; line-height: 1.7; color: var(--content-secondary); margin: 0 0 20px; }
+.eyebrow a { text-decoration: none; }
 .hero { padding: 70px 0 0; }
 .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 8px; }
 .hero h1 { font-size: clamp(38px, 5.1vw, 64px); line-height: 1.16; letter-spacing: -.045em; margin: 0; max-width: 950px; }
@@ -68,7 +69,7 @@ footer a { font-family: var(--sans); margin: 0; text-decoration: none; }
 .footer-links a { padding: 8px 0; }
 .site-footer .footer-note { grid-column: 1 / -1; display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 9px; margin-top: 12px; }
 .editorial-page { max-width: 780px; margin: 42px auto 70px; }
-.editorial-page > .eyebrow { margin-top: 40px; }
+.editorial-page > .eyebrow, .list-container > .eyebrow { margin-top: 40px; }
 .editorial-page h1 { font-size: clamp(34px, 5vw, 48px); letter-spacing: -.035em; line-height: 1.2; margin-top: 14px; }
 .page-lead { font-family: var(--sans); font-size: 21px; line-height: 1.6; color: var(--content-secondary); }
 .editorial-page .single-content { margin-top: 32px; }

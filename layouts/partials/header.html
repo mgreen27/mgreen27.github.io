@@ -1,6 +1,6 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 <div class="site-header" id="top">
-  <a class="brand" href="{{ "/" | relURL }}" aria-label="Matthew Green — home"><img class="brand-icon" src="{{ "/brand-smiley.png" | relURL }}" alt="" width="48" height="48"><span class="brand-name">Matthew Green<span>DFIR / THREAT INTELLIGENCE / RESEARCH</span></span></a>
+  <a class="brand" href="{{ "/" | relURL }}" aria-label="Matthew Green — home"><img class="brand-icon" src="{{ "/brand-smiley.png" | relURL }}" alt="" width="48" height="48"><span class="brand-name">Matthew Green<span>{{ partial "site-label.html" . }}</span></span></a>
   <nav aria-label="Main navigation">
     {{ $page := . }}
     {{ range site.Params.menu }}
