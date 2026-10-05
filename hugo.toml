@@ -1,6 +1,6 @@
 baseURL = 'https://dfir.au/'
 locale = 'en-US'
-title = "Matthew Green | DFIR & Threat Intelligence AI Engineering"
+title = "Matthew Green | DFIR & Threat Intelligence AI Capability Development"
 #title = "Matthew Green"
 theme = 'typo'
 
@@ -12,7 +12,7 @@ id = "G-G41G20SLQN"
 
 [params]
 # Meta description
-description = "AI engineering for DFIR and threat intelligence by Matthew Green. Practical workflows, tool integration and evaluation to help organisations develop investigation and analysis capability."
+description = "AI capability development for DFIR and threat intelligence by Matthew Green. Practical workflows, tool integration and evaluation to help organisations develop investigation and analysis capability."
 authorName = "Matthew Green"
 
 # Appearance settings
