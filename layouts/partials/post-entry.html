@@ -1,4 +1,4 @@
-<div class="post-line"{{ if eq .Section "posts" }} data-article-tags="{{ delimit (.Params.tags | default slice) "|" | lower }}"{{ end }}>
+<div class="post-line">
     {{ $dateFormat := "2 Jan 2006" }}
     {{ with .Site.Params.listDateFormat }}{{ $dateFormat = . }}{{ end }}
     <p class="line-date">{{ .Date | time.Format $dateFormat }}</p>
