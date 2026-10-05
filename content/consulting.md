@@ -1,25 +1,31 @@
 ---
 layout: page
-title: Consulting
-eyebrow: TECHNICAL DEPTH / PRACTICAL DELIVERY
-description: Specialist support for security teams that need to investigate threats, improve detection and build better forensic workflows.
+title: Threat research & CTI consulting
+eyebrow: UNDERSTAND THE THREAT / INFORM THE RESPONSE
+description: Specialist threat research and cyber threat intelligence to help security teams make defensible decisions and focus their investigations.
 ---
-I work with security teams, DFIR practitioners and consultancies on focused technical problems. Engagements can centre on a defined deliverable, a capability review or a practical workshop.
+I work with intelligence, detection and incident response teams on defined threat questions. The starting point is the decision you need to make: which threat deserves attention, what the evidence tells us, or where to focus a hunt.
+
+Engagements combine technical research with clear assessments. Sources, confidence and intelligence gaps are made explicit so your team can judge the findings and act on them.
 
 [Discuss a project →](/contact/)
 
 {{< services >}}
 
-## A clear scope from the start
+## From question to assessment
 
-1. **Discuss the problem.** Outline your environment, objectives and timeframe.
-2. **Agree the scope.** Define deliverables, access requirements, evidence handling and success criteria.
-3. **Build and validate.** Work against the agreed scope, with findings and limitations made explicit.
-4. **Hand over.** Receive the work, supporting documentation and a walkthrough with your team.
+1. **Define the requirement.** Agree the threat question, audience and decision the work needs to support.
+2. **Scope the research.** Identify sources, access requirements, evidence handling and the limits of the engagement.
+3. **Analyse and challenge.** Correlate evidence, test hypotheses and consider alternative explanations.
+4. **Deliver and apply.** Present the assessment, confidence and gaps alongside practical investigation or detection priorities.
 
 ## A useful starting point
 
-A **Velociraptor capability review**, a **custom artifact development project** or a **private VQL workshop** can provide a bounded first engagement. Scope, timing and fees are agreed after an initial discussion.
+A **focused threat assessment**, a **malware or infrastructure research project**, or an **intelligence-led hunt** can provide a bounded first engagement. Scope, timing and fees are agreed after an initial discussion.
+
+## Technical capability behind the analysis
+
+Windows forensics, Velociraptor and VQL support evidence collection and validation. Custom tooling, workflow reviews and practical team training can be included where they help your team apply the intelligence.
 
 For investigation support, availability and response expectations are agreed before work begins.
 

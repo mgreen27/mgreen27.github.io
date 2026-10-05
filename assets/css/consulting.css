@@ -11,8 +11,7 @@ a:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--accent); ou
 .skip-link:focus { left: 24px; top: 8px; z-index: 5; background: var(--background); padding: 12px; }
 .site-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 30px 0; border-bottom: 1px solid var(--line); font-family: var(--sans); }
 .brand { display: flex; align-items: center; gap: 15px; text-decoration: none; }
-.brand-mark { font-family: var(--font-body); font-size: 36px; font-weight: 700; letter-spacing: -3px; }
-.brand-mark span { color: var(--accent); }
+.brand-icon { display: block; width: 48px; height: 48px; flex-shrink: 0; image-rendering: pixelated; }
 .brand-name { font-size: 16px; font-weight: 650; line-height: 1.5; }
 .brand-name > span { display: block; font-family: var(--font-mono); font-size: 8px; letter-spacing: .07em; font-weight: 400; color: var(--content-secondary); }
 .site-header nav { display: flex; align-items: center; gap: 22px; }

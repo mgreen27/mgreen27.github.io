@@ -1,6 +1,6 @@
 baseURL = 'https://dfir.au/'
 locale = 'en-US'
-title = "Matthew Green | DFIR"
+title = "Matthew Green | Threat Research & CTI"
 #title = "Matthew Green"
 theme = 'typo'
 
@@ -12,7 +12,7 @@ id = "G-G41G20SLQN"
 
 [params]
 # Meta description
-description = "DFIR research, incident response techniques and open-source security tools by Matthew Green, including Velociraptor hunting and forensic analysis."
+description = "Threat research and cyber threat intelligence consulting by Matthew Green. Adversary behaviour, malware analysis, intelligence-led hunting and automation."
 authorName = "Matthew Green"
 
 # Appearance settings
@@ -24,7 +24,7 @@ hideHeader = false
 # Intro on main page, content is markdown
 #homeIntroTitle = "Matthew Green"
 homeIntroContent = """
-I’m a cybersecurity professional focused on incident response, threat intelligence and applied AI research. This blog shares my DFIR projects, tools and technical findings.
+I’m a cybersecurity professional focused on threat research, cyber threat intelligence and intelligence-led investigations. This site shares my research, tools and consulting services.
 """
 
 # Collection to display on home

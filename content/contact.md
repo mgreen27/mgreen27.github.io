@@ -2,14 +2,14 @@
 layout: page
 title: Let’s discuss your project
 eyebrow: GET IN TOUCH
-description: Tell me what you need to investigate, build or improve.
+description: Tell me what you need to understand about a threat, investigate or improve in your intelligence workflow.
 ---
 For consulting enquiries, contact me through [LinkedIn](https://www.linkedin.com/in/mgreen27/). I’m based in Sydney, Australia.
 
 ## What to include
 
 - Your organisation and the team you work with.
-- The problem you want to solve or the outcome you need.
+- The threat question, intelligence requirement or investigation you need help with.
 - Your expected timeframe and any important constraints.
 
 A short, high-level description is enough to start. We can agree a suitable channel for sensitive information or evidence after the initial discussion.

@@ -1,26 +1,26 @@
 {{ define "main" }}
 <section class="hero" aria-labelledby="hero-title">
   <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> MATTHEW GREEN / SYDNEY, AUSTRALIA</p>
-  <h1 id="hero-title">Investigate threats.<br>Build better <em>defences.</em></h1>
-  <p class="hero-description">Specialist DFIR, threat hunting and Velociraptor consulting. I help security teams turn complex evidence into clear findings and practical tools.</p>
+  <h1 id="hero-title">Understand the threat.<br>Inform your <em>defence.</em></h1>
+  <p class="hero-description">Threat research and cyber threat intelligence consulting. I help security teams understand adversary behaviour, assess the evidence and turn intelligence into investigation and detection priorities.</p>
   <div class="actions"><a class="button primary" href="{{ "/contact/" | relURL }}">Discuss a project <span aria-hidden="true">↗</span></a><a class="text-link" href="{{ "/posts/" | relURL }}">Explore the research <span aria-hidden="true">→</span></a></div>
-  <div class="expertise-strip"><span>WINDOWS FORENSICS</span><span>VELOCIRAPTOR &amp; VQL</span><span>DETECTION ENGINEERING</span><span>APPLIED AI</span></div>
+  <div class="expertise-strip"><span>THREAT RESEARCH</span><span>CYBER THREAT INTELLIGENCE</span><span>THREAT HUNTING</span><span>INTELLIGENCE AUTOMATION</span></div>
 </section>
 <section class="home-section" aria-labelledby="services-title">
-  <div class="section-heading"><div><p class="eyebrow">HOW I CAN HELP</p><h2 id="services-title">Specialist support.<br>Practical outcomes.</h2></div><a class="text-link" href="{{ "/consulting/" | relURL }}">Consulting services <span aria-hidden="true">→</span></a></div>
+  <div class="section-heading"><div><p class="eyebrow">HOW I CAN HELP</p><h2 id="services-title">From threat intelligence<br>to defensive action.</h2></div><a class="text-link" href="{{ "/consulting/" | relURL }}">Consulting services <span aria-hidden="true">→</span></a></div>
   <div class="service-grid">{{ range hugo.Data.services }}<article class="service-card"><span class="card-number">{{ .number }}</span><h3><a href="{{ printf "/consulting/#%s" .id | relURL }}">{{ .title }}</a></h3><p>{{ .description }}</p><a class="card-link" href="{{ printf "/consulting/#%s" .id | relURL }}" aria-label="Learn about {{ .title }}"><span aria-hidden="true">↗</span></a></article>{{ end }}</div>
 </section>
 <section class="home-section" aria-labelledby="work-title">
   <div class="section-heading"><div><p class="eyebrow">BUILT &amp; SHARED</p><h2 id="work-title">Selected work</h2></div><a class="text-link" href="{{ "/projects/" | relURL }}">All projects <span aria-hidden="true">→</span></a></div>
   <div class="work-grid">
-    <article class="work-card"><p class="eyebrow">AUTOMATION / OPEN SOURCE</p><h3><a href="{{ "/projects/velociraptor-skills/" | relURL }}">Velociraptor Skills <span aria-hidden="true">↗</span></a></h3><p>Reusable AI skills and tooling for case setup, collection, hunting and host analysis.</p><span class="work-label">AI-assisted DFIR</span></article>
-    <article class="work-card"><p class="eyebrow">DETECTION / OPEN SOURCE</p><h3><a href="{{ "/projects/detectraptor/" | relURL }}">DetectRaptor <span aria-hidden="true">↗</span></a></h3><p>Public detection content for repeatable threat hunting with Velociraptor.</p><span class="work-label">Detection engineering</span></article>
-    <article class="work-card"><p class="eyebrow">TRAINING / COMMUNITY</p><h3><a href="{{ "/projects/deathcon2023-practical-death-by-velociraptor/" | relURL }}">Practical VQL <span aria-hidden="true">↗</span></a></h3><p>Hands-on workshop material covering forensic accessors, hunting and analysis.</p><span class="work-label">DEATHcon workshop</span></article>
+    <article class="work-card"><p class="eyebrow">MALWARE / TECHNICAL RESEARCH</p><h3><a href="{{ "/posts/2023/qakbot/" | relURL }}">Inside Qakbot <span aria-hidden="true">↗</span></a></h3><p>Extracting malware configuration data and automating the decode process to support investigation at scale.</p><span class="work-label">Malware configuration analysis</span></article>
+    <article class="work-card"><p class="eyebrow">HUNTING / OPEN SOURCE</p><h3><a href="{{ "/projects/detectraptor/" | relURL }}">DetectRaptor <span aria-hidden="true">↗</span></a></h3><p>Public detection content that helps teams look for adversary activity with Velociraptor.</p><span class="work-label">From behaviour to detection</span></article>
+    <article class="work-card"><p class="eyebrow">AUTOMATION / OPEN SOURCE</p><h3><a href="{{ "/projects/velociraptor-skills/" | relURL }}">Velociraptor Skills <span aria-hidden="true">↗</span></a></h3><p>Reusable AI skills and tooling for evidence collection, threat hunting and host analysis.</p><span class="work-label">Tools that support investigation</span></article>
   </div>
 </section>
 <section class="home-section research-section" aria-labelledby="research-title">
   <div class="section-heading"><div><p class="eyebrow">FROM THE FIELD</p><h2 id="research-title">Research &amp; writing</h2></div><a class="text-link" href="{{ "/posts/" | relURL }}">All articles <span aria-hidden="true">→</span></a></div>
   {{ range first 4 (where site.RegularPages "Section" "posts").ByDate.Reverse }}{{ partial "post-entry.html" . }}{{ end }}
 </section>
-<section class="contact-band"><div><p class="eyebrow">LET’S WORK THROUGH IT</p><h2>Have a problem worth solving?</h2><p>Tell me what you’re investigating, building or trying to improve.</p></div><a class="button primary" href="{{ "/contact/" | relURL }}">Discuss a project <span aria-hidden="true">↗</span></a></section>
+<section class="contact-band"><div><p class="eyebrow">LET’S WORK THROUGH IT</p><h2>What threat question are you working on?</h2><p>Discuss an intelligence requirement, an investigation or a gap in your detection coverage.</p></div><a class="button primary" href="{{ "/contact/" | relURL }}">Discuss a project <span aria-hidden="true">↗</span></a></section>
 {{ end }}

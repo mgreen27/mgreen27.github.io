@@ -1,32 +1,32 @@
-- id: velociraptor
+- id: intelligence
   number: "01"
-  title: Velociraptor engineering
-  description: Build collection and hunting capability your team can operate with confidence.
-  detail: Deployment reviews, custom VQL and artifact development, collection design, and performance tuning.
-  output: Tested artifacts, configuration recommendations and an operating guide.
-  proof: Explore DetectRaptor
-  url: /projects/detectraptor/
-- id: hunting
-  number: "02"
-  title: Threat hunting & detection
-  description: Turn a threat hypothesis into a repeatable, evidence-backed investigation.
-  detail: Focused Windows hunts, detection development and validation, and forensic visibility reviews.
-  output: Hunt findings, validated detection content and documented coverage limitations.
+  title: Cyber threat intelligence
+  description: Understand which threats matter to your organisation and what the evidence supports.
+  detail: Focused research against agreed intelligence requirements, threat relevance assessments and technical intelligence reporting.
+  output: A sourced assessment with confidence levels, intelligence gaps and recommended defensive priorities.
   proof: Read the research
   url: /posts/
-- id: automation
+- id: research
+  number: "02"
+  title: Threat & malware research
+  description: Investigate adversary tooling, infrastructure and behaviour to develop useful intelligence.
+  detail: Malware configuration analysis, infrastructure pivots and correlation of technical evidence to examine relationships and test hypotheses.
+  output: Technical findings, contextualised indicators and behavioural insights, with alternative explanations and limitations documented.
+  proof: Explore the Qakbot research
+  url: /posts/2023/qakbot/
+- id: hunting
   number: "03"
-  title: DFIR automation & AI
-  description: Reduce repetitive analysis while keeping evidence and analyst judgment at the centre.
-  detail: Collection automation, tool integration and bounded AI-assisted workflows with explicit review points.
-  output: A working workflow, evaluation results and a practical handover.
-  proof: Explore Velociraptor Skills
-  url: /projects/velociraptor-skills/
-- id: training
+  title: Intelligence-led hunting
+  description: Turn intelligence about adversary behaviour into focused hunts and detection opportunities.
+  detail: Translate threat reporting into hunt hypotheses, identify required telemetry, and develop and validate detection content.
+  output: Hunt queries, investigation findings and detection recommendations with coverage limitations made explicit.
+  proof: Explore DetectRaptor
+  url: /projects/detectraptor/
+- id: automation
   number: "04"
-  title: Practical team training
-  description: Build skills through the tools, data and investigation problems your team actually uses.
-  detail: Private Velociraptor and VQL workshops, Windows forensic analysis, and hands-on hunting exercises.
-  output: Tailored labs, reference material and a technical walkthrough.
-  proof: See a previous workshop
-  url: /projects/deathcon2023-practical-death-by-velociraptor/
+  title: Intelligence automation
+  description: Connect research, enrichment and analysis so your team can spend more time assessing threats.
+  detail: Tool integrations, repeatable enrichment pipelines and AI-assisted analysis with source traceability and analyst review.
+  output: A working workflow, evaluation results and a documented handover, including review points and data-handling requirements.
+  proof: See my investigation tooling
+  url: /projects/velociraptor-skills/
