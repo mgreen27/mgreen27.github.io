@@ -1,1 +1,8 @@
+{{- with .Get "handle" -}}
+<div class="social-profile-row">
+  <p class="social-handle">Online as <a href="{{ printf "https://x.com/%s" . }}" rel="me" aria-label="@{{ . }} on X">@{{ . }}</a></p>
+  {{ partial "social-links.html" $.Page }}
+</div>
+{{- else -}}
 {{- partial "social-links.html" .Page -}}
+{{- end -}}

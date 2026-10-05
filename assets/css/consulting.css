@@ -139,3 +139,7 @@ footer a { font-family: var(--sans); margin: 0; text-decoration: none; }
 
 .offer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 680px) { .offer-grid { grid-template-columns: 1fr; } }
+
+.social-profile-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-top: 24px; }
+.social-profile-row .social-icons { margin-bottom: 0; }
+.social-profile-row .social-handle { margin: 0; font-family: var(--sans); font-size: 14px; color: var(--content-secondary); }
