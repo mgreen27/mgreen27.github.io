@@ -13,4 +13,4 @@ My interests centre on adversary behaviour, malware and technical intrusion anal
 
 This site shares my research, open-source tools and technical findings. For questions, feedback or collaboration, [get in touch](/contact/).
 
-{{< social-links >}}
+{{< social-links handle="mgreen27" >}}
