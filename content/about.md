@@ -4,7 +4,7 @@ title: About
 description: "Matthew Green — DFIR, threat intelligence and AI capability development. Based in Australia."
 permalink: /about/
 ---
-I’m a cybersecurity professional focused on DFIR, threat intelligence and AI capability development.
+I’m a cybersecurity professional focused on DFIR, threat intelligence and research.
 
 My interests centre on adversary behaviour, malware and the technical evidence that helps explain an intrusion. I combine that research with Windows forensics, threat hunting and detection engineering.
 
