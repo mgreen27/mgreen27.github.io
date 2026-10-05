@@ -12,7 +12,7 @@ id = "G-G41G20SLQN"
 
 [params]
 # Meta description
-description = "AI engineering for DFIR and threat intelligence by Matthew Green. Workflow development, tool integration and evaluation for investigation and intelligence teams."
+description = "AI engineering for DFIR and threat intelligence by Matthew Green. Practical workflows, tool integration and evaluation to help organisations develop investigation and analysis capability."
 authorName = "Matthew Green"
 
 # Appearance settings
@@ -24,7 +24,7 @@ hideHeader = false
 # Intro on main page, content is markdown
 #homeIntroTitle = "Matthew Green"
 homeIntroContent = """
-I help DFIR and threat intelligence teams build and evaluate AI-assisted investigation and analysis workflows. This site shares my research, tools and consulting services.
+I help organisations build practical DFIR and threat intelligence workflows, using AI and automation to develop investigation and analysis capability. This site shares my research, tools and consulting services.
 """
 
 # Collection to display on home

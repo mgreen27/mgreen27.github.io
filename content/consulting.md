@@ -4,9 +4,9 @@ title: AI engineering for DFIR & threat intelligence
 eyebrow: DFIR / THREAT INTELLIGENCE / AI ENGINEERING
 description: Design, build and evaluate AI-assisted workflows for digital forensics, incident response and cyber threat intelligence.
 ---
-I help DFIR and threat intelligence teams turn practical use cases into working AI capabilities. That can mean accelerating evidence triage, connecting enrichment tools or helping analysts work through threat reporting with the original sources close at hand.
+I help organisations build capability through practical DFIR and threat intelligence workflows. That can mean guiding evidence triage, connecting enrichment tools or making threat reporting easier to assess and use.
 
-The work combines investigation experience with engineering: define the task, connect the tools, evaluate the outputs and give your team a capability it can operate and review.
+Workflows are designed around your existing skills, tools and processes, with AI and automation where they help. Clear guidance, evaluation and handover help your team use and develop the capability without needing a dedicated research function.
 
 [Discuss a project →](/contact/)
 

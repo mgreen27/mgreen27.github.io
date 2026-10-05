@@ -8,7 +8,7 @@ I’m a cybersecurity professional focused on DFIR, threat intelligence and AI e
 
 My interests centre on adversary behaviour, malware and the technical evidence that helps explain an intrusion. I combine that research with Windows forensics, threat hunting and detection engineering.
 
-My consulting focuses on building and evaluating AI-assisted workflows for DFIR and threat intelligence teams. My focus is on capabilities analysts can use and evaluate, with evidence traceability and review built into the workflow.
+I build practical DFIR and threat intelligence workflows that help organisations develop their investigation and analysis capability. AI and automation support repeatable processes, with clear guidance, traceable evidence and human review.
 
 This site shares my research, open-source tools and technical findings. For specialist support, [explore my consulting services](/consulting/) or [get in touch](/contact/).
 
