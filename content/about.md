@@ -1,6 +1,7 @@
 ---
 layout: page
 title: About
+hideDescription: true
 description: "Matthew Green — DFIR, threat intelligence and research. Based in Australia."
 permalink: /about/
 ---
