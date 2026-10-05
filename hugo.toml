@@ -1,6 +1,6 @@
 baseURL = 'https://dfir.au/'
 locale = 'en-US'
-title = "Matt's DFIR blog"
+title = "Matthew Green | DFIR"
 #title = "Matthew Green"
 theme = 'typo'
 
@@ -53,21 +53,24 @@ url = "https://x.com/mgreen27"
 
 # Main menu pages
 [[params.menu]]
-name = "home"
-url = "/"
+name = "consulting"
+url = "/consulting/"
 
 [[params.menu]]
-name = "posts"
-url = "/posts"
-
-[[params.menu]]
-name = "about"
-url = "/about"
-social = true
+name = "research"
+url = "/posts/"
 
 [[params.menu]]
 name = "projects"
-url = "/projects"
+url = "/projects/"
+
+[[params.menu]]
+name = "about"
+url = "/about/"
+
+[[params.menu]]
+name = "contact"
+url = "/contact/"
 
 # Syntax highligth on code blocks
 [markup]

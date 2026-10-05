@@ -1,0 +1,32 @@
+- id: velociraptor
+  number: "01"
+  title: Velociraptor engineering
+  description: Build collection and hunting capability your team can operate with confidence.
+  detail: Deployment reviews, custom VQL and artifact development, collection design, and performance tuning.
+  output: Tested artifacts, configuration recommendations and an operating guide.
+  proof: Explore DetectRaptor
+  url: /projects/detectraptor/
+- id: hunting
+  number: "02"
+  title: Threat hunting & detection
+  description: Turn a threat hypothesis into a repeatable, evidence-backed investigation.
+  detail: Focused Windows hunts, detection development and validation, and forensic visibility reviews.
+  output: Hunt findings, validated detection content and documented coverage limitations.
+  proof: Read the research
+  url: /posts/
+- id: automation
+  number: "03"
+  title: DFIR automation & AI
+  description: Reduce repetitive analysis while keeping evidence and analyst judgment at the centre.
+  detail: Collection automation, tool integration and bounded AI-assisted workflows with explicit review points.
+  output: A working workflow, evaluation results and a practical handover.
+  proof: Explore Velociraptor Skills
+  url: /projects/velociraptor-skills/
+- id: training
+  number: "04"
+  title: Practical team training
+  description: Build skills through the tools, data and investigation problems your team actually uses.
+  detail: Private Velociraptor and VQL workshops, Windows forensic analysis, and hands-on hunting exercises.
+  output: Tailored labs, reference material and a technical walkthrough.
+  proof: See a previous workshop
+  url: /projects/deathcon2023-practical-death-by-velociraptor/

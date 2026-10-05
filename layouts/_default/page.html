@@ -1,0 +1,9 @@
+{{ define "main" }}
+<article class="editorial-page">
+  {{ partial "breadcrumbs.html" . }}
+  <p class="eyebrow">{{ .Params.eyebrow | default "MATTHEW GREEN / DFIR" }}</p>
+  <h1>{{ .Title }}</h1>
+  {{ with .Description }}<p class="page-lead">{{ . }}</p>{{ end }}
+  <div class="single-content">{{ .Content }}</div>
+</article>
+{{ end }}

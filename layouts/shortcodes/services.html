@@ -1,0 +1,1 @@
+<div class="service-details">{{ range hugo.Data.services }}<section id="{{ .id }}"><p class="eyebrow">{{ .number }} / SPECIALIST SUPPORT</p><h2>{{ .title }}</h2><p>{{ .detail }}</p><p><strong>Typical deliverables:</strong> {{ .output }}</p><a class="text-link" href="{{ .url | relURL }}">{{ .proof }} <span aria-hidden="true">→</span></a></section>{{ end }}</div>

@@ -1,10 +1,5 @@
-{{ if ne .Site.Params.showFooter false }}
 <div class="site-footer">
-    {{ partial "social-links.html" . }}
-    {{ with .Site.Params.footerContent }}
-    <p>{{ . | markdownify }}</p>
-    {{ else }}
-    <p>Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/tomfran/typo">tomfran/typo</a></p>
-    {{ end }}
+  <div><a class="footer-name" href="{{ "/" | relURL }}">Matthew Green</a><p>Digital forensics. Practical research. Better tooling.</p></div>
+  <div class="footer-links"><a href="{{ "/contact/" | relURL }}">Get in touch</a><a href="https://github.com/mgreen27">GitHub</a><a href="https://www.linkedin.com/in/mgreen27/">LinkedIn</a><a href="{{ "/index.xml" | relURL }}">RSS</a></div>
+  <p class="footer-note">Sydney, Australia <span>Built with Hugo &amp; Typo.</span></p>
 </div>
-{{ end }}
