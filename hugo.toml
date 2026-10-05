@@ -1,6 +1,6 @@
 baseURL = 'https://dfir.au/'
 locale = 'en-US'
-title = "Matthew Green | DFIR & Threat Intelligence AI Capability Development"
+title = "Matthew Green | DFIR, Threat Intelligence & AI"
 #title = "Matthew Green"
 theme = 'typo'
 
@@ -12,7 +12,7 @@ id = "G-G41G20SLQN"
 
 [params]
 # Meta description
-description = "AI capability development for DFIR and threat intelligence by Matthew Green. Practical workflows, tool integration and evaluation to help organisations develop investigation and analysis capability."
+description = "Investigation support and AI capability development for DFIR and threat intelligence by Matthew Green. Evidence review, threat analysis and practical workflows."
 authorName = "Matthew Green"
 
 # Appearance settings
@@ -24,7 +24,7 @@ hideHeader = false
 # Intro on main page, content is markdown
 #homeIntroTitle = "Matthew Green"
 homeIntroContent = """
-I help organisations build practical DFIR and threat intelligence workflows, using AI and automation to develop investigation and analysis capability. This site shares my research, tools and consulting services.
+I help organisations investigate suspicious activity and build practical DFIR and threat intelligence workflows. This site shares my research, tools and consulting services.
 """
 
 # Collection to display on home

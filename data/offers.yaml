@@ -1,0 +1,8 @@
+- id: investigation-support
+  title: Investigation support
+  description: Focused DFIR and threat analysis to help you understand suspicious activity and determine what the evidence supports.
+  label: Evidence review · Targeted analysis · Clear findings
+- id: ai-capability-development
+  title: AI capability development
+  description: Practical DFIR and threat intelligence workflows, using AI and automation to help your organisation develop investigation and analysis capability.
+  label: Workflow development · Tool integration · Evaluation

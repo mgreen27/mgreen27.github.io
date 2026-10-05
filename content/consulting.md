@@ -1,14 +1,30 @@
 ---
 layout: page
-title: AI capability development for DFIR & threat intelligence
+title: Investigation support & AI capability development
 eyebrow: DFIR / THREAT INTELLIGENCE / AI CAPABILITY DEVELOPMENT
-description: Design, build and evaluate AI-assisted workflows for digital forensics, incident response and cyber threat intelligence.
+description: Investigate a problem or build the capability to investigate better, with focused support for DFIR and threat intelligence.
 ---
-I help organisations build capability through practical DFIR and threat intelligence workflows. That can mean guiding evidence triage, connecting enrichment tools or making threat reporting easier to assess and use.
+I help organisations understand suspicious activity and develop practical investigation and analysis capability. You can engage me for a defined investigation, a review of existing findings or the development of AI-assisted workflows.
 
-Workflows are designed around your existing skills, tools and processes, with AI and automation where they help. Clear guidance, evaluation and handover help your team use and develop the capability without needing a dedicated research function.
+[Discuss your requirements →](/contact/)
 
-[Discuss a project →](/contact/)
+## Investigation support
+
+Focused DFIR and threat analysis to help organisations understand suspicious activity and determine what the evidence supports. Engagements can include evidence review, targeted collection and analysis, with clear findings, limitations and recommended next steps.
+
+- **DFIR investigation support:** evidence triage, host analysis, timelines and technical interpretation.
+- **Threat investigation:** examine suspicious activity, malware or infrastructure against a defined question.
+- **Independent technical review:** assess findings, challenge hypotheses and identify evidence gaps.
+
+**Typical deliverables:** an evidence-backed report or technical assessment, a timeline or supporting indicators where relevant, and clearly stated findings, confidence, limitations and recommended next steps.
+
+We agree the investigation question, authorised systems and data, collection scope, evidence handling and deliverables before work begins. Availability and response expectations are agreed for each engagement.
+
+[Discuss an investigation →](/contact/)
+
+## AI capability development
+
+I build practical DFIR and threat intelligence workflows around your existing skills, tools and processes, with AI and automation where they help. Clear guidance, evaluation and handover help your team use and develop the capability without needing a dedicated research function.
 
 {{< services >}}
 
@@ -21,10 +37,8 @@ Workflows are designed around your existing skills, tools and processes, with AI
 
 ## A useful starting point
 
-A **DFIR or CTI AI capability assessment**, a **focused workflow prototype**, or an **evaluation of an existing AI workflow** can provide a bounded first engagement. Scope, timing and fees are agreed after an initial discussion.
+A **focused evidence review**, a **DFIR or CTI AI capability assessment**, or a **workflow prototype** can provide a bounded first engagement. Scope, timing and fees are agreed after an initial discussion.
 
-## Built on investigation experience
+Investigation findings can also highlight opportunities to improve collection or analysis workflows. Any follow-on capability work is scoped separately.
 
-Threat research and forensic analysis shape what we build and how we test it. Windows forensics, Velociraptor and VQL support evidence collection and validation. AI helps analysts work with that evidence while keeping sources, uncertainty and responsibility for conclusions visible.
-
-[Get in touch to discuss your workflow →](/contact/)
+[Get in touch to discuss your requirements →](/contact/)

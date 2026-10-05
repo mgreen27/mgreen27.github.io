@@ -76,7 +76,7 @@ footer a { font-family: var(--sans); margin: 0; text-decoration: none; }
 .service-details section { padding: 30px 0; border-top: 1px solid var(--line); }
 .service-details section:first-child { margin-top: 36px; }
 .service-details .eyebrow { margin: 0 0 12px; }
-.service-details h2 { margin-top: 0; }
+.service-details h3 { margin-top: 0; font-size: 24px; }
 .service-details p:not(.eyebrow) { font-size: 17px; }
 .main > .list-container { margin: 40px auto; max-width: 900px; }
 .main > .breadcrumbs, .main > div:not([class]), .main > .autonumber { max-width: 780px; margin-left: auto; margin-right: auto; }
@@ -115,3 +115,6 @@ footer a { font-family: var(--sans); margin: 0; text-decoration: none; }
   .footer-note { gap: 20px; flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.offer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 680px) { .offer-grid { grid-template-columns: 1fr; } }

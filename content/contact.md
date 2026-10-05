@@ -2,14 +2,14 @@
 layout: page
 title: Let’s discuss your project
 eyebrow: GET IN TOUCH
-description: Tell me which DFIR or threat intelligence workflow you want to improve with AI.
+description: Tell me what you need to investigate, review or improve in your DFIR and threat intelligence workflows.
 ---
 For consulting enquiries, contact me through [LinkedIn](https://www.linkedin.com/in/mgreen27/). I’m based in Australia.
 
 ## What to include
 
 - Your organisation and the team you work with.
-- The DFIR or CTI use case, existing workflow and outcome you need.
+- The investigation question, evidence review or workflow you need help with.
 - Your expected timeframe and any important constraints.
 
 A short, high-level description is enough to start. We can agree a suitable channel for sensitive information or evidence after the initial discussion.
