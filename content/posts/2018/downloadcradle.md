@@ -1,14 +1,14 @@
 ---
-area: "Detection Engineering"
+areas: ["Detection Engineering"]
 layout: post
 title:  "Powershell Download Cradles"
 date:   2018-04-02
 categories: posts
-tags: [DFIR, Powershell]
+tags: [DFIR, Powershell, Detection]
 image: wolfandsheep2.png
 showTags: true
 readTime: true
-summary: In this post I thought I would share some information on Powershell download cradles I put together recently. I’m going to provide an overview, highlighting areas I found interesting thinking about detection from both network and endpoint views.
+summary: "Compare PowerShell download cradles and their network and endpoint traces, with test scripts to help assess detection coverage."
 aliases: /posts/2018/04/02/DownloadCradle.html
 ---
 

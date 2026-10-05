@@ -1,5 +1,5 @@
 ---
-area: "Detection Engineering"
+areas: ["Detection Engineering"]
 layout: post
 title:  "WMI Event Consumers: what are you missing?"
 date:   2022-01-12
@@ -8,7 +8,7 @@ author: "Matt Green - @mgreen27"
 tags: [DFIR,WMI,Detection,Velociraptor]
 showTags: true
 readTime: true
-summary: WMI Eventing is a fairly well known technique in DFIR, however some tools may not provide the coverage you expect. This article covers WMI eventing visibility and detection including custom namespaces.
+summary: "Find WMI event consumers that common collection methods miss, including persistence in custom namespaces. Covers collection and detection with Velociraptor."
 aliases: /posts/2022/01/12/wmi-eventing.html
 ---
 

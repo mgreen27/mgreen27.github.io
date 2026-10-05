@@ -1,5 +1,5 @@
 ---
-area: "DFIR"
+areas: ["DFIR"]
 layout: post
 title: "Finding the LNK: Techniques and methodology for advanced analysis"
 date: 2024-11-01

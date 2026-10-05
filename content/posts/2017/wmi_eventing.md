@@ -1,14 +1,14 @@
 ---
-area: "Detection Engineering"
+areas: ["Detection Engineering"]
 layout: post
 title:  "Blue Team Hacks - WMI Eventing"
 date:   2017-04-03
 categories: posts
-tags: [DFIR, Powershell, WMI]
+tags: [DFIR, Powershell, WMI, Detection]
 image: 00Title_cogs.jpg
 showTags: true
 readTime: true
-summary: In this post I am going to cover a little Windows Management Instrumentation (WMI), and in particular an interesting use case for potential use in older environments with Process Monitoring gaps. Thinking about this gap led to me looking at WMI starting as an alternate near real time detection fix, and during feature investigation ended with another technically novel solution I thought was interesting enough to share.
+summary: "Use WMI event subscriptions to monitor processes and trigger file collection on older Windows systems with visibility gaps."
 aliases: /posts/2017/04/03/Blue_Team_Hacks-WMI_Eventing.html
 ---
 ![ ](00Title.jpg)

@@ -6,6 +6,7 @@ theme = 'typo'
 
 [taxonomies]
 tag = 'tags'
+area = 'areas'
 
 [services.googleAnalytics]
 id = "G-G41G20SLQN"

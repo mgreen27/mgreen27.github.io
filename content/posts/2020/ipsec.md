@@ -1,5 +1,5 @@
 ---
-area: "DFIR"
+areas: ["DFIR"]
 layout: post
 title:  "Windows IPSEC for endpoint quarantine"
 date:   2020-07-23
@@ -7,7 +7,7 @@ categories: posts
 tags: [DFIR,Velociraptor,VQL]
 showTags: true
 readTime: true
-summary: This post is going to talk about using Windows IPSec for a quarantine use case. Im going to explain the background, how to configure a policy and some of the design decisions as I was initially looking at building an endpoint based containment capability.
+summary: "Build and deploy Windows IPsec policies for endpoint quarantine through Velociraptor, with containment requirements and policy removal considerations."
 aliases: /posts/2020/07/23/IPSEC.html
 ---
 

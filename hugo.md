@@ -67,3 +67,7 @@ Enable GitHub Actions email/web notifications, optionally **Send notifications
 for failed workflows only**, in your GitHub notification settings. Delivery is
 controlled by GitHub and your account preferences; the workflow itself does not
 send email.
+
+### Article metadata
+
+Give each post one main area with `areas: ["DFIR"]` (or Threat Intel, Threat Hunting, Detection Engineering, Malware Analysis, AI & Automation). Hugo generates `/areas/` archives; the main-area label links to its archive. Use `tags` for overlapping topics and tools, and a short `summary` for listings. Keep historical limitations in summaries where examples have been superseded.

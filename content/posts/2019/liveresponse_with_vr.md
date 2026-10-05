@@ -1,5 +1,5 @@
 ---
-area: "DFIR"
+areas: ["DFIR"]
 layout: post
 title:  "Live response automation with Velociraptor"
 date:   2019-11-10
@@ -7,7 +7,7 @@ categories: posts
 tags: [DFIR,Velociraptor,VQL]
 showTags: true
 readTime: true
-summary: This post is going to talk about the Velociraptor project. Specifically, live response and automation I have built for my own engagements. Im going to provide some background and walk through a proof of concept, then share the code. 
+summary: "A historical walkthrough of automating Velociraptor collections and post-processing through its API. The examples predate the current API."
 aliases: /posts/2019/11/10/LRwithVRaptor.html 
 ---
 ![](00title.png)

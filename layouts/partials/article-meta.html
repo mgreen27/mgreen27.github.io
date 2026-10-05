@@ -1,5 +1,7 @@
 <p class="article-meta">
-  <span class="article-area"><span class="visually-hidden">Main area: </span>{{ .Params.area | default "DFIR" }}</span>
+  {{ range .GetTerms "areas" }}
+  <a class="article-area" href="{{ .RelPermalink }}"><span class="visually-hidden">Main area: </span>{{ .LinkTitle }}</a>
+  {{ end }}
   <span aria-hidden="true">·</span>
   {{ if .Params.reportUrl }}
   <span>{{ .Params.reportPages }}-page PDF</span>

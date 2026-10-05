@@ -3,7 +3,7 @@ layout: post
 title: "Kimsuky's Phishing and Payload Tactics"
 date: 2024-07-16
 aliases: ["/posts/2026/kimsuky-phishing-payload-tactics/"]
-area: "Threat Intel"
+areas: ["Threat Intel"]
 tags: [CTI, Kimsuky, Phishing, Malware]
 description: "Earlier research into Kimsuky's phishing and payload tactics, co-authored for Rapid7 in 2024."
 summary: "My 2024 Rapid7 research with Natalie Zargarov and Anna Širokova on Kimsuky's social engineering, delivery methods and payloads."

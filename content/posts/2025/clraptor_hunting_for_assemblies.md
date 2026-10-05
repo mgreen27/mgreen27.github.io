@@ -1,5 +1,5 @@
 ---
-area: "Threat Hunting"
+areas: ["Threat Hunting"]
 layout: post
 title: "CLRaptor: Hunting reflected assemblies with Velociraptor"
 date: 2025-12-01

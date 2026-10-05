@@ -1,5 +1,5 @@
 ---
-area: "AI & Automation"
+areas: ["AI & Automation"]
 layout: post
 title: "AI Ate My DFIR Homework"
 date: 2026-06-24

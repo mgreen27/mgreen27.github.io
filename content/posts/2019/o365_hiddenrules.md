@@ -1,5 +1,5 @@
 ---
-area: "DFIR"
+areas: ["DFIR"]
 layout: post
 title:  "O365: Hidden InboxRules"
 date:   2019-06-09
@@ -7,7 +7,7 @@ categories: posts
 tags: [DFIR,O365,Powershell]
 showTags: true
 readTime: true
-summary: In this post Im going to talk about Office365 hidden inbox rules. Im going to give some background, show rule modification, and talk about detection methodology.
+summary: "Examine how Office 365 inbox rules can be hidden, how rule properties are modified, and methods for detecting the changes."
 aliases: /posts/2019/06/09/O365HiddenRules.html
 ---
 ![](00title.png)

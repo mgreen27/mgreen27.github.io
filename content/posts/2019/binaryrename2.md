@@ -1,5 +1,5 @@
 ---
-area: "Detection Engineering"
+areas: ["Detection Engineering"]
 layout: post
 title:  "Binary Rename 2"
 date:   2019-05-29
@@ -8,7 +8,7 @@ tags: [DFIR,Powershell,Yara,Detection]
 image: hello.png
 showTags: true
 readTime: true
-summary: This is my second Binary Rename post, in this post I am focusing on static detection, that is assessing files on disk. I am going to describe differences between both Yara and Powershell based detections, then share the code.
+summary: "Compare YARA and PowerShell approaches to finding renamed executables on disk, with code examples and detection limitations."
 aliases: /posts/2019/05/29/BinaryRename2.html
 ---
 For the first post and a detailed description of what Binary Rename is, please see: [Blue Team Hacks - Binary Rename](../binaryrename/).  
