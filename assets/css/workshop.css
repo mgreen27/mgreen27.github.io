@@ -1,0 +1,22 @@
+.workshop-page { max-width: 880px; }
+.workshop-cover { display: block; width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px; margin-top: 24px; }
+.workshop-note { border-left: 3px solid var(--accent); padding: 14px 18px; background: var(--surface); font-family: var(--sans); font-size: 13px; line-height: 1.65; margin: 24px 0; }
+.workshop-note p { margin: 6px 0 0; }
+.workshop-position { font-family: var(--font-mono); font-size: 12px; color: var(--content-secondary); margin: 28px 0 0; }
+.workshop-lessons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 0; list-style: none; counter-reset: lab; }
+.workshop-lessons li { counter-increment: lab; margin: 0; padding: 22px; border: 1px solid var(--line); border-radius: 4px; }
+.workshop-lessons li::before { content: "LAB " counter(lab, decimal-leading-zero); font-family: var(--font-mono); font-size: 10px; color: var(--accent); }
+.workshop-lessons h3 { font-size: 21px; margin: 10px 0; }
+.workshop-lessons p { font-family: var(--sans); font-size: 14px; line-height: 1.6; margin: 0 0 14px; }
+.workshop-video, .workshop-links { font-family: var(--sans); font-size: 14px; }
+.workshop-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 24px 0; }
+.workshop-toc { border: 1px solid var(--line); border-radius: 4px; padding: 12px 18px; font-family: var(--sans); font-size: 14px; }
+.workshop-toc summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+.workshop-toc li { margin-top: 6px; }
+.workshop-page .single-content img { max-width: 100%; height: auto; }
+.workshop-page .single-content { overflow-wrap: anywhere; }
+.workshop-page pre { max-width: 100%; overflow-x: auto; overflow-wrap: normal; }
+.workshop-page blockquote { border-left: 3px solid var(--accent); background: var(--surface); margin: 24px 0; padding: 12px 18px; }
+.workshop-page blockquote p { margin: 8px 0; }
+.workshop-pagination { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; border-top: 1px solid var(--line); margin-top: 40px; padding-top: 24px; font-family: var(--sans); font-size: 14px; }
+@media (max-width: 680px) { .workshop-lessons { grid-template-columns: 1fr; } .workshop-lessons li { padding: 18px; } .workshop-toc { padding: 10px 14px; } }

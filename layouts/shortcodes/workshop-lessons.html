@@ -1,0 +1,5 @@
+<ol class="workshop-lessons">
+  {{ range .Page.RegularPages.ByWeight }}
+  <li><h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3><p>{{ .Description }}</p>{{ with .Params.videoUrl }}<a class="workshop-video" href="{{ . }}">Watch recording ↗</a>{{ end }}</li>
+  {{ end }}
+</ol>
