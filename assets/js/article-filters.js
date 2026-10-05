@@ -7,6 +7,7 @@
   const topics = {
     all: null,
     dfir: ['dfir'],
+    malware: ['malware'],
     'threat-intel': ['cti', 'threat intelligence', 'threat intel'],
     velociraptor: ['velociraptor'],
     ai: ['ai']
