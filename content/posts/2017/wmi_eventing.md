@@ -1,4 +1,5 @@
 ---
+area: "Detection Engineering"
 layout: post
 title:  "Blue Team Hacks - WMI Eventing"
 date:   2017-04-03

@@ -1,0 +1,8 @@
+{{ with .GetTerms "tags" }}
+<ul class="article-tags" aria-label="Article tags">
+  {{ range . }}
+  {{ $labels := dict "powershell" "PowerShell" "yara" "YARA" "cti" "Threat Intel" }}
+  <li><a href="{{ .RelPermalink }}">{{ index $labels (lower .LinkTitle) | default .LinkTitle }}</a></li>
+  {{ end }}
+</ul>
+{{ end }}

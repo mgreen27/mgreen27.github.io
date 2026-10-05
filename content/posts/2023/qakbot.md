@@ -1,4 +1,5 @@
 ---
+area: "Malware Analysis"
 layout: post
 title: "Automating Qakbot decode at scale"
 description: |

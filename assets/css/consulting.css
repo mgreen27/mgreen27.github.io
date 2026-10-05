@@ -57,6 +57,12 @@ a:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--accent); ou
 .line-summary { font-family: var(--sans); font-size: 14px; line-height: 1.65; margin-top: 8px !important; max-width: 740px; }
 .entry-source { font-family: var(--sans); font-size: 12px; color: var(--content-secondary); margin: 12px 0 0; }
 .entry-source a { text-decoration: none; }
+.article-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; font-family: var(--sans); font-size: 12px; color: var(--content-secondary); margin: 10px 0 12px; }
+.article-area { color: var(--accent); font-weight: 600; }
+.article-tags { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 14px 0; list-style: none; }
+.article-tags li { margin: 0; padding: 0; }
+.article-tags a { display: inline-block; font-family: var(--font-mono); font-size: 10px; line-height: 1.5; color: var(--content-secondary); background: var(--surface); border: 1px solid var(--line); border-radius: 3px; padding: 6px 9px; text-decoration: none; }
+.article-tags a:hover { color: var(--accent); border-color: var(--accent); }
 .article-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 12px; }
 .article-filters button { font-family: var(--sans); font-size: 13px; min-height: 44px; padding: 8px 16px; border: 1px solid var(--line); border-radius: 3px; background: transparent; color: var(--content-primary); cursor: pointer; }
 .article-filters button[aria-pressed="true"] { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }

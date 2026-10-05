@@ -1,4 +1,5 @@
 ---
+area: "Threat Hunting"
 layout: post
 title: "How To Hunt For UEFI Malware"
 date: 2024-02-29

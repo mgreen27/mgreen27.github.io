@@ -1,4 +1,5 @@
 ---
+area: "DFIR"
 layout: post
 title:  "PowerShell Remoting and Incident Response"
 date:   2017-01-12 12:00:00 +1000

@@ -1,4 +1,5 @@
 ---
+area: "Detection Engineering"
 layout: post
 title:  "Blue Team Hacks - Binary Rename"
 date:   2019-05-12

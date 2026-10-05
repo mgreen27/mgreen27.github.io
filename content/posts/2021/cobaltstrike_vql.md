@@ -1,4 +1,5 @@
 ---
+area: "Threat Hunting"
 layout: post
 title:  "Cobalt Strike Payload Discovery And Data Manipulation In VQL"
 date:   2021-11-09

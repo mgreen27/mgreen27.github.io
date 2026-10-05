@@ -1,4 +1,5 @@
 ---
+area: "Detection Engineering"
 layout: post
 title:  "WMI Event Consumers: what are you missing?"
 date:   2022-01-12

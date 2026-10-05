@@ -18,6 +18,7 @@
         <p class="line-title">
             <a href="{{ $href }}"{{ if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Title }}</a>
         </p>
+        {{ if eq .Section "posts" }}{{ partial "article-meta.html" . }}{{ end }}
         {{ if .Site.Params.listSummaries }}
         {{ if eq .Section "projects" }}
         <p class="line-summary">{{ .Description }}</p>
@@ -25,6 +26,7 @@
         <p class="line-summary">{{ .Summary | plainify | htmlUnescape }}</p>
         {{ end }}
         {{ end }}
+        {{ if eq .Section "posts" }}{{ partial "article-tags.html" . }}{{ end }}
         {{ with .Params.projectUrl }}
         <p class="entry-source"><a href="{{ . }}">{{ $.Params.projectLinkLabel | default "Project resource" }} <span aria-hidden="true">↗</span></a></p>
         {{ end }}

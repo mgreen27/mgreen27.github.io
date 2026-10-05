@@ -1,4 +1,5 @@
 ---
+area: "DFIR"
 layout: post
 title:  "O365: Hidden InboxRules"
 date:   2019-06-09
