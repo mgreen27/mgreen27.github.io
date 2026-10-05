@@ -1,32 +1,30 @@
 ---
 layout: page
-title: AI, DFIR & threat consulting
-eyebrow: THREAT EXPERTISE / ENGINEERING DEPTH / PRACTICAL AI
-description: Build the AI capabilities, workflows and tooling your team needs to understand threats and investigate them effectively.
+title: AI engineering for DFIR & threat intelligence
+eyebrow: DFIR / THREAT INTELLIGENCE / AI ENGINEERING
+description: Design, build and evaluate AI-assisted workflows for digital forensics, incident response and cyber threat intelligence.
 ---
-I work with intelligence, detection and incident response teams to improve how they investigate threats. Engagements combine threat research with practical engineering, from a focused assessment or prototype to an operational capability and team handover.
+I help DFIR and threat intelligence teams turn practical use cases into working AI capabilities. That can mean accelerating evidence triage, connecting enrichment tools or helping analysts work through threat reporting with the original sources close at hand.
 
-The starting point is the outcome you need: answer a threat question, reduce repetitive analysis, connect your tools or give analysts a new capability.
+The work combines investigation experience with engineering: define the task, connect the tools, evaluate the outputs and give your team a capability it can operate and review.
 
 [Discuss a project →](/contact/)
 
 {{< services >}}
 
-## Assess, build and support
+## From use case to working capability
 
-1. **Assess the opportunity.** Agree the intelligence or investigation requirement, review the current workflow and define success criteria.
-2. **Build a focused capability.** Implement a bounded prototype or integration with agreed access and data-handling requirements.
-3. **Evaluate in context.** Test against representative cases, measure accuracy and time saved, and document limitations and failure modes. For AI-assisted analysis, retain source traceability and explicit analyst review.
-4. **Hand over and improve.** Deliver operating guidance and team training. Ongoing engineering and analytical support can be scoped separately.
+1. **Define the use case.** Review the current DFIR or intelligence workflow, identify where AI can help and agree success criteria.
+2. **Build a focused prototype.** Connect the required tools and data with explicit access boundaries and evidence-handling requirements.
+3. **Evaluate against real tasks.** Test on agreed representative cases, measure accuracy and time saved, and document limitations, failure modes and analyst review points.
+4. **Hand over and improve.** Deliver operating guidance and team training. Ongoing integration, evaluation and maintenance can be scoped separately.
 
 ## A useful starting point
 
-An **AI capability assessment**, a **focused workflow prototype**, or an **intelligence-led hunt** can provide a bounded first engagement. Scope, timing and fees are agreed after an initial discussion.
+A **DFIR or CTI AI capability assessment**, a **focused workflow prototype**, or an **evaluation of an existing AI workflow** can provide a bounded first engagement. Scope, timing and fees are agreed after an initial discussion.
 
-## Threat analysis informs the engineering
+## Investigation experience behind the engineering
 
-Adversary behaviour and investigation experience shape what we build and how we test it. Windows forensics, Velociraptor and VQL support evidence collection and validation; AI and automation help analysts work with that evidence while keeping sources and uncertainty visible.
+Threat research and forensic analysis shape what we build and how we test it. Windows forensics, Velociraptor and VQL support evidence collection and validation. AI helps analysts work with that evidence while keeping sources, uncertainty and responsibility for conclusions visible.
 
-For investigation support, availability and response expectations are agreed before work begins.
-
-[Get in touch to discuss your requirements →](/contact/)
+[Get in touch to discuss your workflow →](/contact/)
