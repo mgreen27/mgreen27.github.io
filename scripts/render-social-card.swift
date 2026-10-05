@@ -31,7 +31,7 @@ label("DFIR & threat intel.", x: 72, top: 244, size: 66, weight: .bold, ink: for
 label("Research, tools & practical AI.", x: 72, top: 336, size: 48, weight: .medium, ink: accent)
 color(62, 67, 62).setFill()
 NSRect(x: 72, y: 115, width: 1056, height: 1).fill()
-label("dfir.au", x: 72, top: 539, size: 27, weight: .medium, ink: muted)
+label("dfir.au · @mgreen27", x: 72, top: 539, size: 27, weight: .medium, ink: muted)
 NSGraphicsContext.restoreGraphicsState()
 let output = URL(fileURLWithPath: "static/social-preview.png")
 try bitmap.representation(using: .png, properties: [:])!.write(to: output)
