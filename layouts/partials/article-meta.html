@@ -4,12 +4,20 @@
   {{ if .Params.reportUrl }}
   <span>{{ .Params.reportPages }}-page PDF</span>
   <span aria-hidden="true">·</span>
+  {{ with .Params.reportWordCount }}
+  <span title="Word count from the complete PDF text">{{ lang.FormatNumber 0 . }} words</span>
+  {{ else }}
+  <span>{{ lang.FormatNumber 0 .WordCount }} overview words</span>
+  {{ end }}
+  <span aria-hidden="true">·</span>
   {{ with .Params.reportReadingTime }}
   <span title="Estimated from the full white paper at 200 words per minute">{{ . }} min read</span>
   {{ else }}
   <span title="Estimated from the overview text">{{ math.Max 1 .ReadingTime }} min overview</span>
   {{ end }}
   {{ else }}
+  <span>{{ lang.FormatNumber 0 .WordCount }} words</span>
+  <span aria-hidden="true">·</span>
   <span title="Estimated from the article text">{{ math.Max 1 .ReadingTime }} min read</span>
   {{ end }}
 </p>
