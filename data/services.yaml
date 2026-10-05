@@ -1,32 +1,32 @@
-- id: intelligence
+- id: ai-capability
   number: "01"
-  title: Cyber threat intelligence
-  description: Understand which threats matter to your organisation and what the evidence supports.
-  detail: Focused research against agreed intelligence requirements, threat relevance assessments and technical intelligence reporting.
-  output: A sourced assessment with confidence levels, intelligence gaps and recommended defensive priorities.
-  proof: Read the research
-  url: /posts/
-- id: research
+  title: AI capability development
+  description: Design, build and evaluate AI-assisted intelligence and investigation workflows your team can operate.
+  detail: Assess useful applications, prototype analyst workflows, and connect AI to CTI sources, investigation tools and internal systems. Evaluate against representative cases before operational use.
+  output: A working capability, evaluation results covering accuracy and time saved, documented limitations, access controls, source traceability and analyst review points, plus team training and handover.
+  proof: Explore Velociraptor Skills
+  url: /projects/velociraptor-skills/
+- id: workflow-engineering
   number: "02"
-  title: Threat & malware research
-  description: Investigate adversary tooling, infrastructure and behaviour to develop useful intelligence.
-  detail: Malware configuration analysis, infrastructure pivots and correlation of technical evidence to examine relationships and test hypotheses.
-  output: Technical findings, contextualised indicators and behavioural insights, with alternative explanations and limitations documented.
-  proof: Explore the Qakbot research
-  url: /posts/2023/qakbot/
+  title: Workflow engineering & automation
+  description: Connect collection, enrichment and analysis into reliable workflows that reduce repetitive work.
+  detail: Build tool integrations, collection pipelines and orchestration for intelligence and investigation teams. Define data handling, failure recovery and operating requirements around the way your analysts work.
+  output: Tested integrations, repeatable workflows, operating guidance and a technical handover.
+  proof: See my investigation tooling
+  url: /projects/
 - id: hunting
   number: "03"
-  title: Intelligence-led hunting
+  title: Threat hunting & detection
   description: Turn intelligence about adversary behaviour into focused hunts and detection opportunities.
   detail: Translate threat reporting into hunt hypotheses, identify required telemetry, and develop and validate detection content.
   output: Hunt queries, investigation findings and detection recommendations with coverage limitations made explicit.
   proof: Explore DetectRaptor
   url: /projects/detectraptor/
-- id: automation
+- id: research
   number: "04"
-  title: Intelligence automation
-  description: Connect research, enrichment and analysis so your team can spend more time assessing threats.
-  detail: Tool integrations, repeatable enrichment pipelines and AI-assisted analysis with source traceability and analyst review.
-  output: A working workflow, evaluation results and a documented handover, including review points and data-handling requirements.
-  proof: See my investigation tooling
-  url: /projects/velociraptor-skills/
+  title: Threat research & intelligence
+  description: Investigate adversary behaviour, malware and infrastructure to answer the threat questions that matter to your team.
+  detail: Focused research against agreed intelligence requirements, malware configuration analysis, infrastructure pivots and correlation of technical evidence to test hypotheses.
+  output: A sourced assessment, contextualised indicators and defensive priorities, with confidence levels, alternative explanations and intelligence gaps documented.
+  proof: Explore the Qakbot research
+  url: /posts/2023/qakbot/

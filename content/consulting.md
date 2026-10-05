@@ -1,31 +1,31 @@
 ---
 layout: page
-title: Threat research & CTI consulting
-eyebrow: UNDERSTAND THE THREAT / INFORM THE RESPONSE
-description: Specialist threat research and cyber threat intelligence to help security teams make defensible decisions and focus their investigations.
+title: AI, engineering & threat consulting
+eyebrow: THREAT EXPERTISE / ENGINEERING DEPTH / PRACTICAL AI
+description: Build the AI capabilities, workflows and tooling your team needs to understand threats and investigate them effectively.
 ---
-I work with intelligence, detection and incident response teams on defined threat questions. The starting point is the decision you need to make: which threat deserves attention, what the evidence tells us, or where to focus a hunt.
+I work with intelligence, detection and incident response teams to improve how they investigate threats. Engagements combine threat research with practical engineering, from a focused assessment or prototype to an operational capability and team handover.
 
-Engagements combine technical research with clear assessments. Sources, confidence and intelligence gaps are made explicit so your team can judge the findings and act on them.
+The starting point is the outcome you need: answer a threat question, reduce repetitive analysis, connect your tools or give analysts a new capability.
 
 [Discuss a project →](/contact/)
 
 {{< services >}}
 
-## From question to assessment
+## Assess, build and support
 
-1. **Define the requirement.** Agree the threat question, audience and decision the work needs to support.
-2. **Scope the research.** Identify sources, access requirements, evidence handling and the limits of the engagement.
-3. **Analyse and challenge.** Correlate evidence, test hypotheses and consider alternative explanations.
-4. **Deliver and apply.** Present the assessment, confidence and gaps alongside practical investigation or detection priorities.
+1. **Assess the opportunity.** Agree the intelligence or investigation requirement, review the current workflow and define success criteria.
+2. **Build a focused capability.** Implement a bounded prototype or integration with agreed access and data-handling requirements.
+3. **Evaluate in context.** Test against representative cases, measure accuracy and time saved, and document limitations and failure modes. For AI-assisted analysis, retain source traceability and explicit analyst review.
+4. **Hand over and improve.** Deliver operating guidance and team training. Ongoing engineering and analytical support can be scoped separately.
 
 ## A useful starting point
 
-A **focused threat assessment**, a **malware or infrastructure research project**, or an **intelligence-led hunt** can provide a bounded first engagement. Scope, timing and fees are agreed after an initial discussion.
+An **AI capability assessment**, a **focused workflow prototype**, or an **intelligence-led hunt** can provide a bounded first engagement. Scope, timing and fees are agreed after an initial discussion.
 
-## Technical capability behind the analysis
+## Threat analysis informs the engineering
 
-Windows forensics, Velociraptor and VQL support evidence collection and validation. Custom tooling, workflow reviews and practical team training can be included where they help your team apply the intelligence.
+Adversary behaviour and investigation experience shape what we build and how we test it. Windows forensics, Velociraptor and VQL support evidence collection and validation; AI and automation help analysts work with that evidence while keeping sources and uncertainty visible.
 
 For investigation support, availability and response expectations are agreed before work begins.
 
