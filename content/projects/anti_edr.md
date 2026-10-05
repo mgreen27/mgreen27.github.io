@@ -4,6 +4,9 @@ title:  "Endpoint Hunting in an AntiEDR World"
 slug: "Endpoint Hunting in an AntiEDR World"
 date: 2019-06-26
 categories: project
+description: "Endpoint hunting techniques for defenders investigating activity that bypasses EDR. Includes presentation slides and examples of detection evasion."
+projectUrl: "https://github.com/mgreen27/mgreen27.github.io/raw/master/static/talks/2019-06-26-AntiEDR.pdf"
+projectLinkLabel: "Presentation slides"
 tags: [DFIR,EDR,Detection]
 aliases: /projects/AntiEDRWorld/
 ---

@@ -4,6 +4,9 @@ title:  "Notebook and VQL - data munging your way to victory!"
 slug: "Notebook and VQL - data munging your way to victory!"
 date: 2022-09-17
 categories: project
+description: "A practical introduction to VQL data manipulation for Velociraptor users, with examples for building artifacts and analysing investigation data."
+projectUrl: "https://www.youtube.com/watch?v=VoO7y65TOsE"
+projectLinkLabel: "Watch presentation"
 tags: [DFIR,Velociraptor,VQL,Detection]
 aliases: /projects/Velocon2022/
 ---

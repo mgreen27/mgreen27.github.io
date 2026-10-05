@@ -5,6 +5,9 @@ slug: "Invoke-LiveResponse"
 date: 2018-01-14
 update: 2022-02-22
 categories: project
+description: "A PowerShell module for responders collecting forensic artifacts from Windows systems over WinRM or through local script execution."
+projectUrl: "https://github.com/mgreen27/Invoke-LiveResponse"
+projectLinkLabel: "GitHub repository"
 tags: [DFIR,Powershell]
 aliases: /projects/invoke-liveresponse/
 ---

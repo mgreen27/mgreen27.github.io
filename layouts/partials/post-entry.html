@@ -1,4 +1,4 @@
-<div class="post-line">
+<div class="post-line"{{ if eq .Section "posts" }} data-article-tags="{{ delimit (.Params.tags | default slice) "|" | lower }}"{{ end }}>
     {{ $dateFormat := "2 Jan 2006" }}
     {{ with .Site.Params.listDateFormat }}{{ $dateFormat = . }}{{ end }}
     <p class="line-date">{{ .Date | time.Format $dateFormat }}</p>
@@ -19,7 +19,19 @@
             <a href="{{ $href }}"{{ if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Title }}</a>
         </p>
         {{ if .Site.Params.listSummaries }}
-        <p class="line-summary">{{ .Summary }}</p>
+        {{ if eq .Section "projects" }}
+        <p class="line-summary">{{ .Description }}</p>
+        {{ else }}
+        <p class="line-summary">{{ .Summary | plainify | htmlUnescape }}</p>
+        {{ end }}
+        {{ end }}
+        {{ with .Params.projectUrl }}
+        <p class="entry-source"><a href="{{ . }}">{{ $.Params.projectLinkLabel | default "Project resource" }} <span aria-hidden="true">↗</span></a></p>
+        {{ end }}
+        {{ if $isExternal }}
+        {{ $host := (urls.Parse $href).Hostname }}
+        {{ $publishers := dict "labs.infoguard.ch" "InfoGuard Labs" "www.rapid7.com" "Rapid7" }}
+        <p class="entry-source">Published at {{ index $publishers $host | default $host }} <span aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span></p>
         {{ end }}
     </div>
 </div>

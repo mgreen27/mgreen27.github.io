@@ -7,6 +7,22 @@
     <h1>{{ .Title }}</h1>
     {{ .Content }}
 
+    {{ if eq .Section "posts" }}
+    <div class="article-filters" role="group" aria-label="Filter articles by topic" hidden>
+        <button type="button" data-topic="all" aria-pressed="true">All</button>
+        <button type="button" data-topic="dfir" aria-pressed="false">DFIR</button>
+        <button type="button" data-topic="threat-intel" aria-pressed="false">Threat Intel</button>
+        <button type="button" data-topic="velociraptor" aria-pressed="false">Velociraptor</button>
+        <button type="button" data-topic="ai" aria-pressed="false">AI</button>
+    </div>
+    <p class="filter-status" role="status" aria-live="polite" hidden></p>
+    {{ range .RegularPages.ByDate.Reverse }}
+    {{ partial "post-entry.html" . }}
+    {{ end }}
+    {{ with resources.Get "js/article-filters.js" | minify | fingerprint }}
+    <script src="{{ .RelPermalink }}" defer></script>
+    {{ end }}
+    {{ else }}
     {{ $tagsPage := eq .Title "Tags"}}
 
     {{ $paginationSize := 1}}
@@ -27,6 +43,7 @@
     {{ end }}
 
     {{ partial "pagination-controls.html" $paginator}}
+    {{ end }}
 
 </div>
 {{ end }}
