@@ -1,9 +1,10 @@
 <div class="site-footer">
-  <div>
-    <a class="footer-brand" href="{{ "/" | relURL }}" aria-label="Matthew Green — home">
-      <img src="{{ "/brand-smiley.png" | relURL }}" alt="" width="32" height="32">
-      <span><span class="footer-name">Matthew Green</span><span class="footer-tagline">DFIR, threat intel &amp; research.</span></span>
-    </a>
+  <div class="footer-brand">
+    <a href="{{ "/" | relURL }}" aria-label="Matthew Green — home"><img src="{{ "/brand-smiley.png" | relURL }}" alt="" width="32" height="32"></a>
+    <div>
+      <div class="footer-identity"><a class="footer-name" href="{{ "/" | relURL }}">Matthew Green</a><span class="footer-handle"><span aria-hidden="true">· </span><a href="https://x.com/mgreen27" rel="me" aria-label="@mgreen27 on X">@mgreen27</a></span></div>
+      <span class="footer-tagline">DFIR, threat intel &amp; research.</span>
+    </div>
   </div>
   <nav class="footer-links" aria-label="Contact and social links">
     <a href="{{ "/contact/" | relURL }}">Get in touch</a>
