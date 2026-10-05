@@ -83,7 +83,7 @@ footer a { font-family: var(--sans); margin: 0; text-decoration: none; }
 .footer-icons a { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; color: var(--content-secondary); }
 .footer-icons a:hover, .footer-icons a:focus-visible { color: var(--accent); }
 .footer-icons svg { display: block; width: 19px; height: 19px; }
-.site-footer .footer-note { grid-column: 1 / -1; display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 9px; margin-top: 12px; }
+.site-footer .footer-note { grid-column: 1 / -1; display: flex; justify-content: flex-end; font-family: var(--font-mono); font-size: 9px; margin-top: 12px; }
 .editorial-page { max-width: 780px; margin: 42px auto 70px; }
 .editorial-page > .eyebrow, .list-container > .eyebrow { margin-top: 40px; }
 .editorial-page h1 { font-size: clamp(34px, 5vw, 48px); letter-spacing: -.035em; line-height: 1.2; margin-top: 14px; }
