@@ -1,7 +1,7 @@
 /* Local design overrides; the upstream Typo theme remains unchanged. */
-:root { --main-width: 1120px; --main-padding: 32px; --accent: #456581; --accent-bg: #e7edf3; --line: #dedbd4; --surface: #f4f3ef; --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+:root { --main-width: 1120px; --main-padding: 32px; --accent: #233e60; --accent-bg: #e5ebf3; --line: #dedbd4; --surface: #f4f3ef; --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 body.light, body.auto { --background: #faf9f6; --content-primary: #242a27; --content-secondary: #626762; --code-background: #f0eee9; --code-border: #dedbd4; }
-body.dark { --accent: #9bb4ce; --accent-bg: #24303c; --line: #3e433e; --surface: #202420; --background: #181c19; --content-primary: #e7e9e2; --content-secondary: #afb6ad; }
+body.dark { --accent: #7392b8; --accent-bg: #1c293c; --line: #3e433e; --surface: #202420; --background: #181c19; --content-primary: #e7e9e2; --content-secondary: #afb6ad; }
 html { scroll-padding-top: 24px; }
 body { max-width: var(--main-width); }
 a { text-underline-offset: 4px; }
