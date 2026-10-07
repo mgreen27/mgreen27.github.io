@@ -1,38 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>VQL on Matthew Green | DFIR, Threat Intelligence &amp; Research</title><link>https://dfir.au/tags/vql/</link><description>Recent content in VQL on Matthew Green | DFIR, Threat Intelligence &amp; Research</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Tue, 15 Apr 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://dfir.au/tags/vql/index.xml" rel="self" type="application/rss+xml"/><item><title>MCP Velociraptor</title><link>https://dfir.au/projects/mcp-velociraptor/</link><pubDate>Tue, 15 Apr 2025 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/mcp-velociraptor/</guid><description>&lt;p&gt;A Model Context Protocol bridge that connects AI assistants to Velociraptor for DFIR workflows.
-&lt;a href="https://github.com/mgreen27/mcp-velociraptor"&gt;GitHub repository&lt;/a&gt;&lt;/p&gt;</description></item><item><title>DEATHcon2023: Practical DEATH by Velociraptor</title><link>https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/</link><pubDate>Mon, 20 Nov 2023 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/</guid><description>&lt;p&gt;&lt;a href="https://www.notion.so/mgreen27Velociraptor-DEATHcon-2023-25d9760af2ac4b419ff39c2a48f7bb2c"&gt;
-
-
-
-
-
-
-
-
-
-
-
-&lt;figure class=""&gt;
-
- &lt;div&gt;
- &lt;img loading="lazy" alt="" src="https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/skulls.png" width="728px" height="410px"&gt;
- &lt;/div&gt;
-
- 
- &lt;div class="caption-container"&gt;
- &lt;figcaption&gt; Workshop link &lt;/figcaption&gt;
- &lt;/div&gt;
- 
-&lt;/figure&gt;
-&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;DEATHcon Velociraptor workshop was held November 2023. I covered practical break down of Velociraptor and VQL, incorporated into real world scenarios.&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Brief introduction to Velociraptor and lab setup&lt;/li&gt;
-&lt;li&gt;Available data / VQL accessors&lt;/li&gt;
-&lt;li&gt;VQL Performance and Yara.&lt;/li&gt;
-&lt;li&gt;ATT&amp;amp;CK Detection use case: RDP patching&lt;/li&gt;
-&lt;li&gt;UEFI BlackLotus&lt;/li&gt;
-&lt;li&gt;LNK Analysis&lt;/li&gt;
-&lt;/ol&gt;</description></item><item><title>Content Management Like a Boss!</title><link>https://dfir.au/projects/content-management-like-a-boss/</link><pubDate>Wed, 13 Sep 2023 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/content-management-like-a-boss/</guid><description>&lt;p&gt;Content management is one of the most under rated Velociraptor capabilities used by mature users. This talk will walk through some basics of content management, introduce automation and hopefully leave you with actionable ideas on how to do Velociraptor Content like a boss.&lt;/p&gt;
+&lt;a href="https://github.com/mgreen27/mcp-velociraptor"&gt;GitHub repository&lt;/a&gt;&lt;/p&gt;</description></item><item><title>DEATHcon2023: Practical DEATH by Velociraptor</title><link>https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/</link><pubDate>Mon, 20 Nov 2023 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/</guid><description>&lt;p&gt;This workshop was presented at DEATHcon in November 2023. It combines an introduction to Velociraptor and VQL with practical investigation and detection scenarios. Follow the six labs in order, or choose a topic below. Five labs include links to the original video recordings.&lt;/p&gt;
+&lt;h2 class="heading" id="before-you-start"&gt;
+ Before you start
+ &lt;a href="#before-you-start"&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;The original labs use a Windows 10 or later virtual machine with administrator access, Velociraptor GUI mode and internet access for downloads and artifact imports. The GUI walkthrough used Velociraptor 0.7.0-3 at the time of writing. The UEFI lab also requires a UEFI-enabled VM.&lt;/p&gt;</description></item><item><title>Content Management Like a Boss!</title><link>https://dfir.au/projects/content-management-like-a-boss/</link><pubDate>Wed, 13 Sep 2023 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/content-management-like-a-boss/</guid><description>&lt;p&gt;Content management is one of the most under rated Velociraptor capabilities used by mature users. This talk will walk through some basics of content management, introduce automation and hopefully leave you with actionable ideas on how to do Velociraptor Content like a boss.&lt;/p&gt;
 &lt;p&gt;&lt;div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;"&gt;
 			&lt;iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/DjMAri17-MI?autoplay=0&amp;amp;controls=1&amp;amp;end=0&amp;amp;loop=0&amp;amp;mute=0&amp;amp;start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"&gt;&lt;/iframe&gt;
 		&lt;/div&gt;

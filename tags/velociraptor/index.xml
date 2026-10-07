@@ -1,39 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Velociraptor on Matthew Green | DFIR, Threat Intelligence &amp; Research</title><link>https://dfir.au/tags/velociraptor/</link><description>Recent content in Velociraptor on Matthew Green | DFIR, Threat Intelligence &amp; Research</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Mon, 28 Sep 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://dfir.au/tags/velociraptor/index.xml" rel="self" type="application/rss+xml"/><item><title>AI Ate My Velociraptor</title><link>https://dfir.au/posts/2026/ai_ate_my_velociraptor/</link><pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate><guid>https://dfir.au/posts/2026/ai_ate_my_velociraptor/</guid><description>Introducing velociraptor-skills, reusable AI skills for case setup, collection, hunting and evidence analysis with Velociraptor.</description></item><item><title>Velociraptor Skills</title><link>https://dfir.au/projects/velociraptor-skills/</link><pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/velociraptor-skills/</guid><description>&lt;p&gt;Reusable AI skills and DFIR tooling for Velociraptor setup, artifact selection, collection, hunting and host analysis. Includes the shared &lt;code&gt;vraptor&lt;/code&gt; command-line runtime, installation helpers and agent templates.&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://github.com/ig-labs/velociraptor-skills"&gt;GitHub repository&lt;/a&gt; · &lt;a href="https://labs.infoguard.ch/posts/ai_ate_my_velociraptor/"&gt;Introducing Velociraptor Skills: AI Ate My Velociraptor&lt;/a&gt;&lt;/p&gt;</description></item><item><title>CLRaptor: Hunting reflected assemblies with Velociraptor</title><link>https://dfir.au/posts/2025/clraptor_hunting_for_assemblies/</link><pubDate>Mon, 01 Dec 2025 00:00:00 +0000</pubDate><guid>https://dfir.au/posts/2025/clraptor_hunting_for_assemblies/</guid><description>Hunt reflected .NET assemblies at scale with Velociraptor, detect CLR visibility gaps, and dump suspicious in-memory assemblies for analysis.</description></item><item><title>MCP Velociraptor</title><link>https://dfir.au/projects/mcp-velociraptor/</link><pubDate>Tue, 15 Apr 2025 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/mcp-velociraptor/</guid><description>&lt;p&gt;A Model Context Protocol bridge that connects AI assistants to Velociraptor for DFIR workflows.
-&lt;a href="https://github.com/mgreen27/mcp-velociraptor"&gt;GitHub repository&lt;/a&gt;&lt;/p&gt;</description></item><item><title>Finding the LNK: Techniques and methodology for advanced analysis</title><link>https://dfir.au/posts/2024/finding_the_lnk/</link><pubDate>Fri, 01 Nov 2024 00:00:00 +0000</pubDate><guid>https://dfir.au/posts/2024/finding_the_lnk/</guid><description>Advanced LNK analysis with Velociraptor, covering shortcut structures, suspicious fields, and useful clustering points for DFIR and CTI workflows.</description></item><item><title>How To Hunt For UEFI Malware</title><link>https://dfir.au/posts/2024/uefi/</link><pubDate>Thu, 29 Feb 2024 00:00:00 +0000</pubDate><guid>https://dfir.au/posts/2024/uefi/</guid><description>UEFI malware hunting with Velociraptor, including firmware visibility, collection approaches, and artifacts for field investigation.</description></item><item><title>DEATHcon2023: Practical DEATH by Velociraptor</title><link>https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/</link><pubDate>Mon, 20 Nov 2023 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/</guid><description>&lt;p&gt;&lt;a href="https://www.notion.so/mgreen27Velociraptor-DEATHcon-2023-25d9760af2ac4b419ff39c2a48f7bb2c"&gt;
-
-
-
-
-
-
-
-
-
-
-
-&lt;figure class=""&gt;
-
- &lt;div&gt;
- &lt;img loading="lazy" alt="" src="https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/skulls.png" width="728px" height="410px"&gt;
- &lt;/div&gt;
-
- 
- &lt;div class="caption-container"&gt;
- &lt;figcaption&gt; Workshop link &lt;/figcaption&gt;
- &lt;/div&gt;
- 
-&lt;/figure&gt;
-&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;DEATHcon Velociraptor workshop was held November 2023. I covered practical break down of Velociraptor and VQL, incorporated into real world scenarios.&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Brief introduction to Velociraptor and lab setup&lt;/li&gt;
-&lt;li&gt;Available data / VQL accessors&lt;/li&gt;
-&lt;li&gt;VQL Performance and Yara.&lt;/li&gt;
-&lt;li&gt;ATT&amp;amp;CK Detection use case: RDP patching&lt;/li&gt;
-&lt;li&gt;UEFI BlackLotus&lt;/li&gt;
-&lt;li&gt;LNK Analysis&lt;/li&gt;
-&lt;/ol&gt;</description></item><item><title>Content Management Like a Boss!</title><link>https://dfir.au/projects/content-management-like-a-boss/</link><pubDate>Wed, 13 Sep 2023 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/content-management-like-a-boss/</guid><description>&lt;p&gt;Content management is one of the most under rated Velociraptor capabilities used by mature users. This talk will walk through some basics of content management, introduce automation and hopefully leave you with actionable ideas on how to do Velociraptor Content like a boss.&lt;/p&gt;
+&lt;a href="https://github.com/mgreen27/mcp-velociraptor"&gt;GitHub repository&lt;/a&gt;&lt;/p&gt;</description></item><item><title>Finding the LNK: Techniques and methodology for advanced analysis</title><link>https://dfir.au/posts/2024/finding_the_lnk/</link><pubDate>Fri, 01 Nov 2024 00:00:00 +0000</pubDate><guid>https://dfir.au/posts/2024/finding_the_lnk/</guid><description>Advanced LNK analysis with Velociraptor, covering shortcut structures, suspicious fields, and useful clustering points for DFIR and CTI workflows.</description></item><item><title>How To Hunt For UEFI Malware</title><link>https://dfir.au/posts/2024/uefi/</link><pubDate>Thu, 29 Feb 2024 00:00:00 +0000</pubDate><guid>https://dfir.au/posts/2024/uefi/</guid><description>UEFI malware hunting with Velociraptor, including firmware visibility, collection approaches, and artifacts for field investigation.</description></item><item><title>DEATHcon2023: Practical DEATH by Velociraptor</title><link>https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/</link><pubDate>Mon, 20 Nov 2023 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/deathcon2023-practical-death-by-velociraptor/</guid><description>&lt;p&gt;This workshop was presented at DEATHcon in November 2023. It combines an introduction to Velociraptor and VQL with practical investigation and detection scenarios. Follow the six labs in order, or choose a topic below. Five labs include links to the original video recordings.&lt;/p&gt;
+&lt;h2 class="heading" id="before-you-start"&gt;
+ Before you start
+ &lt;a href="#before-you-start"&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;The original labs use a Windows 10 or later virtual machine with administrator access, Velociraptor GUI mode and internet access for downloads and artifact imports. The GUI walkthrough used Velociraptor 0.7.0-3 at the time of writing. The UEFI lab also requires a UEFI-enabled VM.&lt;/p&gt;</description></item><item><title>Content Management Like a Boss!</title><link>https://dfir.au/projects/content-management-like-a-boss/</link><pubDate>Wed, 13 Sep 2023 00:00:00 +0000</pubDate><guid>https://dfir.au/projects/content-management-like-a-boss/</guid><description>&lt;p&gt;Content management is one of the most under rated Velociraptor capabilities used by mature users. This talk will walk through some basics of content management, introduce automation and hopefully leave you with actionable ideas on how to do Velociraptor Content like a boss.&lt;/p&gt;
 &lt;p&gt;&lt;div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;"&gt;
 			&lt;iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/DjMAri17-MI?autoplay=0&amp;amp;controls=1&amp;amp;end=0&amp;amp;loop=0&amp;amp;mute=0&amp;amp;start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"&gt;&lt;/iframe&gt;
 		&lt;/div&gt;
