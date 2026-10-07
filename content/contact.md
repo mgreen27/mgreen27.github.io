@@ -4,9 +4,11 @@ title: Get in touch
 lead: Questions, feedback or collaboration on DFIR, threat intel and research.
 description: Questions, feedback or collaboration on DFIR, threat intelligence and research.
 ---
-Email [matt@dfir.au](mailto:matt@dfir.au) or contact me through [LinkedIn](https://www.linkedin.com/in/mgreen27/). I’m based in Australia.
+Email [matt@dfir.au](mailto:matt@dfir.au) or contact me through [LinkedIn](https://www.linkedin.com/in/mgreen27/).
 
-Questions about an article or open-source project are welcome. Include a link and a short description so I can understand the context.
+I’m based in Australian Eastern time (AEST, UTC+10; AEDT, UTC+11 during daylight saving).
+
+Collaboration or questions about an article or open-source project are welcome. Include a link and a short description so I can understand the context.
 
 You can also find my work on [GitHub](https://github.com/mgreen27) or reach me on [X](https://x.com/mgreen27).
 
